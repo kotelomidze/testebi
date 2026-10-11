@@ -226,6 +226,7 @@
     <div class="works">
       <button class="work" id="mode-test"><span class="wt">გააზრება</span><span class="wa">ტესტი ნაწარმოებების მიხედვით</span></button>
       <button class="work" id="mode-edit"><span class="wt">რედაქტირება</span><span class="wa">ტექსტის ჩასწორება</span></button>
+      <button class="work" id="mode-gram"><span class="wt">გრამატიკა</span><span class="wa">ქართული ენა, მორფოლოგია</span></button>
       <button class="work" id="mode-theme"><span class="wt">გააზრება და თემა</span><span class="wa">ტექსტის გააზრება და თხზულება</span></button>
       <button class="work" id="mode-only"><span class="wt">გააზრება თემის გარეშე</span><span class="wa">მხოლოდ ტექსტის გააზრება</span></button>
     </div>
@@ -432,6 +433,10 @@ $("mode-test").onclick = () => show("s-work");
 $("mode-edit").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
   location.href = "redaqtireba.html";
+};
+$("mode-gram").onclick = () => {
+  try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
+  location.href = "gramatika/";
 };
 $("mode-theme").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
