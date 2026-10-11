@@ -534,7 +534,7 @@ $("mode-gram").onclick = () => {
   location.href = "gramatika/";
 };
 /* „რედაქტირება“ და „თემები“: ჯერ არჩევანი — აპლიკაციიდან თუ PDF ფაილის გადმოწერა.
-   თემები: PDF დევს <საქაღალდე>/pdf/-ში და ჰქვია ისე, როგორც ტესტის ფაილში წერია („sourceFile“).
+   თემები: PDF დევს gaazreba-tema-pdf/ ან gaazreba-pdf/-ში და ჰქვია ისე, როგორც ტესტის ფაილში წერია („sourceFile“).
    რედაქტირება: PDF დევს redaqtireba-pdf/-ში და ჰქვია „რედაქტირება 121.pdf“ (121 = ნომერი სახელმძღვანელოდან);
    ასევე მიიღება „რედაქტირება, 121.pdf“ და „121.pdf“ */
 let FILES = null;
@@ -557,7 +557,10 @@ async function themeCandidates(dir, pre){
     try{
       const j = await (await fetch(dir + "/" + t.file, { cache:"no-store" })).json();
       if(!j.sourceFile) return null;
-      return { label:(t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile), name:j.sourceFile, url: dir + "/pdf/" + encodeURIComponent(j.sourceFile) };
+      const f = encodeURIComponent(j.sourceFile);
+      // PDF-ები მთავარ გვერდზე, საქაღალდეში „gaazreba-tema-pdf“ / „gaazreba-pdf“ (ან ძველებურად <dir>/pdf/)
+      return { label:(t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile),
+        alts:[{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/pdf/" + f }] };
     }catch(e){ return null; }
   }))).filter(Boolean);
 }
