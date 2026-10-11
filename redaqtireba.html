@@ -469,6 +469,12 @@
                 setIdx(0);
                 setStatus('idle');
             };
+            // „ყველა დავალებიდან“: redaqtireba.html#n=5 — პირდაპირ ეს დავალება იხსნება
+            useEffect(() => {
+                const m = location.hash.match(/^#n=(\d+)$/);
+                const t = m && TASKS.find(x => x.n === +m[1]);
+                if (t) openTask(t);
+            }, []);
 
             const backToList = () => {
                 if (edited && status !== 'success' &&

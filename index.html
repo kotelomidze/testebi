@@ -633,8 +633,8 @@ async function themeCandidates(dir, pre){
     }catch(e){ return null; }
   }))).filter(Boolean);
 }
-function openFiles(key){
-  FILES = FILE_SETS[key];
+function openFiles(key, target){   // target: კონკრეტული დავალება („ყველა დავალებიდან“)
+  FILES = Object.assign({ key, target }, FILE_SETS[key]);
   $("files-title").textContent = FILES.title;
   $("files-box").classList.add("hidden"); $("files-list").innerHTML = "";
   show("s-files");
@@ -645,6 +645,15 @@ $("mode-only").onclick = () => openFiles("only");
 $("files-back").onclick = () => show("s-mode");
 $("files-app").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
+  const T = FILES.target;
+  if(T && FILES.key === "red"){ location.href = FILES.app + "#n=" + T; return; }
+  if(T){
+    // „თემის“ აპლიკაციები: ტექსტი წინასწარ არჩეული დახვდება (თუ სხვა ტესტი არ არის დაწყებული)
+    try{
+      const cur = JSON.parse(sessionStorage.getItem("georgian_exam_session") || "null");
+      if(!cur || !cur.student) sessionStorage.setItem("georgian_exam_session", JSON.stringify({ student:null, testId:T }));
+    }catch(e){}
+  }
   location.href = FILES.app;
 };
 $("files-dl").onclick = async () => {
@@ -750,10 +759,10 @@ $("mode-all").onclick = async () => {
     const k = document.createElement("span"); k.className = "kind"; k.textContent = kind; d.append(k, document.createTextNode(text)); return a; };
   ["gaz","red","gram","tema","mit","only"].forEach(t => acts.filter(a => a.t === t).forEach(a => {
     if(t === "gaz") sections[0].items.push(btn(KIND[t], a.text, () => { state.work = CHAPTERS[a.idx].work; setWorkTitle(); renderChapters(); startTest(a.idx); }));
-    else if(t === "red") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("red")));
-    else if(t === "gram") sections[0].items.push(btn(KIND[t], a.text, () => goSection("gramatika/")));
-    else if(t === "tema") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("tema")));
-    else if(t === "only") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("only")));
+    else if(t === "red") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("red", a.n)));
+    else if(t === "gram") sections[0].items.push(btn(KIND[t], a.text, () => goSection("gramatika/#" + a.id)));
+    else if(t === "tema") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("tema", a.id)));
+    else if(t === "only") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("only", a.id)));
     else if(t === "mit"){ const m = mits.find(x => x.a === a); if(m && m.u) sections[0].items.push(link(KIND[t], a.text, m.u)); }
   }));
   acts.filter(a => a.t === "file").forEach(a => {
@@ -901,7 +910,7 @@ async function visCatalog(mats){
     const t = await fetchText("redaqtireba.html");
     const re = /"n":\s*(\d+),\s*"id":\s*"[^"]*",\s*"wrong":\s*"([^"]{0,70})/g; let m;
     while((m = re.exec(t))) red.kids.push({ key:"red:" + m[1], label:"დავალება " + m[1] + " — " + m[2].split(" ").slice(0,6).join(" ") + "…",
-      act:{ t:"red", text:"დავალება " + m[1] + " — " + m[2].split(" ").slice(0,4).join(" ") + "…" } });
+      act:{ t:"red", n: m[1], text:"დავალება " + m[1] + " — " + m[2].split(" ").slice(0,4).join(" ") + "…" } });
   }catch(e){ red.err = true; }
   cat.push(red);
   // 3. გრამატიკა: თემები → დავალებები
@@ -910,7 +919,7 @@ async function visCatalog(mats){
     const t = await fetchText("gramatika/index.html");
     const topics = {}; let m;
     const reT = /\{id:"(t\d+)", no:"([^"]+)", title:"([^"]+)"\}/g;
-    while((m = reT.exec(t))){ topics[m[1]] = { key:"gram:" + m[1], label: m[2] + " " + m[3], kids:[], act:{ t:"gram", text: m[2] + " " + m[3] } }; gram.kids.push(topics[m[1]]); }
+    while((m = reT.exec(t))){ topics[m[1]] = { key:"gram:" + m[1], label: m[2] + " " + m[3], kids:[], act:{ t:"gram", id: m[1], text: m[2] + " " + m[3] } }; gram.kids.push(topics[m[1]]); }
     const reE = /\bid:"([^"]+)",\s*topic:"(t\d+)"([^\n]*)\n\s*title:"([^"]*)"/g;
     while((m = reE.exec(t))){
       const no = (m[3].match(/no:"([^"]+)"/) || [,""])[1];
@@ -925,7 +934,7 @@ async function visCatalog(mats){
       const j = JSON.parse(await fetchText(dir + "/tests.json"));
       (j.tests || []).forEach(x => {
         const label = (x.author ? x.author + " — " : "") + (x.work || x.title || x.id) + (x.title ? " (" + x.title + ")" : "");
-        const n = { key: pre + ":" + x.id, label, act:{ t: pre, text: label } };
+        const n = { key: pre + ":" + x.id, label, act:{ t: pre, id: x.id, text: label } };
         // თემის მითითება მიბმულია ტექსტზე: ჩანს, სანამ ცალკე არ მოხსნი
         if(pre === "tema") n.kids = [{ key: n.key + ":mit", label:"თემის მითითება", act:{ t:"mit", file: x.file, text: label } }];
         node.kids.push(n);

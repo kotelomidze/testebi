@@ -6983,7 +6983,7 @@ function doneTopic(t){
   S.st.textContent = "დავალება გაგზავნილია. მადლობა!"; S.st.className = "stat ok";
 }
 
-show(0);
+show(Math.max(0, TOPICS.findIndex(function (t) { return "#" + t.id === location.hash; })));   // „ყველა დავალებიდან“: გრამატიკა/#t25
 
 /* ============ აპლიკაციად დაყენება ============ */
 (function(){
