@@ -560,7 +560,8 @@ async function themeCandidates(dir, pre){
       const f = encodeURIComponent(j.sourceFile);
       // PDF-ები მთავარ გვერდზე, საქაღალდეში „gaazreba-tema-pdf“ / „gaazreba-pdf“ (ან ძველებურად <dir>/pdf/)
       return { label:(t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile),
-        alts:[{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/pdf/" + f }] };
+        alts:[{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/" + dir + "-pdf/" + f },
+              { name:j.sourceFile, url: dir + "/pdf/" + f }] };
     }catch(e){ return null; }
   }))).filter(Boolean);
 }
