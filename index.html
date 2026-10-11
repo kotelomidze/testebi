@@ -185,7 +185,7 @@
 
   <!-- 1. სახელი და გვარი -->
   <section id="s-name">
-    <h2>ტესტი ნაწარმოებების მიხედვით</h2>
+    <h2>შესვლა</h2>
     <p class="lead">ჩაწერე შენი გვარი სრულად და აირჩიე შენი სახელი.</p>
     <div class="field">
       <label for="fullname">გვარი</label>
@@ -219,6 +219,17 @@
     <p style="margin-top:28px"><button class="btn ghost" id="admin-exit">გასვლა</button></p>
   </section>
 
+  <!-- 1ა. დავალების ტიპი -->
+  <section id="s-mode" class="hidden">
+    <h2>აირჩიე დავალება</h2>
+    <p class="lead">რას გააკეთებ ახლა?</p>
+    <div class="works">
+      <button class="work" id="mode-test"><span class="wt">გააზრება</span><span class="wa">ტესტი ნაწარმოებების მიხედვით</span></button>
+      <button class="work" id="mode-edit"><span class="wt">რედაქტირება</span><span class="wa">ტექსტის ჩასწორება</span></button>
+    </div>
+    <p style="margin-top:28px"><button class="btn ghost" id="back-name">სახელის შეცვლა</button></p>
+  </section>
+
   <!-- 2. ნაწარმოების არჩევა -->
   <section id="s-work" class="hidden">
     <h2>აირჩიე ნაწარმოები</h2>
@@ -228,7 +239,7 @@
       <button class="work" data-work="abo"><span class="wt">„აბოს წამება“</span><span class="wa">იოანე საბანისძე</span></button>
       <button class="work" data-work="gr"><span class="wt">„გრიგოლ ხანძთელის ცხოვრება“</span><span class="wa">გიორგი მერჩულე</span></button>
     </div>
-    <p style="margin-top:28px"><button class="btn ghost" id="back-name">სახელის შეცვლა</button></p>
+    <p style="margin-top:28px"><button class="btn ghost" id="back-mode">უკან</button></p>
   </section>
 
   <!-- 3. თავის არჩევა -->
@@ -308,7 +319,7 @@
 <script src="config.js"></script>
 <script>
 /* Apps Script-ის ბმული ცალკე ფაილშია: config.js (index.html-ის განახლებისას არ იკარგება) */
-const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbzBpGa0f_H3xq-E33Bsp52aPHDcFeTFpsdfn_GGECUaBbRimz3cmb6Coa9PsxGnuipb/exec"; // სათადარიგო, თუ config.js არ აიტვირთა
+const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbycuDAMQrAPEoa3rjtgf69Z-1rqwVIbyNB6fGyWSfpj6JDtny4HGZAMS6dMd93Lt8FU2w/exec"; // სათადარიგო, თუ config.js არ აიტვირთა
 const SEND_URL = ((typeof SCRIPT_URL !== "undefined" && /\/exec$/.test(String(SCRIPT_URL).trim())) ? String(SCRIPT_URL) : DEFAULT_URL).trim();
 
 /* კითხვები (სწორი პასუხები აქ არ არის — ისინი მხოლოდ Apps Script-შია) */
@@ -324,7 +335,7 @@ const $ = id => document.getElementById(id);
 const state = { name:"", work:null, chap:null, answers:[], i:0, sending:false };
 
 function show(id){
-  ["s-name","s-admin","s-work","s-chap","s-test","s-done"].forEach(s => $(s).classList.toggle("hidden", s!==id));
+  ["s-name","s-admin","s-mode","s-work","s-chap","s-test","s-done"].forEach(s => $(s).classList.toggle("hidden", s!==id));
   window.scrollTo(0,0);
 }
 
@@ -348,6 +359,7 @@ function netErr(e){
 
 /* 1. შესვლა: სახელი და გვარი მოწმდება მხოლოდ სრულად, სკრიპტში */
 const NAME_KEY = "hagiography-surname";
+const SESSION_KEY = "lit-session-name";   // შესული მოსწავლე (ამ ჩანართში); რედაქტირების გვერდიც ამას კითხულობს
 let adminKey = null;
 function setWho(){
   $("who").textContent = state.name; $("who").classList.toggle("hidden", !state.name);
@@ -392,7 +404,8 @@ async function chooseStudent(n, surname){
     state.name = r.name;
     try{ localStorage.setItem(NAME_KEY, surname); }catch(e){}
     setWho(); clearPick();
-    show("s-work");
+    try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
+    show("s-mode");
   }catch(e){
     $("name-err").textContent = netErr(e);
     $("pick-list").querySelectorAll("button").forEach(b => b.disabled = false);
@@ -407,7 +420,18 @@ $("fullname").addEventListener("input", () => {
   if($("fullname").value.trim().length >= 2) lookupTimer = setTimeout(() => lookup(false), 700);
 });
 try{ $("fullname").value = localStorage.getItem(NAME_KEY) || ""; }catch(e){}
-$("back-name").onclick = () => { state.name = ""; setWho(); clearPick(); show("s-name"); };
+$("back-name").onclick = () => {
+  state.name = ""; setWho(); clearPick();
+  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+  show("s-name");
+};
+/* დავალების ტიპი: გააზრება (ეს ტესტი) ან რედაქტირება (ცალკე გვერდი redaqtireba.html) */
+$("mode-test").onclick = () => show("s-work");
+$("mode-edit").onclick = () => {
+  try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
+  location.href = "redaqtireba.html";
+};
+$("back-mode").onclick = () => { state.work = null; setWorkTitle(); show("s-mode"); };
 
 /* მასწავლებლის გვერდი: მოსწავლეების დამატება/წაშლა */
 let students = [];
@@ -433,6 +457,7 @@ function renderStudents(){
 async function openAdmin(){
   $("work-title").textContent = "მასწავლებლის გვერდი";
   state.name = ""; setWho();
+  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
   show("s-admin"); adminMsg("", true);
   $("list-title").textContent = "სია იტვირთება…"; $("slist").innerHTML = "";
   try{
@@ -477,7 +502,7 @@ function chooseWork(w){
   renderChapters();
   show("s-chap");
 }
-document.querySelectorAll(".work").forEach(b => b.onclick = () => chooseWork(b.dataset.work));
+document.querySelectorAll(".work[data-work]").forEach(b => b.onclick = () => chooseWork(b.dataset.work));
 
 /* 3. თავები */
 function renderChapters(){
@@ -659,6 +684,11 @@ $("again").onclick = () => { state.chap = null; state.done = false; save(); show
 
 
 restore();
+if(!state.chap){
+  let sn = "";
+  try{ sn = sessionStorage.getItem(SESSION_KEY) || ""; }catch(e){}
+  if(sn){ state.name = sn; setWho(); show("s-mode"); }
+}
 
 /* ===== აპლიკაციად დაყენება (Android: Install, iPhone: Add to Home Screen) ===== */
 const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
