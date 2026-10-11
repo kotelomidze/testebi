@@ -152,6 +152,11 @@
   .vis .tools{display:flex;gap:8px;flex-wrap:wrap;padding:2px 12px 8px 38px}
   .vis .tools button{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:.85rem;color:var(--lapis);min-height:32px}
   .vis-save{position:sticky;bottom:0;background:var(--bg);padding:10px 0;margin-top:6px;z-index:5}
+  .copyrow{margin:0 0 16px}
+  .copyrow label{display:block;font-weight:600;margin-bottom:6px;font-size:.95rem}
+  .copyrow .row{flex-wrap:nowrap}
+  .copyrow .gselect{flex:1 1 auto;min-width:0;width:auto}
+  .copyrow .btn{flex:0 0 auto;margin:0}
   .vis-root{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}
   .vis-root button{background:var(--paper);border:1.5px solid var(--lapis);border-radius:6px;padding:8px 12px;color:var(--lapis);font-weight:600;min-height:40px}
   .ginput,.gselect{font:inherit;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);min-height:48px}
@@ -258,6 +263,10 @@
     <h3 style="margin-top:44px">დავალებების ჩვენება და დამალვა</h3>
     <p class="lead" style="margin-bottom:14px">ჯერ აირჩიე, ვისთვის აწყობ. მონიშნული ჩანს, მოუნიშნავი დამალულია. ▸-ით ჩამოშლი და დაინახავ შიგნით არსებულ თავებს, ტექსტებსა და დავალებებს. შიდა დავალების მონიშვნა მის ზედა ბლოკებსაც ავტომატურად ჩართავს. ბოლოს დააჭირე „შენახვას“.</p>
     <div class="field"><label for="vis-target">ვისთვის</label><select id="vis-target" class="gselect"></select></div>
+    <div class="copyrow">
+      <label for="vis-from">დავალებების გადმოტანა სხვა ჯგუფიდან (მერე აქ მხოლოდ განსხვავებას შეცვლი)</label>
+      <div class="row"><select id="vis-from" class="gselect"></select><button type="button" class="btn ghost" id="vis-copy">გადმოტანა</button></div>
+    </div>
     <div class="vis-root"><button type="button" id="vis-all-on">ყველაფრის ჩვენება</button><button type="button" id="vis-all-off">ყველაფრის დამალვა</button></div>
     <div id="vis-tree" class="vis"></div>
     <div class="row vis-save"><button class="btn" id="vis-save">შენახვა</button><span id="vis-count" class="vis-count"></span></div>
@@ -568,8 +577,25 @@ function renderTargets(){
   const o = document.createElement("option"); o.value = "default"; o.textContent = "ჯგუფის გარეშე მოსწავლეები (საერთო)"; sel.appendChild(o);
   CFG.groups.forEach(g => { const x = document.createElement("option"); x.value = g.id; x.textContent = "ჯგუფი: " + g.name + " (" + g.members.size + ")"; sel.appendChild(x); });
   sel.value = TARGET;
+  // საიდან გადმოვიტანოთ: ყველა, გარდა ახლა არჩეულისა
+  const from = $("vis-from"), prev = from.value; from.innerHTML = "";
+  Array.from(sel.options).forEach(op => { if(op.value !== TARGET){ const x = op.cloneNode(true); from.appendChild(x); } });
+  if(Array.from(from.options).some(o => o.value === prev)) from.value = prev;
+  $("vis-copy").disabled = !from.options.length;
 }
-$("vis-target").onchange = () => { TARGET = $("vis-target").value; renderTree(); };
+$("vis-target").onchange = () => { TARGET = $("vis-target").value; renderTargets(); renderTree(); };
+$("vis-copy").onclick = () => {
+  const fromId = $("vis-from").value; if(!fromId) return;
+  const src = fromId === "default" ? CFG.hidden : (CFG.groups.find(g => g.id === fromId) || {}).hidden;
+  if(!src) return;
+  const fromName = $("vis-from").options[$("vis-from").selectedIndex].text;
+  const toName = $("vis-target").options[$("vis-target").selectedIndex].text;
+  openModal("გადმოვიტანო?", "„" + toName + "“ მიიღებს ზუსტად იმავე დავალებებს, რაც აქვს „" + fromName + "“. აქამდე მონიშნული შეიცვლება.", "გაუქმება", "გადმოტანა", () => {
+    const dst = curSet(); dst.clear(); src.forEach(k => dst.add(k));
+    markDirty(true); renderTree();
+    $("vis-msg").textContent = "გადმოტანილია. ახლა შეცვალე მხოლოდ განსხვავება და დააჭირე „შენახვას“."; $("vis-msg").className = "msg ok";
+  });
+};
 function renderGroups(){
   const host = $("groups"); const open = new Set(Array.from(host.querySelectorAll("details[open]")).map(d => d.dataset.id));
   host.innerHTML = "";
