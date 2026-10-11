@@ -226,6 +226,7 @@
     <div class="works">
       <button class="work" id="mode-test"><span class="wt">გააზრება</span><span class="wa">ტესტი ნაწარმოებების მიხედვით</span></button>
       <button class="work" id="mode-edit"><span class="wt">რედაქტირება</span><span class="wa">ტექსტის ჩასწორება</span></button>
+      <button class="work" id="mode-theme"><span class="wt">გააზრება და თემა</span><span class="wa">ტექსტის გააზრება და თხზულება</span></button>
     </div>
     <p style="margin-top:28px"><button class="btn ghost" id="back-name">სახელის შეცვლა</button></p>
   </section>
@@ -430,6 +431,10 @@ $("mode-test").onclick = () => show("s-work");
 $("mode-edit").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
   location.href = "redaqtireba.html";
+};
+$("mode-theme").onclick = () => {
+  try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
+  location.href = "gaazreba-tema/";
 };
 $("back-mode").onclick = () => { state.work = null; setWorkTitle(); show("s-mode"); };
 
