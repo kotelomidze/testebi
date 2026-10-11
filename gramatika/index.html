@@ -256,6 +256,9 @@ body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inse
   var LIT_NAME = '';
   try { LIT_NAME = sessionStorage.getItem('lit-session-name') || ''; } catch (e) {}
   if (!LIT_NAME) location.replace('../');
+  var LIT_HIDDEN = [];
+  try { LIT_HIDDEN = JSON.parse(sessionStorage.getItem('lit-hidden') || '[]'); } catch (e) {}
+  function LIT_HID(k) { return LIT_HIDDEN.indexOf(k) > -1; }   // მასწავლებლის მიერ დამალული
 </script>
 <a href="../" style="display:inline-block;margin:12px 0 10px 16px;padding:8px 14px;border:1.5px solid #c7d2fe;border-radius:12px;color:#0f3d54;font-weight:700;font-size:14px;text-decoration:none;background:#fff">← მთავარი მენიუ</a>
 
@@ -2696,7 +2699,7 @@ const TOPICS = [
   {id:"t41", no:"1.19", title:"თავისებური ზმნები"},
   {id:"t42", no:"1.20", title:"რიცხვში მონაცვლე ზმნები"},
   {id:"t43", no:"1.21", title:"რთული ზმნების მართლწერა"}
-];
+].filter(function (t) { return !LIT_HID("gram:" + t.id); });
 
 /* ============ სტატიკური ბარათები ============ */
 const POS = ["არსებითი სახელი","ზედსართავი სახელი","რიცხვითი სახელი","ნაცვალსახელი","ზმნა","ზმნიზედა","თანდებული","კავშირი","ნაწილაკი","შორისდებული"];
@@ -6408,7 +6411,7 @@ const EX = [
     {t:["მოსახლეობა","სამალავიდან","გამოვიდნენ","და","მშვიდობიან","შრომას","შეუდგენ."], a:[2,6], fx:{2:"გამოვიდა",6:"შეუდგა|შეუდგა."}}
   ]
 }
-];
+].filter(function (ex) { return !LIT_HID("gram:" + ex.topic + ":" + ex.id); });
 
 /* ============ დამხმარე ============ */
 const $ = s => document.querySelector(s);
