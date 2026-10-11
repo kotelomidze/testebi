@@ -707,9 +707,10 @@ async function mitUrl(testFile){
   }catch(e){}
   return null;
 }
-let STUDENT_CAT = null;
+let STUDENT_BASE = null;   // დავალებების ჩამონათვალი (ერთხელ იტვირთება); მასალები ყოველ ჯერზე ახლიდან
 async function studentActs(){
-  if(!STUDENT_CAT) STUDENT_CAT = await visCatalog(MATERIALS);
+  if(!STUDENT_BASE) STUDENT_BASE = (await visCatalog([])).filter(n => !/^m:(books|pres|mat)$/.test(n.key));
+  const STUDENT_CAT = STUDENT_BASE.concat(matNodes(MATERIALS));
   const out = [];
   (function walk(nodes){ nodes.forEach(n => {
     if(isHidden(n.key)) return;
@@ -934,9 +935,11 @@ async function visCatalog(mats){
     if(pre === "tema") cat.push({ key:"m:mit", label:"თემის მითითებები (ბლოკი; თითოეული მიბმულია „გააზრება და თემის“ ტექსტზე)" });
   }
   // 6–8. მასალები
-  ["books","pres","mat"].forEach(c => cat.push({ key:"m:" + c, label: MAT_CAT[c],
+  return cat.concat(matNodes(mats));
+}
+function matNodes(mats){
+  return ["books","pres","mat"].map(c => ({ key:"m:" + c, label: MAT_CAT[c],
     kids: (mats || []).filter(m => m.cat === c).map(m => ({ key:"mat:" + m.id, label: m.title, act:{ t:"file", m, text: m.title } })) }));
-  return cat;
 }
 function visNode(n, depth, parentKey){
   const set = curSet();
