@@ -175,6 +175,13 @@
   .slist .gtag{color:var(--muted);font-size:.85rem;margin-left:6px}
   .dirty{color:#A3291C !important;font-weight:600}
   .vis-count{color:var(--muted);font-size:.92rem}
+  /* PDF ფაილები */
+  .flist{display:flex;flex-direction:column;gap:10px}
+  .flist a{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:12px 14px;color:var(--ink);text-decoration:none;min-height:52px}
+  .flist a:hover{border-color:var(--lapis);background:var(--lapis-soft)}
+  .flist a span{min-width:0;overflow-wrap:anywhere}
+  .flist a b{flex:0 0 auto;color:var(--lapis);font-size:.9rem;white-space:nowrap}
+  .flist p{margin:0;color:var(--muted)}
   /* აპლიკაციად დაყენება */
   .install{margin-top:34px;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:16px 16px 14px}
   .install b{display:block;margin-bottom:4px}
@@ -289,6 +296,21 @@
     <p style="margin-top:28px"><button class="btn ghost" id="back-name">სახელის შეცვლა</button></p>
   </section>
 
+  <!-- 1ბ. „თემა“: აპლიკაციიდან თუ ფაილით -->
+  <section id="s-files" class="hidden">
+    <h2 id="files-title"></h2>
+    <p class="lead">როგორ გააკეთებ?</p>
+    <div class="works">
+      <button class="work" id="files-app"><span class="wt">აპლიკაციიდან გაკეთება</span><span class="wa">ტესტი და თხზულება აქვე</span></button>
+      <button class="work" id="files-dl"><span class="wt">ფაილის გადმოწერა</span><span class="wa">PDF ვერსია</span></button>
+    </div>
+    <div id="files-box" class="hidden" style="margin-top:22px">
+      <h3 style="font-family:var(--serif);font-size:1.2rem;margin:0 0 10px">ფაილები</h3>
+      <div id="files-list" class="flist"></div>
+    </div>
+    <p style="margin-top:28px"><button class="btn ghost" id="files-back">უკან</button></p>
+  </section>
+
   <!-- 2. ნაწარმოების არჩევა -->
   <section id="s-work" class="hidden">
     <h2>აირჩიე ნაწარმოები</h2>
@@ -394,7 +416,7 @@ const $ = id => document.getElementById(id);
 const state = { name:"", work:null, chap:null, answers:[], i:0, sending:false };
 
 function show(id){
-  ["s-name","s-admin","s-mode","s-work","s-chap","s-test","s-done"].forEach(s => $(s).classList.toggle("hidden", s!==id));
+  ["s-name","s-admin","s-mode","s-files","s-work","s-chap","s-test","s-done"].forEach(s => $(s).classList.toggle("hidden", s!==id));
   window.scrollTo(0,0);
 }
 
@@ -507,21 +529,74 @@ $("back-name").onclick = () => {
 };
 /* დავალების ტიპი: გააზრება (ეს ტესტი) ან რედაქტირება (ცალკე გვერდი redaqtireba.html) */
 $("mode-test").onclick = () => show("s-work");
-$("mode-edit").onclick = () => {
-  try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
-  location.href = "redaqtireba.html";
-};
 $("mode-gram").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
   location.href = "gramatika/";
 };
-$("mode-theme").onclick = () => {
-  try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
-  location.href = "gaazreba-tema/";
+/* „რედაქტირება“ და „თემები“: ჯერ არჩევანი — აპლიკაციიდან თუ PDF ფაილის გადმოწერა.
+   თემები: PDF დევს <საქაღალდე>/pdf/-ში და ჰქვია ისე, როგორც ტესტის ფაილში წერია („sourceFile“).
+   რედაქტირება: PDF დევს redaqtireba-pdf/-ში და ჰქვია დავალების ნომრით სახელმძღვანელოდან (id), მაგ. 121.pdf */
+let FILES = null;
+const FILE_SETS = {
+  red: { title:"რედაქტირება", app:"redaqtireba.html", candidates: async () => {
+    const t = await (await fetch("redaqtireba.html", { cache:"no-store" })).text();
+    const out = [], re = /"n":\s*(\d+),\s*"id":\s*"([^"]+)"/g; let m;
+    while((m = re.exec(t))) if(!isHidden("red:" + m[1]))
+      out.push({ label:"დავალება " + m[1], name: m[2] + ".pdf", url:"redaqtireba-pdf/" + encodeURIComponent(m[2]) + ".pdf" });
+    return out;
+  } },
+  tema: { title:"გააზრება და თემა", app:"gaazreba-tema/", candidates: () => themeCandidates("gaazreba-tema", "tema") },
+  only: { title:"გააზრება თემის გარეშე", app:"gaazreba/", candidates: () => themeCandidates("gaazreba", "only") }
 };
-$("mode-only").onclick = () => {
+async function themeCandidates(dir, pre){
+  const list = (JSON.parse(await (await fetch(dir + "/tests.json", { cache:"no-store" })).text()).tests || [])
+    .filter(t => !isHidden(pre + ":" + t.id));
+  return (await Promise.all(list.map(async t => {
+    try{
+      const j = await (await fetch(dir + "/" + t.file, { cache:"no-store" })).json();
+      if(!j.sourceFile) return null;
+      return { label:(t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile), name:j.sourceFile, url: dir + "/pdf/" + encodeURIComponent(j.sourceFile) };
+    }catch(e){ return null; }
+  }))).filter(Boolean);
+}
+function openFiles(key){
+  FILES = FILE_SETS[key];
+  $("files-title").textContent = FILES.title;
+  $("files-box").classList.add("hidden"); $("files-list").innerHTML = "";
+  show("s-files");
+}
+$("mode-edit").onclick = () => openFiles("red");
+$("mode-theme").onclick = () => openFiles("tema");
+$("mode-only").onclick = () => openFiles("only");
+$("files-back").onclick = () => show("s-mode");
+$("files-app").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
-  location.href = "gaazreba/";
+  location.href = FILES.app;
+};
+$("files-dl").onclick = async () => {
+  const box = $("files-list"), F = FILES;
+  $("files-box").classList.remove("hidden");
+  box.innerHTML = "<p>ფაილები მოწმდება…</p>";
+  $("files-box").scrollIntoView({ block:"start", behavior:"smooth" });
+  try{
+    const cands = await F.candidates();
+    const found = (await Promise.all(cands.map(async c => {
+      try{
+        const h = await fetch(c.url, { method:"HEAD", cache:"no-store" });
+        if(!h.ok || !/pdf/i.test(h.headers.get("content-type") || "pdf")) return null;
+        return Object.assign({ size: +h.headers.get("content-length") || 0 }, c);
+      }catch(e){ return null; }
+    }))).filter(Boolean);
+    if(FILES !== F) return;
+    box.innerHTML = "";
+    if(!found.length){ box.innerHTML = "<p>ფაილები ჯერ არ არის. გამოიყენე „აპლიკაციიდან გაკეთება“.</p>"; return; }
+    found.forEach(f => {
+      const a = document.createElement("a"); a.href = f.url; a.setAttribute("download", f.name); a.target = "_blank"; a.rel = "noopener";
+      const sp = document.createElement("span"); sp.textContent = f.label;
+      const b = document.createElement("b"); b.textContent = "⬇ PDF" + (f.size ? " · " + (f.size / 1048576).toFixed(1) + " მბ" : "");
+      a.append(sp, b); box.appendChild(a);
+    });
+  }catch(e){ box.innerHTML = "<p>ფაილების სია ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.</p>"; }
 };
 $("back-mode").onclick = () => { state.work = null; setWorkTitle(); show("s-mode"); };
 
