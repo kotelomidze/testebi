@@ -535,14 +535,16 @@ $("mode-gram").onclick = () => {
 };
 /* „რედაქტირება“ და „თემები“: ჯერ არჩევანი — აპლიკაციიდან თუ PDF ფაილის გადმოწერა.
    თემები: PDF დევს <საქაღალდე>/pdf/-ში და ჰქვია ისე, როგორც ტესტის ფაილში წერია („sourceFile“).
-   რედაქტირება: PDF დევს redaqtireba-pdf/-ში და ჰქვია დავალების ნომრით სახელმძღვანელოდან (id), მაგ. 121.pdf */
+   რედაქტირება: PDF დევს redaqtireba-pdf/-ში და ჰქვია „რედაქტირება 121.pdf“ (121 = ნომერი სახელმძღვანელოდან);
+   ასევე მიიღება „რედაქტირება, 121.pdf“ და „121.pdf“ */
 let FILES = null;
 const FILE_SETS = {
   red: { title:"რედაქტირება", app:"redaqtireba.html", candidates: async () => {
     const t = await (await fetch("redaqtireba.html", { cache:"no-store" })).text();
     const out = [], re = /"n":\s*(\d+),\s*"id":\s*"([^"]+)"/g; let m;
     while((m = re.exec(t))) if(!isHidden("red:" + m[1]))
-      out.push({ label:"დავალება " + m[1], name: m[2] + ".pdf", url:"redaqtireba-pdf/" + encodeURIComponent(m[2]) + ".pdf" });
+      out.push({ label:"დავალება " + m[1], alts: ["რედაქტირება " + m[2] + ".pdf", "რედაქტირება, " + m[2] + ".pdf", m[2] + ".pdf"]
+        .map(n => ({ name:n, url:"redaqtireba-pdf/" + encodeURIComponent(n) })) });
     return out;
   } },
   tema: { title:"გააზრება და თემა", app:"gaazreba-tema/", candidates: () => themeCandidates("gaazreba-tema", "tema") },
@@ -581,11 +583,14 @@ $("files-dl").onclick = async () => {
   try{
     const cands = await F.candidates();
     const found = (await Promise.all(cands.map(async c => {
-      try{
-        const h = await fetch(c.url, { method:"HEAD", cache:"no-store" });
-        if(!h.ok || !/pdf/i.test(h.headers.get("content-type") || "pdf")) return null;
-        return Object.assign({ size: +h.headers.get("content-length") || 0 }, c);
-      }catch(e){ return null; }
+      for(const v of (c.alts || [{ name:c.name, url:c.url }])){      // რამდენიმე შესაძლო სახელი — პირველი ნაპოვნი
+        try{
+          const h = await fetch(v.url, { method:"HEAD", cache:"no-store" });
+          if(h.ok && /pdf/i.test(h.headers.get("content-type") || "pdf"))
+            return { label:c.label, name:v.name, url:v.url, size: +h.headers.get("content-length") || 0 };
+        }catch(e){}
+      }
+      return null;
     }))).filter(Boolean);
     if(FILES !== F) return;
     box.innerHTML = "";
