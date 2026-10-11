@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>შუშანიკის წამება - ინფოგრაფიკა</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .card {
+            background-color: #ffffff;
+            border-left: 5px solid;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .page-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .page-content {
+            width: 100%;
+        }
+        .title-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mx-auto">
+        <div class="flex flex-col justify-between items-center w-full mb-4">
+            <h1 class="text-4xl sm:text-5xl font-bold text-center text-gray-800 tracking-tight">
+                <span class="text-blue-600">შუშანიკის წამება</span>
+            </h1>
+            <p class="text-lg text-center text-gray-600 mt-2">
+                გეგმა
+            </p>
+        </div>
+        
+        <div class="title-bar">
+            <span class="text-lg font-bold text-gray-800"></span>
+            <span class="text-lg font-bold text-gray-800">კოტე ლომიძე</span>
+        </div>
+
+        <!-- Pages Container -->
+        <div class="page-container">
+            <!-- Page 1 -->
+            <div id="page-1" class="page-content">
+                <div class="card p-6 border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 text-white text-2xl">
+                            1
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი I: ვარსქენის განდგომა</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📅</span>
+                            <p>მოვლენები ხდება სპარსთა ხელმწიფის მეფობის მერვე წელს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">👤</span>
+                            <p>ქართლის პიტიახშია ვარსქენი, არშუშას ძე, ქრისტიან ოჯახში დაბადებული.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✈️</span>
+                            <p>ვარსქენ პიტიახში სპარსეთის სამეფო კარზე მიდის.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🔥</span>
+                            <p>ქრისტეს უარყოფს და ცეცხლთაყვანისმცემლობას იღებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💍</span>
+                            <p>ცდილობს, მეფეს თავი მოაწონოს და მის ასულზე ქორწინებას ითხოვს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">❤️</span>
+                            <p>ვარსქენის ცოლია ვარდან მამიკონიანის ასული შუშანიკი, ბავშვობიდან ღვთისმოშიში და სარწმუნოებაში განმტკიცებული.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙏</span>
+                            <p>შუშანიკი გრძნობს ვარსქენის უკეთურებას და მუდამ ლოცულობს მისთვის.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 2 -->
+            <div id="page-2" class="page-content">
+                <div class="card p-6 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-purple-500 text-white text-2xl">
+                            2
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი II: ვარსქენი ქართლში ბრუნდება</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚶‍♂️</span>
+                            <p>საზღვრიდან ცურტავში აგზავნის მსახურს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>შუშანიკის წინასწარმეტყველური პასუხი.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💔</span>
+                            <p>მსახური სიმართლეს ამხელს – ვარსქენმა უარყო ქრისტე.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😭</span>
+                            <p>შუშანიკი მწარედ ტირის.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛪</span>
+                            <p>ეკლესიას მიაშურებს, შვილებს საკურთხეველთან დააყენებს და ღმერთს შეავედრებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🏠</span>
+                            <p>საღამოს ლოცვის შემდეგ განმარტოებით ტირის სახლაკში.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 3 -->
+            <div id="page-3" class="page-content">
+                <div class="card p-6 border-green-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-green-500 text-white text-2xl">
+                            3
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი III: იაკობ ხუცესი და შუშანიკი</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📜</span>
+                            <p>ეპისკოპოსი აფოცი და იაკობ ხუცესი „ვანად კაცისა ვისამე წმიდისა“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>დიაკვანი ახალ ამბავს ატყობინებს აფოცსა და იაკობს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💪</span>
+                            <p>ხუცესი მიდის შუშანიკთან, მასთან ერთად ტირის და ამხნევებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⚔️</span>
+                            <p>შუშანიკი ამბობს, რომ მზადაა დიდი განსაცდელისთვის.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚶‍♀️</span>
+                            <p>ხუცესი მხნეობისკენ მოუწოდებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤝</span>
+                            <p>შუშანიკი ამბობს: „უმჯობეს არს ჩემდა ჴელთა მისთაგან სიკუდილი, ვიდრე ჩემი და მისი შეკრებაჲ და წარწყმედაჲ სულისა ჩემისაჲ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📖</span>
+                            <p>ციტირებს პავლე მოციქულის სიტყვებს: „არა დამონებულ არს ძმაჲ, გინა დაჲ, არამედ განეყენენ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✍️</span>
+                            <p>ხუცესი აღუთქვამს, რომ მის ღვაწლს აღწერს.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 4 -->
+            <div id="page-4" class="page-content">
+                <div class="card p-6 border-orange-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-orange-500 text-white text-2xl">
+                            4
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი IV: პინგპონგი 🏓</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤥</span>
+                            <p>„კაცი ერთი სპარსი“ თვალთმაქცობით ცდილობს შუშანიკის გულის მოგებას.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🛡️</span>
+                            <p>შუშანიკი თავს შორს დაიჭერს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗓️</span>
+                            <p>სამი დღის შემდეგ ვარსქენი ბრუნდება.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤫</span>
+                            <p>სპარსელი ფარულად ურჩევს: „ნუ რას ფიცხელსა სიტყუასა ეტყჳ მას, რამეთუ დედათა ბუნებაჲ იწრო არს“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📞</span>
+                            <p>მეორე დღეს ვარსქენი მღვდლებს უხმობს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>შუშანიკს უთხარით: „შენ ჩემი ხატი დაამჴუ. და საგებელსა ჩემსა ნაცარი გარდაასხ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>შუშანიკი მტკიცედ უპასუხებს: „არა თუ მე აღმემართა ხატი იგი? და მემცა დავამჴუ! მამამან შენმან ღმერთი ცათაჲ და ქუეყანისაჲ ჰრწმენა, ხოლო შენ ღმერთი ჭეშმარიტი უვარ-ჰყავ და ცეცხლსა თაყუანის-ეც.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😡</span>
+                            <p>ვარსქენი სასტიკად განრისხდა.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 5 -->
+            <div id="page-5" class="page-content">
+                <div class="card p-6 border-red-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 text-white text-2xl">
+                            5
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი V: შუამავლები</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤝</span>
+                            <p>ვარსქენი შუშანიკთან აგზავნის ძმას – ჯოჯიკს, მის ცოლს და ეპისკოპოს აფოცს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>აბარებს: „ესრეთ არქუთ: აღდეგ და მოვედ ადგილსა თჳსსა და ნუ ეგევითარი გონებაჲ გიპყრიეს, უკუეთუ არა, თრევით მოგითრიო!“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💬</span>
+                            <p>შუშანიკი უპასუხებს: „მე მისი ცოლი აღარ ვარ. მეგონა, ჩემს რჯულზე მოვაქცევდი, ახლა კი მაიძულებთ უარი ვთქვა ღმერთზე? ამას არ ვიზამ!“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📢</span>
+                            <p>ჯოჯიკი ამბობს: „ვარსქენი ძალით წაგიყვანს.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">❤️</span>
+                            <p>შუშანიკი: „მიხარია, რადგან ეს იქნება ჩვენი საბოლოო განშორება.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😭</span>
+                            <p>ყველანი ტირიან.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📖</span>
+                            <p>დაიყოლიებენ: შუშანიკი იღებს სახარებას და მოწამეთა წიგნებს და გაჰყვება.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙏</span>
+                            <p>ამბობს: „უფალო ღმერთო, შენ უწყი, ვითარმედ მე სიკუდილდ მივალ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🏡</span>
+                            <p>სასახლეში პატარა სენაკში დაბინავდება და ამბობს: „უფალო ღმერთო, ყოველთა მე სიკუდილდ მიმითუალეს მტერსა ღმრთისასა ვარსქენს“.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 6 -->
+            <div id="page-6" class="page-content">
+                <div class="card p-6 border-yellow-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-yellow-500 text-white text-2xl">
+                            6
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი VI: პურობა 🍴🥖</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🍽️</span>
+                            <p>ორი დღის შემდეგ ვარსქენი მოითხოვს ჯოჯიკთან და მის ცოლთან ერთად ვახშმობას.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚪</span>
+                            <p>ძალით მიჰყავთ შუშანიკიც.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🍔</span>
+                            <p>დედოფალი არაფერს არ ჭამს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🍷</span>
+                            <p>ჯოჯიკის ცოლი ღვინით სავსე თასს აწვდის – შუშანიკი სახეში შეალეწავს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😡</span>
+                            <p>გაგიჟებული ვარსქენი იწყებს გინებას, მუშტებითა და წიხლებით სცემს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤕</span>
+                            <p>ასტამი ჩაარტყა – თვალი დაუბუშტა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😠</span>
+                            <p>თმით ათრევს და ცოფიანივით ღრიალებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🐺</span>
+                            <p>ჯოჯიკი ძლივს ართმევს ხელიდან, როგორც მგელს 🐑-ს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😵</span>
+                            <p>შუშანიკი მიწაზე მკვდარივით წევს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🔗</span>
+                            <p>ვარსქენი აგინებს და ბრძანებს: „ბორკილი დაადეთ!“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤝</span>
+                            <p>მხოლოდ სპარსელის ხანგრძლივი თხოვნის შემდეგ იხსნება ბორკილი.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🏠</span>
+                            <p>შუშანიკი ერთ პატარა ოთახში შეჰყავთ, კართან მცველი დაუყენეს.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Page 7 -->
+            <div id="page-7" class="page-content">
+                <div class="card p-6 border-teal-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-teal-500 text-white text-2xl">
+                            7
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი VII: იაკობი ნაცემ დედოფალთან</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤕</span>
+                            <p>ვარსქენი მსახურს ეკითხება შუშანიკის მდგომარეობას, მსახური უპასუხებს: „ვერ გადარჩება“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😢</span>
+                            <p>ვარსქენი თავად შედის შუშანიკთან, ხედავს მის ჭრილობებს და კრძალავს მის ნახვას.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💔</span>
+                            <p>ხუცესი ფარულად შედის დედოფალთან, ხედავს მის დასახიჩრებულ სახეს და შუშანიკი ამშვიდებს: „ეს ღამე სიხარულის დასაწყისად მექცა“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✝️</span>
+                            <p>შუშანიკი უარს ამბობს ჭრილობების მოვლაზე: „ეს სისხლი ჩემი ცოდვების განმწმენდია“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🦷</span>
+                            <p>დედოფალი ძლივს იღებს პურსა და ღვინოს, რადგან ყბა და კბილები ჩამტვრეული აქვს (სამოელ ეპისკოპოსისა და იოანეს მოსაკითხი).</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💍</span>
+                            <p>შუშანიკი სთხოვს ხუცესს, ვარსქენს დაუბრუნოს სამკაულები, რადგან აღარ დასჭირდება.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>ვარსქენი ამბობს, რომ „მოიძებნება ვინმე, ვინც დაიმშვენებს სამკაულებს“ და მიდის ჰუნებთან საბრძოლველად.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 8 -->
+            <div id="page-8" class="page-content">
+                <div class="card p-6 border-indigo-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-indigo-500 text-white text-2xl">
+                            8
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი VIII: მოვიდა პიტიახში ბრძოლისა მისგან ჰონთაჲსა — მეორე წამება</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛪</span>
+                            <p>დიდმარხვისას შუშანიკი ეკლესიის გვერდით პატარა სენაკში მარხვით, ლოცვითა და ცრემლით განმარტოვდება.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>აღდგომის შემდეგ ვარსქენი ბრუნდება და ეკლესიაში მიდის, სადაც ეპისკოპოსს ადანაშაულებს: „გამომეც ცოლი ჩემი, რად განმაშორებ ჩემგან?“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😡</span>
+                            <p>ვარსქენი კვერთხით სცემს მღვდელს, რომელიც ენას შეუტლიკინებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤕</span>
+                            <p>შუშანიკს ტალახში და ეკლებზე ათრევს ეკლესიიდან სასახლემდე, დედოფლის სხეული და სამოსი დაგლეჯილია.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⚔️</span>
+                            <p>სასახლეში მიყვანილს თითქმის სამასჯერ დაარტყეს კვერთხი. შუშანიკი ამბობს: „უბადოო, შენღა თავი თჳსი არა შეიწყალე და განსდეგ ღმრთისაგან, შენ მემცა შემიწყალეა?!“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🔒</span>
+                            <p>ვარსქენი ბრძანებს ჯაჭვი დაადონ კისერზე და ბნელ საკანში ჩააგდონ, რომ შიმშილით მოკვდეს.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 9 -->
+            <div id="page-9" class="page-content">
+                <div class="card p-6 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-purple-500 text-white text-2xl">
+                            9
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი IX: შუშანიკის მიყვანა ციხეში</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤫</span>
+                            <p>ერთ დიაკვანს სურს, გაამხნეოს შუშანიკი, მაგრამ პიტიახში თვალებს დაუბრიალებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚶‍♀️</span>
+                            <p>შუშანიკი მიჰყავთ უჴამური და თმაგარდატევებული, როგორც ერთი ვინმე მდაბიოთაგანი.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😭</span>
+                            <p>ხალხი ფეხდაფეხ მისდევს და ტირის.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>შუშანიკი ხალხს ამშვიდებს: „ნუ ტირით... ლოცვაში მომიხსენეთ – ციხიდან ცოცხალი აღარ გამოვალ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🐎</span>
+                            <p>ვარსქენი ხალხს ცხენით დასდევს და ფანტავს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚪</span>
+                            <p>ციხის კართან ვარსქენი ეუბნება: „აქედან ცოცხალი აღარ გამოხვალ, ოთხი კაცი გამოგიტანს“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛓️</span>
+                            <p>შუშანიკს ბნელ საკანში ამწყვდევენ, კისერზე კი ისევ ჯაჭვი აქვს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🕊️</span>
+                            <p>შუშანიკი სიხარულით ამბობს: „აქ დავიტანჯები და იქ მოვისვენებ“, რაზეც ვარსქენი დასცინის: „ჰო, ჰო, მოისვენე“ 😂 😂.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">👮‍♂️</span>
+                            <p>მცველებს ეუბნება, რომ შიმშილით მოკლან და არავინ შეუშვან მასთან.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Page 10 -->
+            <div id="page-10" class="page-content">
+                <div class="card p-6 border-green-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-green-500 text-white text-2xl">
+                            10
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი X: შუშანიკის გამძლეობა ციხეში</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">👤</span>
+                            <p>ვარსქენი კითხულობს: „ის საცოდავი კიდევ ცოცხალია?“ მცველი უპასუხებს: „უფრო მკვდარს ჰგავს, ვიდრე ცოცხალს“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😡</span>
+                            <p>ვარსქენი ამბობს: „ნუ ნაღვლობ, დაე, მოკვდეს.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙏</span>
+                            <p>ხუცესი მცველს სთხოვს შეშვებას, მოისყიდის და ფარულად შედის შუშანიკთან.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛓️</span>
+                            <p>დედოფალი ბორკილებითა და ჯაჭვით დამშვენებული — როგორც ქრისტეს საპატარძლო.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😭</span>
+                            <p>ხუცესი ტირის. შუშანიკი უპასუხებს: „კეთილისა ამისთჳს სტირა, ხუცეს?“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>მცველი ბრაზობს: „ესეღა თუმცა მეცნა, არამცა შემოგიტევე შენ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛓️</span>
+                            <p>ჯოჯიკი ვარსქენს ევედრება შუშანიკსათვის ბორკილის მოხსნას და დაითანხმებს. ჯაჭვს მოიხსნის, მაგრამ  უარს ამბობს ბორკილის მოხსნაზე და ექნება კიდეც სიკვდილამდე.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📚</span>
+                            <p>ექვსი წელი ციხეში: მარხვა, ლოცვა, სიფხიზლე, წიგნის კითხვა. ციხე ნათდება მისი სულიერი ცხოვრებით.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 11 -->
+            <div id="page-11" class="page-content">
+                <div class="card p-6 border-red-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 text-white text-2xl">
+                            11
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XI: წმინდა შუშანიკს კურნების უნარი მიემადლა</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🪄</span>
+                            <p>შუშანიკის ამბავი მთელ ქართლში ვრცელდება. ხალხი მოდის და ლოცვით კურნებას იღებს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">👨‍👩‍👧‍👦</span>
+                            <p>უშვილოებს შვილი უჩნდებათ, ავადმყოფები იკურნებიან, ბრმებს თვალის ჩინი უბრუნდებათ.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✝️</span>
+                            <p> შუშანიკი კეთროვან სპარსელ ქალს მოაქცევს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙏</span>
+                            <p>ქალი იერუსალიმში მიდის და იესო ქრისტეს სახელით განიკურნება.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 12 -->
+            <div id="page-12" class="page-content">
+                <div class="card p-6 border-orange-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-orange-500 text-white text-2xl">
+                            12
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XII: ფსალმუნთა შესწავლა და შვილების განდგომა</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📖</span>
+                            <p>შუშანიკი დიდ გულმოდგინებით სწავლობს ფსალმუნებს. მალე 150 ფსალმუნი ზეპირად იცის და დღედაღამ გალობს ცრემლით.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💔</span>
+                            <p>ვარსქენი შვილებს მოგვობაზე მოაქცევს. დედოფალი ტირის და ლოცულობს: „გმადლობ, უფალო, ისინი შენი მოცემულნი იყვნენ. როგორც გენებოს, ისე იყოს.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😢</span>
+                            <p>ხუცესი ტირილისგან გამოფიტულ დედოფალს აძალებს მცირეოდენი საზრდოს მიღებას.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚫</span>
+                            <p>შვილები, რომლებიც ადრე სტუმრობდნენ, ვეღარ ბედავდნენ მის ნახვას. შუშანიკს მათი სახელის გაგონებაც სძაგდა.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 13 -->
+            <div id="page-13" class="page-content">
+                <div class="card p-6 border-indigo-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-indigo-500 text-white text-2xl">
+                            13
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XIII: პიტიახშის მცდელობანი — კვლავაც შუამავლები</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>პიტიახში შუშანიკს ემუქრება: თუ არ დაბრუნდები, „ჩორდ წარგცე შენ, ანუ კარად, კარაულითა“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🛡️</span>
+                            <p>შუშანიკის პასუხი: „იქნებ სიკეთეს გადავეყარო და ბოროტებას განვშორდე.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💡</span>
+                            <p>ვარსქენი ფიქრობს, მართლაც ვინმე მთავართაგანს არ ეცოლოსო.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📞</span>
+                            <p>კვლავ უგზავნის კაცს (ძუძუმტეს) – „დაბრუნდი, ნუ ააოხრებ სახლს.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">❤️</span>
+                            <p>შუშანიკის ახსენებს: „შენ მომკალ და მარქუ მე: ცოცხალიღა ფერჴითა არა გამოხჳდე შენ მაგიერ ციხით.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>„უკუეთუ შემძლებელ ხარ მკუდარსა აღდგინებად პირველად დედაჲ შენი აღადგინე, რომელი ურდს დამარხულ არს</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✅</span>
+                            <p>ვარსქენი აღიარებს თუ ადასტურებს: „ნანდჳლვე ვთქუ ეგე!“</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 14 -->
+            <div id="page-14" class="page-content">
+                <div class="card p-6 border-pink-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-pink-500 text-white text-2xl">
+                            14
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XIV: დედოფლის მდგომარეობა ციხეში</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤒</span>
+                            <p>მეექვსე წელს შუშანიკი დასნეულდა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🛐</span>
+                            <p>არ ისვენებდა – მარხვითა და ლოცვით ბოლომდე დაიფერფლა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🌙</span>
+                            <p>„ეგოდენითა ფიცხლად მარხვითა და მარადის ზედგომითა და ღამე ყოველ დაშრომითა, ფსალმუნებითა და გალობითა“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✝️</span>
+                            <p>აღვსების მარხვაში არ ჭამდა, არ სვამდა, არ ეძინა, მხოლოდ მცირე ბოსტნეულის წვენსა და ზიარებას იღებდა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🧱</span>
+                            <p>სასთუმლად ჰქონდა აგური.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🛏️</span>
+                            <p>„და ქუესაგებელად იყო გირჯაკი ერთი ძუელი“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🦟</span>
+                            <p>ცურტავის კლიმატის აღწერ: „ქარნი ხორშაკნი და წყალნი მავნებელნი... მოხუცებული არა ვინ არს მათ ქუეყანათა“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛓️</span>
+                            <p>ექვსი წელი ბორკილდადებული ადიდებდა ღმერთს.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 15 -->
+            <div id="page-15" class="page-content">
+                <div class="card p-6 border-red-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 text-white text-2xl">
+                            15
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XV: წყლულები და სიმტკიცე</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🩸</span>
+                            <p>მეშვიდე წელს სხეული დაუწყლულდა, ფეხები დაუსივდა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🐛</span>
+                            <p>წყლულებს მატლი მოსდებოდა – თავად იღებდა და მადლობას სწირავდა ღმერთს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😭</span>
+                            <p>შუშანიკი მტირალ იაკობს: „ხუცეს, რად მწუხარე ხარ, ვიდრე უკუდავთა მათ მატლთა შეჭმასა უმჯობჱს იყავნ ამათ მოკუდავთა შეჭმაჲ აქავე“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>იაკობი: „ძაძისა სამოსელი მცირედღა შეგერაცხაა საგუემელად? და აწ მატლთა მაგათთჳს მხიარულ ხარ!“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🤫</span>
+                            <p>აფრთხილებს: „ნურავის ეტყვი, რომ ძაძით ვარ შემოსილი.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🎽</span>
+                            <p>გარედან ანტიოქიური პერანგი ეცვა, შიგნით – ძაძა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🎭</span>
+                            <p>თავის ტანჯვას ხალხს უმალავდა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">💪</span>
+                            <p>რჩებოდა მტკიცე, ღმერთს მინდობილი.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Page 16 -->
+            <div id="page-16" class="page-content">
+                <div class="card p-6 border-teal-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-teal-500 text-white text-2xl">
+                            16
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XVI: ჯოჯიკი საპყრობილეში</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">👨‍👩‍👧‍👦</span>
+                            <p>ჯოჯიკი ოჯახთან ერთად მივიდა შუშანიკთან ციხეში.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>დედოფალი ამბობს: „კარგად ვარ, იმ გზას მივდივარ, რომელსაც ყველა გაივლის.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙏</span>
+                            <p>ჯოჯიკი სთხოვს პატიებას.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>შუშანიკი უპასუხებს: „თუ შენ სხუად სახედ, ყრმებრ, არარაჲ ჰქმნე, ღმერთმან მოგიტევნეს შენ“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙌</span>
+                            <p>ჯოჯიკი კვლავ სთხოვს: „გვაკურთხე მე და ჩემი ოჯახი.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🛡️</span>
+                            <p>დედოფალი ამხელს მათ უგულობას. შუშანიკი მიუთითებს პირუთვნელ სამსჯავროზე.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✝️</span>
+                            <p>ბოლოს აკურთხებს ჯოჯიკსა და მის სახლეულს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📚</span>
+                            <p>ასწავლის: „ვინ სთესა, მოიმკო, და, ვინ განაბნია გლახაკთათჳს, შეიკრიბა, და რომელმან წარიწყმიდოს თავი თჳსი, მან პოოს იგი, რომელმან ადიდა იგი“.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 17 -->
+            <div id="page-17" class="page-content">
+                <div class="card p-6 border-blue-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 text-white text-2xl">
+                            17
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XVII: ეპისკოპოსთა და დიდებულთა სტუმრობა</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🚶‍♂️</span>
+                            <p>შუშანიკს ეწვივნენ „თავი იგი ეპისკოპოსთაჲ სამოელ და იოვანე ეპისკოპოსი“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">👥</span>
+                            <p>მოვიდნენ დიდი აზნაურები, დიდგვაროვანი ქალები და მდაბიოები.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">😭</span>
+                            <p>„მადლობით წარჰგზავნიდეს ნავთსადგურისა მის მიმართ ქრისტესისა“.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 18 -->
+            <div id="page-18" class="page-content">
+                <div class="card p-6 border-orange-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-orange-500 text-white text-2xl">
+                            18
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XVIII: წმინდა შუშანიკის აღსასრული</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📅</span>
+                            <p>დადგა მისი გარდაცვალების დღე.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📞</span>
+                            <p>უხმო ეპისკოპოს აფოცს და მადლობა შესწირა თანადგომისთვის.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🗣️</span>
+                            <p>სთხოვა: „ჩემი ძვლები იქ დაიკრძალოს, საიდანაც პირველად გამომათრიეს.“</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🍇</span>
+                            <p>თავი შეადარა ვენახის მეთერთმეტე ჟამის მუშაკს.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙏</span>
+                            <p>აკურთხა ყველანი: „იყვენით ყოველნი კურთხეულ უკუნისამდე ჟამთა“.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🕊️</span>
+                            <p>აღესრულა: „და შეჰვედრა სული თჳსი უფალსა ყოველთა შემწყნარებელსა“.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 19 -->
+            <div id="page-19" class="page-content">
+                <div class="card p-6 border-purple-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-purple-500 text-white text-2xl">
+                            19
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XIX: შუშანიკის დაკრძალვა</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📦</span>
+                            <p>იღებენ შუშანიკის დამაშვრალ სხეულს, განბანენ და შემოსავენ წმინდა ტილოთი.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">⛪</span>
+                            <p>შუშანიკის დაკრძალვა.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🙌</span>
+                            <p>მთელი ღამე ღმერთს ადიდებენ და ფსალმუნებენ.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Page 20 -->
+            <div id="page-20" class="page-content">
+                <div class="card p-6 border-red-500">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 flex items-center justify-center rounded-full bg-red-500 text-white text-2xl">
+                            20
+                        </div>
+                        <h2 class="text-2xl font-semibold text-gray-800 ml-4">თავი XX: ქრონოლოგიური მონაცემები</h2>
+                    </div>
+                    <ul class="space-y-4 text-gray-700 text-lg">
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">📅</span>
+                            <p>შუშანიკის ტანჯვათა დასაწყისი — აპნისის (იანვრის) თვის მერვე დღე, ორშაბათი.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">🕊️</span>
+                            <p>შუშანიკის აღსასრული – 17 ოქტომბერი.</p>
+                        </li>
+                        <li class="flex items-center space-x-3">
+                            <span class="text-xl">✝️</span>
+                            <p>მისი ხსენების დღედ ხუთშაბათი დაწესდა.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
