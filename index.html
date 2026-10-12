@@ -152,6 +152,21 @@
   .vis .tools{display:flex;gap:8px;flex-wrap:wrap;padding:2px 12px 8px 38px}
   .vis .tools button{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:.85rem;color:var(--lapis);min-height:32px}
   .vis-save{position:sticky;bottom:0;background:var(--bg);padding:10px 0;margin-top:6px;z-index:5}
+  .atabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px;border-bottom:2px solid var(--line);padding-bottom:8px}
+  .atabs button{background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;font-weight:600;color:var(--ink);min-height:44px}
+  .atabs button.on{background:var(--lapis);border-color:var(--lapis);color:#fff}
+  .aslist{display:flex;flex-direction:column;gap:8px}
+  .aslist .arow{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:10px 12px}
+  .aslist .arow.cur{border-color:var(--lapis);background:var(--lapis-soft)}
+  .aslist .arow b{font-weight:600}
+  .aslist .arow .acts{display:flex;gap:6px;flex-wrap:wrap}
+  .aslist .arow .acts button{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.88rem;min-height:36px;color:var(--lapis)}
+  .aslist .arow .acts button.danger{color:#A3291C;border-color:#E2B4AE}
+  .given{color:#B06A10;font-size:.82rem;font-weight:600;margin-left:6px;white-space:nowrap}
+  .asave{position:sticky;bottom:0;background:var(--bg);padding:10px 0;z-index:6}
+  #as-editor .vis-save{flex-wrap:nowrap;gap:8px}
+  #as-editor .vis-save .btn{padding:10px 12px;min-height:44px;font-size:.95rem}
+  #as-editor .vis-save .vis-count{font-size:.85rem}
   .copyrow{margin:0 0 16px}
   .copyrow label{display:block;font-weight:600;margin-bottom:6px;font-size:.95rem}
   .copyrow .row{flex-wrap:nowrap}
@@ -182,6 +197,20 @@
   .mats .ok{color:#1E7B34}.mats .bad{color:#A3291C}
   .mform{display:grid;gap:8px;margin:0 0 10px}
   .vis-count{color:var(--muted);font-size:.92rem}
+  /* მთავარი მენიუ, ახალი/ძველი, გაკეთებული */
+  header.top #home-btn{margin:0}
+  .assign-btns{display:grid;gap:10px;margin:0 0 26px}
+  .allbtn .sub{display:block;font-weight:400;font-size:.85rem;opacity:.85}
+  .blocks-h{font-family:var(--serif);font-size:1.1rem;margin:0 0 12px;color:var(--muted);font-weight:600}
+  .work.done,.chap.done{background:#E6F4EA;border-color:#8CC79A}
+  .work.done .wt::after{content:" ✓";color:#1E7B34}
+  .chap.done .num{color:#1E7B34}
+  .allsec li{display:flex;gap:8px;align-items:stretch}
+  .allsec li>a,.allsec li>button.item{flex:1 1 auto;min-width:0}
+  .allsec li.done>a,.allsec li.done>button.item{background:#E6F4EA;border-color:#8CC79A}
+  .allsec .tick{flex:0 0 52px;border:1.5px solid var(--line);border-radius:8px;background:var(--paper);font-size:1.3rem;color:var(--muted);cursor:pointer;min-height:48px}
+  .allsec li.done .tick{background:#1E7B34;border-color:#1E7B34;color:#fff}
+  .allsec li .no{font-weight:700;color:var(--lapis);flex:0 0 auto;min-width:1.6em}
   /* ყველა დავალება */
   .allbtn{width:100%;margin:0 0 16px;font-size:1.05rem;min-height:54px}
   .allsec h3{font-family:var(--serif);font-size:1.2rem;margin:26px 0 10px;color:var(--lapis)}
@@ -190,7 +219,6 @@
   .allsec li{counter-increment:n;margin:0 0 8px}
   .allsec li>a,.allsec li>button{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--paper);border:1.5px solid var(--line);border-radius:8px;padding:11px 14px;color:var(--ink);text-decoration:none;font:inherit;cursor:pointer;min-height:48px}
   .allsec li>a:hover,.allsec li>button:hover{border-color:var(--lapis);background:var(--lapis-soft)}
-  .allsec li>*::before{content:counter(n) ".";font-weight:700;color:var(--lapis);flex:0 0 auto;min-width:1.6em}
   .allsec .kind{display:block;font-size:.85rem;color:var(--muted)}
   .allsec .none{color:var(--muted);margin:0}
   /* PDF ფაილები */
@@ -245,6 +273,7 @@
   <header class="top">
     <h1 id="work-title">კოტეს დავალება</h1>
     <span class="who hidden" id="who"></span>
+    <button class="btn ghost small hidden" id="home-btn">⌂ მთავარი მენიუ</button>
   </header>
 
   <!-- 1. სახელი და გვარი -->
@@ -271,60 +300,96 @@
 
   <!-- მოსწავლეების სია (მხოლოდ მასწავლებლისთვის) -->
   <section id="s-admin" class="hidden admin">
-    <h2>მოსწავლეების სია</h2>
-    <p class="lead">აპლიკაციაში შესვლა შეუძლიათ მხოლოდ ამ სიაში მყოფ მოსწავლეებს. მოსწავლე წერს გვარს სრულად, შემდეგ ხედავს ამ გვარის მოსწავლეებს და ირჩევს თავის სახელს.</p>
-    <label for="new-students" style="font-weight:600;display:block;margin-bottom:6px">დაამატე მოსწავლეები — თითო სტრიქონზე ერთი „გვარი სახელი“ (ჯერ გვარი!)</label>
-    <textarea id="new-students" placeholder="ბერიძე ნინო&#10;კაპანაძე გიორგი"></textarea>
-    <div class="row" style="margin-top:10px"><button class="btn" id="add-students">დამატება</button></div>
-    <div class="msg" id="admin-msg"></div>
-    <h3 id="list-title">სიაში: …</h3>
-    <div class="field" style="margin-bottom:0"><input id="filter" placeholder="ძებნა სიაში" autocomplete="off"></div>
-    <ul class="slist" id="slist"></ul>
-    <h3 style="margin-top:44px">ჯგუფები</h3>
-    <p class="lead" style="margin-bottom:14px">ჯგუფში შეიძლება იყოს რამდენიმე მოსწავლე ან ერთიც. თითო მოსწავლე მხოლოდ ერთ ჯგუფშია. ჯგუფს თავისი დავალებები აქვს (იხ. ქვემოთ), ჯგუფის გარეშე მოსწავლეები საერთო პარამეტრებს ხედავენ.</p>
-    <div class="row"><input id="new-group" class="ginput" placeholder="ჯგუფის სახელი, მაგ. „IX ა“" autocomplete="off"><button class="btn" id="add-group">ჯგუფის შექმნა</button></div>
-    <div id="groups" class="groups"></div>
+    <nav class="atabs" role="tablist">
+      <button type="button" data-tab="ap-assign" class="on">დავალების მიცემა</button>
+      <button type="button" data-tab="ap-groups">ჯგუფები</button>
+      <button type="button" data-tab="ap-students">მოსწავლეები</button>
+      <button type="button" data-tab="ap-mats">მასალები</button>
+    </nav>
 
-    <h3 style="margin-top:44px">მასალები: წიგნები, პრეზენტაციები, სასწავლო მასალა</h3>
-    <p class="lead" style="margin-bottom:14px">ჯერ ფაილი ატვირთე GitHub-ზე შესაბამის საქაღალდეში (მთავარ გვერდზე): წიგნები → <b>wignebi</b>, პრეზენტაციები → <b>prezentaciebi</b>, სასწავლო მასალა → <b>masala</b>. მერე აქ დაამატე: სათაური და ფაილის ზუსტი სახელი. ✓ ნიშნავს, რომ ფაილი ნაპოვნია. დამატებულ მასალას ქვემოთ, დავალებებივით, ჯგუფებს უჩვენებ ან უმალავ.</p>
-    <div class="mform">
-      <select id="mat-cat" class="gselect"><option value="books">წიგნი (საქაღალდე wignebi)</option><option value="pres">პრეზენტაცია (საქაღალდე prezentaciebi)</option><option value="mat">სასწავლო მასალა (საქაღალდე masala)</option></select>
-      <input id="mat-title" class="ginput" placeholder="სათაური, მაგ. „შუშანიკის წამება“" autocomplete="off">
-      <input id="mat-file" class="ginput" placeholder="ფაილის სახელი (ცარიელი = სათაური.pdf)" autocomplete="off">
-      <div class="row"><button class="btn" id="mat-add">მასალის დამატება</button></div>
-    </div>
-    <div id="mats" class="mats"></div>
+    <!-- დავალების მიცემა -->
+    <div class="apane" id="ap-assign">
+      <div class="field"><label for="as-group">ჯგუფი</label><select id="as-group" class="gselect"></select></div>
+      <div id="as-none" class="lead hidden">ჯერ შექმენი ჯგუფი („ჯგუფები“ ჩანართში) და დაამატე მოსწავლეები.</div>
+      <div id="as-body">
+        <h3>ამ ჯგუფის დავალებები</h3>
+        <div id="as-list" class="aslist"></div>
+        <div class="row" style="margin:12px 0 0"><button class="btn" id="as-new">+ ახალი დავალების შედგენა</button></div>
 
-    <h3 style="margin-top:44px">დავალებების ჩვენება და დამალვა</h3>
-    <p class="lead" style="margin-bottom:14px">ჯერ აირჩიე, ვისთვის აწყობ. მონიშნული ჩანს, მოუნიშნავი დამალულია. ▸-ით ჩამოშლი და დაინახავ შიგნით არსებულ თავებს, ტექსტებსა და დავალებებს. შიდა დავალების მონიშვნა მის ზედა ბლოკებსაც ავტომატურად ჩართავს. ბოლოს დააჭირე „შენახვას“.</p>
-    <div class="field"><label for="vis-target">ვისთვის</label><select id="vis-target" class="gselect"></select></div>
-    <div class="copyrow">
-      <label for="vis-from">დავალებების გადმოტანა სხვა ჯგუფიდან (მერე აქ მხოლოდ განსხვავებას შეცვლი)</label>
-      <div class="row"><select id="vis-from" class="gselect"></select><button type="button" class="btn ghost" id="vis-copy">გადმოტანა</button></div>
+        <div id="as-editor" class="hidden">
+          <h3 id="as-ed-h"></h3>
+          <p class="lead" style="margin-bottom:10px">მონიშნე, რაც უნდა გააკეთონ. ▸-ით ჩამოშლი. ნარინჯისფერი „უკვე მიეცა“ ნიშნავს, რომ ეს ამ ჯგუფს უკვე მიეცა ადრე — მაინც შეგიძლია ხელახლა მისცე.</p>
+          <div class="copyrow">
+            <label for="as-from">მონიშვნის გადმოტანა სხვა ჯგუფის ახალი დავალებიდან</label>
+            <div class="row"><select id="as-from" class="gselect"></select><button type="button" class="btn ghost" id="as-copy">გადმოტანა</button></div>
+          </div>
+          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button></div>
+          <div id="vis-tree" class="vis"></div>
+          <div class="row vis-save">
+            <button class="btn" id="as-give">მიცემა</button>
+            <button class="btn ghost" id="as-cancel">გაუქმება</button>
+            <span id="vis-count" class="vis-count"></span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="vis-root"><button type="button" id="vis-all-on">ყველაფრის ჩვენება</button><button type="button" id="vis-all-off">ყველაფრის დამალვა</button></div>
-    <div id="vis-tree" class="vis"></div>
-    <div class="row vis-save"><button class="btn" id="vis-save">შენახვა</button><span id="vis-count" class="vis-count"></span></div>
+
+    <!-- ჯგუფები -->
+    <div class="apane hidden" id="ap-groups">
+      <p class="lead" style="margin-bottom:14px">ყოველი მოსწავლე ერთ ჯგუფშია (ჯგუფში შეიძლება ერთი მოსწავლეც იყოს). მოსწავლე ხედავს მხოლოდ თავისი ჯგუფისთვის მიცემულ დავალებებს.</p>
+      <div class="row"><input id="new-group" class="ginput" placeholder="ჯგუფის სახელი, მაგ. „IX ა“" autocomplete="off"><button class="btn" id="add-group">ჯგუფის შექმნა</button></div>
+      <p class="err" id="nogroup-warn"></p>
+      <div id="groups" class="groups"></div>
+    </div>
+
+    <!-- მოსწავლეები -->
+    <div class="apane hidden" id="ap-students">
+      <p class="lead">შესვლა შეუძლიათ მხოლოდ ამ სიაში მყოფ მოსწავლეებს: წერენ გვარს და ირჩევენ სახელს.</p>
+      <label for="new-students" style="font-weight:600;display:block;margin-bottom:6px">დაამატე მოსწავლეები — თითო სტრიქონზე ერთი „გვარი სახელი“ (ჯერ გვარი!)</label>
+      <textarea id="new-students" placeholder="ბერიძე ნინო&#10;კაპანაძე გიორგი"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn" id="add-students">დამატება</button></div>
+      <div class="msg" id="admin-msg"></div>
+      <h3 id="list-title">სიაში: …</h3>
+      <div class="field" style="margin-bottom:0"><input id="filter" placeholder="ძებნა სიაში" autocomplete="off"></div>
+      <ul class="slist" id="slist"></ul>
+    </div>
+
+    <!-- მასალები -->
+    <div class="apane hidden" id="ap-mats">
+      <p class="lead" style="margin-bottom:14px">ჯერ ფაილი ატვირთე GitHub-ზე შესაბამის საქაღალდეში (მთავარ გვერდზე): წიგნები → <b>wignebi</b>, პრეზენტაციები → <b>prezentaciebi</b>, სასწავლო მასალა → <b>masala</b>. მერე აქ დაამატე სათაური და ფაილის ზუსტი სახელი (✓ = ნაპოვნია). დამატებულ მასალას ჯგუფს „დავალების მიცემაში“ მისცემ.</p>
+      <div class="mform">
+        <select id="mat-cat" class="gselect"><option value="books">წიგნი (საქაღალდე wignebi)</option><option value="pres">პრეზენტაცია (საქაღალდე prezentaciebi)</option><option value="mat">სასწავლო მასალა (საქაღალდე masala)</option></select>
+        <input id="mat-title" class="ginput" placeholder="სათაური, მაგ. „შუშანიკის წამება“" autocomplete="off">
+        <input id="mat-file" class="ginput" placeholder="ფაილის სახელი (ცარიელი = სათაური.pdf)" autocomplete="off">
+        <div class="row"><button class="btn" id="mat-add">მასალის დამატება</button></div>
+      </div>
+      <div id="mats" class="mats"></div>
+    </div>
+
+    <div class="row asave hidden" id="asave"><button class="btn" id="vis-save">ცვლილებების შენახვა</button><span class="dirty">შეუნახავი ცვლილებებია (ჯგუფები / მასალები)</span></div>
     <div class="msg" id="vis-msg"></div>
     <p style="margin-top:28px"><button class="btn ghost" id="admin-exit">გასვლა</button></p>
   </section>
 
   <!-- 1ა. დავალების ტიპი -->
   <section id="s-mode" class="hidden">
-    <h2>აირჩიე დავალება</h2>
-    <p class="lead">რას გააკეთებ ახლა?</p>
-    <p class="err hidden" id="mode-none">ახლა გასაკეთებელი დავალებები არ არის.</p>
-    <button class="btn allbtn" id="mode-all">📋 ყველა დავალება</button>
+    <h2>დავალებები</h2>
+    <p class="err hidden" id="mode-none">ჯერ დავალება არ მოგცემია. მიმართე მასწავლებელს.</p>
+    <div class="assign-btns" id="assign-btns">
+      <button class="btn allbtn" id="mode-new">📋 ახალი დავალება<span class="sub" id="new-sub"></span></button>
+      <button class="btn ghost allbtn" id="mode-old">🗂 ძველი დავალებები<span class="sub" id="old-sub"></span></button>
+    </div>
+    <h3 class="blocks-h">ყველა მასალა და დავალება განყოფილებების მიხედვით</h3>
     <div class="works">
-      <button class="work" id="mode-test"><span class="wt">გააზრება</span><span class="wa">ტესტი ნაწარმოებების მიხედვით</span></button>
-      <button class="work" id="mode-edit"><span class="wt">რედაქტირება</span><span class="wa">ტექსტის ჩასწორება</span></button>
-      <button class="work" id="mode-gram"><span class="wt">გრამატიკა</span><span class="wa">ქართული ენა, მორფოლოგია</span></button>
-      <button class="work" id="mode-theme"><span class="wt">გააზრება და თემა</span><span class="wa">ტექსტის გააზრება და თხზულება</span></button>
-      <button class="work" id="mode-mit"><span class="wt">თემის მითითებები</span><span class="wa">„გააზრება და თემის“ მითითებები</span></button>
-      <button class="work" id="mode-only"><span class="wt">გააზრება თემის გარეშე</span><span class="wa">მხოლოდ ტექსტის გააზრება</span></button>
       <button class="work" id="mode-books"><span class="wt">წიგნები</span><span class="wa">ნაწარმოებები PDF-ად</span></button>
       <button class="work" id="mode-pres"><span class="wt">პრეზენტაციები</span><span class="wa">თემების მიხედვით</span></button>
       <button class="work" id="mode-mat"><span class="wt">სასწავლო მასალა</span><span class="wa">თხრობით სასწავლი</span></button>
+      <button class="work" id="mode-theme"><span class="wt">გააზრება და თემა</span><span class="wa">ტექსტის გააზრება და თხზულება</span></button>
+      <button class="work" id="mode-mit"><span class="wt">თემის მითითებები</span><span class="wa">„გააზრება და თემის“ მითითებები</span></button>
+      <button class="work" id="mode-edit"><span class="wt">რედაქტირება</span><span class="wa">ტექსტის ჩასწორება</span></button>
+      <button class="work" id="mode-test"><span class="wt">გააზრება</span><span class="wa">ტესტი ნაწარმოებების მიხედვით</span></button>
+      <button class="work" id="mode-only"><span class="wt">გააზრება თემის გარეშე</span><span class="wa">მხოლოდ ტექსტის გააზრება</span></button>
+      <button class="work" id="mode-gram"><span class="wt">გრამატიკა</span><span class="wa">ქართული ენა, მორფოლოგია</span></button>
     </div>
     <p style="margin-top:28px"><button class="btn ghost" id="back-name">სახელის შეცვლა</button></p>
   </section>
@@ -354,10 +419,18 @@
 
   <!-- 1დ. ყველა დავალება -->
   <section id="s-all" class="hidden">
-    <h2>ყველა დავალება</h2>
-    <p class="lead">აქ თავმოყრილია ყველაფერი, რაც ახლა გევალება. დააჭირე და გაიხსნება.</p>
+    <h2 id="all-h">ახალი დავალება</h2>
+    <p class="lead" id="all-lead">დააჭირე და გაიხსნება. როცა რამეს გააკეთებ, მონიშნე ✓ — გამწვანდება.</p>
     <div id="all-box"></div>
     <p style="margin-top:28px"><button class="btn ghost" id="all-back">უკან</button></p>
+  </section>
+
+  <!-- 1ე. ძველი დავალებები -->
+  <section id="s-old" class="hidden">
+    <h2>ძველი დავალებები</h2>
+    <p class="lead">აქ ინახება აქამდე მიცემული დავალებები. შეგიძლია ნებისმიერი გახსნა.</p>
+    <div id="old-list" class="flist"></div>
+    <p style="margin-top:28px"><button class="btn ghost" id="old-back">უკან</button></p>
   </section>
 
   <!-- 2. ნაწარმოების არჩევა -->
@@ -390,6 +463,7 @@
       <div class="head-btns">
         <button class="btn small" id="open-text">ტექსტი</button>
         <button class="btn ghost small" id="change-chap">თავის შეცვლა</button>
+        <button class="btn ghost small" id="clear-chap">გასუფთავება</button>
       </div>
     </div>
     <div class="dots" id="dots"></div>
@@ -465,7 +539,9 @@ const $ = id => document.getElementById(id);
 const state = { name:"", work:null, chap:null, answers:[], i:0, sending:false };
 
 function show(id){
-  ["s-name","s-admin","s-mode","s-files","s-list","s-all","s-work","s-chap","s-test","s-done"].forEach(s => $(s).classList.toggle("hidden", s!==id));
+  ["s-name","s-admin","s-mode","s-files","s-list","s-all","s-old","s-work","s-chap","s-test","s-done"].forEach(s => $(s).classList.toggle("hidden", s!==id));
+  // „მთავარი მენიუ“ ყველგან, სადაც მოსწავლე შიგნითაა
+  $("home-btn").classList.toggle("hidden", !state.name || ["s-mode","s-name","s-admin"].indexOf(id) > -1);
   window.scrollTo(0,0);
 }
 
@@ -490,44 +566,84 @@ function netErr(e){
 /* 1. შესვლა: სახელი და გვარი მოწმდება მხოლოდ სრულად, სკრიპტში */
 const NAME_KEY = "hagiography-surname";
 const SESSION_KEY = "lit-session-name";
-const HIDDEN_KEY = "lit-hidden";          // მასწავლებლის მიერ დამალული დავალებები; სხვა გვერდებიც ამას კითხულობს
-let HIDDEN = [];
-try{ HIDDEN = JSON.parse(sessionStorage.getItem(HIDDEN_KEY) || "[]"); }catch(e){}
-const isHidden = k => HIDDEN.indexOf(k) > -1;
-const MAT_KEY = "lit-materials";
+const USER_KEY = "lit-user";             // შესული მოსწავლე ამ მოწყობილობაზე (აპლიკაციის დახურვის შემდეგაც)
+/* ===== მიცემული დავალებები: ჩანს მხოლოდ ის, რაც მასწავლებელმა ჯგუფს მისცა ===== */
+let ASSIGNS = [];                          // [{id, date, items}] — ძველიდან ახლისკენ
+let ALLOWED = new Set();                   // ყველა მიცემული (ახალი + ძველი)
 let MATERIALS = [];
-try{ MATERIALS = JSON.parse(sessionStorage.getItem(MAT_KEY) || "[]"); }catch(e){}
-function setMaterials(m){
-  if(!Array.isArray(m)) return;
-  MATERIALS = m;
-  try{ sessionStorage.setItem(MAT_KEY, JSON.stringify(m)); }catch(e){}
-  applyHidden();
-}
 const MAT_DIR = { books:"wignebi", pres:"prezentaciebi", mat:"masala" };
 const MAT_CAT = { books:"წიგნები", pres:"პრეზენტაციები", mat:"სასწავლო მასალა" };
 const matUrl = m => MAT_DIR[m.cat] + "/" + encodeURIComponent(m.file);
-function setHiddenList(h){
-  HIDDEN = Array.isArray(h) ? h : [];
-  try{ sessionStorage.setItem(HIDDEN_KEY, JSON.stringify(HIDDEN)); }catch(e){}
+const lsGet = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; }catch(e){ return d; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+// გასაღები ჩანს თუ არა მოცემულ სიმრავლეში (ჯგუფური გასაღებები — თუ შიგნით რამე ჩანს)
+function inSet(k, set){
+  if(set.has(k)) return true;
+  const any = f => { for(const x of set) if(f(x)) return true; return false; };
+  if(k.indexOf("m:") === 0){
+    const c = k.slice(2);
+    if(c === "gaz" || c === "red" || c === "gram" || c === "only") return any(x => x.indexOf(c + ":") === 0);
+    if(c === "tema") return any(x => /^tema:[^:]+$/.test(x));
+    if(c === "mit") return any(x => /^tema:.+:mit$/.test(x));
+    if(MAT_DIR[c]) return MATERIALS.some(m => m.cat === c && set.has("mat:" + m.id));
+    return false;
+  }
+  if(/^gaz:[a-z]+$/.test(k) && WORKS[k.slice(4)]) return CHAPTERS.some(ch => ch.work === k.slice(4) && set.has("gaz:" + ch.id));
+  return any(x => x.indexOf(k + ":") === 0);
+}
+const isHidden = k => !inSet(k, ALLOWED);
+function setAssigns(a, mats){
+  if(Array.isArray(mats)) MATERIALS = mats;
+  ASSIGNS = (Array.isArray(a) ? a : []).slice().sort((x, y) => String(x.date).localeCompare(String(y.date)));
+  ALLOWED = new Set(); ASSIGNS.forEach(x => (x.items || []).forEach(k => ALLOWED.add(k)));
+  // სხვა გვერდები (გრამატიკა, რედაქტირება, თემები) ამას კითხულობენ
+  try{ sessionStorage.setItem("lit-allowed", JSON.stringify(Array.from(ALLOWED))); }catch(e){}
+  if(state.name) lsSet("lit-assigns:" + state.name, { assigns: ASSIGNS, materials: MATERIALS });
+  STUDENT_BASE_ACTS = null;
   applyHidden();
 }
 const MODE_BTNS = { "mode-test":"m:gaz", "mode-edit":"m:red", "mode-gram":"m:gram", "mode-theme":"m:tema", "mode-only":"m:only",
   "mode-mit":"m:mit", "mode-books":"m:books", "mode-pres":"m:pres", "mode-mat":"m:mat" };
-const visibleMats = cat => isHidden("m:" + cat) ? [] : MATERIALS.filter(m => m.cat === cat && !isHidden("mat:" + m.id));
+const visibleMats = cat => MATERIALS.filter(m => m.cat === cat && ALLOWED.has("mat:" + m.id));
+const KA_MONTHS = ["იანვარი","თებერვალი","მარტი","აპრილი","მაისი","ივნისი","ივლისი","აგვისტო","სექტემბერი","ოქტომბერი","ნოემბერი","დეკემბერი"];
+function fmtDate(d){   // „12 ოქტომბერი, 14:05“ (წელი — თუ მიმდინარე არ არის)
+  const x = new Date(d); if(isNaN(x)) return String(d || "");
+  const p = n => (n < 10 ? "0" : "") + n;
+  return x.getDate() + " " + KA_MONTHS[x.getMonth()] + (x.getFullYear() !== new Date().getFullYear() ? " " + x.getFullYear() : "") + ", " + p(x.getHours()) + ":" + p(x.getMinutes());
+}
 function applyHidden(){
   let shown = 0;
-  Object.keys(MODE_BTNS).forEach(id => {
-    const key = MODE_BTNS[id], cat = key.slice(2);
-    const h = isHidden(key) || (!!MAT_DIR[cat] && !visibleMats(cat).length);   // ცარიელი მასალის ბლოკი არ ჩანს
-    $(id).classList.toggle("hidden", h); if(!h) shown++;
-  });
-  $("mode-none").classList.toggle("hidden", shown > 0);
+  Object.keys(MODE_BTNS).forEach(id => { const h = isHidden(MODE_BTNS[id]); $(id).classList.toggle("hidden", h); if(!h) shown++; });
+  $("mode-none").classList.toggle("hidden", ASSIGNS.length > 0);
+  $("assign-btns").classList.toggle("hidden", !ASSIGNS.length);
+  $("mode-old").classList.toggle("hidden", ASSIGNS.length < 2);
+  const cur = ASSIGNS[ASSIGNS.length - 1];
+  $("new-sub").textContent = cur ? fmtDate(cur.date) : "";
+  $("old-sub").textContent = ASSIGNS.length > 1 ? (ASSIGNS.length - 1) + " დავალება" : "";
+  document.querySelector(".blocks-h").classList.toggle("hidden", !shown);
   document.querySelectorAll(".work[data-work]").forEach(b => b.classList.toggle("hidden", isHidden("gaz:" + b.dataset.work)));
   if(state.work && !$("s-chap").classList.contains("hidden")) renderChapters();
+  paintDone();
 }
-function refreshHidden(){   // ფონურად: უახლესი სია სკრიპტიდან
-  api({ action:"visibility", name: state.name }).then(r => { if(r && r.ok){ setMaterials(r.materials); setHiddenList(r.hidden); } }).catch(() => {});
-}   // შესული მოსწავლე (ამ ჩანართში); რედაქტირების გვერდიც ამას კითხულობს
+function refreshHidden(){   // ფონურად: უახლესი დავალებები სკრიპტიდან
+  if(!state.name) return;
+  api({ action:"visibility", name: state.name }).then(r => { if(r && r.ok) setAssigns(r.assigns, r.materials); }).catch(() => {});
+}
+/* ===== მოსწავლის „გავაკეთე“ ნიშნები (მხოლოდ მისთვის, ტელეფონში) ===== */
+let DONE = new Set();
+function loadDone(){ DONE = new Set(lsGet("lit-done:" + state.name, [])); }
+function setDone(k, on){ on ? DONE.add(k) : DONE.delete(k); lsSet("lit-done:" + state.name, Array.from(DONE)); paintDone(); }
+let STUDENT_BASE_ACTS = null;   // ყველა მიცემული დავალების სია (ბლოკების გასამწვანებლად)
+function paintDone(){
+  // ბლოკი მწვანდება, როცა მასში ყველა მიცემული დავალება მონიშნულია
+  const byBlock = {};
+  (STUDENT_BASE_ACTS || []).forEach(a => { (byBlock[a.block] = byBlock[a.block] || []).push(a.key); });
+  Object.keys(MODE_BTNS).forEach(id => {
+    const ks = byBlock[MODE_BTNS[id]] || [];
+    $(id).classList.toggle("done", ks.length > 0 && ks.every(k => DONE.has(k)));
+  });
+  document.querySelectorAll("#chapters .chap").forEach(b => b.classList.toggle("done", DONE.has(b.dataset.key)));
+}
 let adminKey = null;
 function setWho(){
   $("who").textContent = state.name; $("who").classList.toggle("hidden", !state.name);
@@ -568,14 +684,12 @@ async function chooseStudent(n, surname){
   $("pick-list").querySelectorAll("button").forEach(b => b.disabled = true);
   try{
     const r = await api({ action:"login", name: n });
-    if(r.ok && r.materials) setMaterials(r.materials);
-    if(r.ok && r.hidden) setHiddenList(r.hidden);
     if(!r.ok || !r.name){ $("name-err").textContent = "ეს მოსწავლე სიაში აღარ არის. მიმართე მასწავლებელს."; clearPick(); return; }
-    state.name = r.name;
+    signIn(r.name);
+    setAssigns(r.assigns, r.materials);
     try{ localStorage.setItem(NAME_KEY, surname); }catch(e){}
-    setWho(); clearPick();
-    try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
-    show("s-mode");
+    clearPick();
+    goHome();
   }catch(e){
     $("name-err").textContent = netErr(e);
     $("pick-list").querySelectorAll("button").forEach(b => b.disabled = false);
@@ -590,11 +704,18 @@ $("fullname").addEventListener("input", () => {
   if($("fullname").value.trim().length >= 2) lookupTimer = setTimeout(() => lookup(false), 700);
 });
 try{ $("fullname").value = localStorage.getItem(NAME_KEY) || ""; }catch(e){}
-$("back-name").onclick = () => {
-  state.name = ""; setWho(); clearPick();
-  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+// შესვლა ინახება ტელეფონში: აპლიკაციის ხელახლა გახსნისას სახელის ჩაწერა აღარ სჭირდება
+function signIn(name){
+  state.name = name; setWho(); loadDone();
+  try{ sessionStorage.setItem(SESSION_KEY, name); localStorage.setItem(USER_KEY, name); }catch(e){}
+}
+function goHome(){ state.work = null; setWorkTitle(); show("s-mode"); loadStudentActs(); }
+$("home-btn").onclick = goHome;
+$("back-name").onclick = () => openModal("სხვა სახელით შესვლა?", "ამ მოწყობილობაზე შესვლა გაუქმდება. შენი შენახული პასუხები არ წაიშლება.", "დარჩენა", "გასვლა", () => {
+  state.name = ""; setWho(); clearPick(); ASSIGNS = []; ALLOWED = new Set();
+  try{ sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem("lit-allowed"); localStorage.removeItem(USER_KEY); }catch(e){}
   show("s-name");
-};
+});
 /* დავალების ტიპი: გააზრება (ეს ტესტი) ან რედაქტირება (ცალკე გვერდი redaqtireba.html) */
 $("mode-test").onclick = () => show("s-work");
 $("mode-gram").onclick = () => {
@@ -642,7 +763,7 @@ function openFiles(key, target){   // target: კონკრეტული დ
 $("mode-edit").onclick = () => openFiles("red");
 $("mode-theme").onclick = () => openFiles("tema");
 $("mode-only").onclick = () => openFiles("only");
-$("files-back").onclick = () => show("s-mode");
+$("files-back").onclick = goHome;
 $("files-app").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
   const T = FILES.target;
@@ -650,8 +771,8 @@ $("files-app").onclick = () => {
   if(T){
     // „თემის“ აპლიკაციები: ტექსტი წინასწარ არჩეული დახვდება (თუ სხვა ტესტი არ არის დაწყებული)
     try{
-      const cur = JSON.parse(sessionStorage.getItem("georgian_exam_session") || "null");
-      if(!cur || !cur.student) sessionStorage.setItem("georgian_exam_session", JSON.stringify({ student:null, testId:T }));
+      const cur = JSON.parse(localStorage.getItem("georgian_exam_session") || "null");
+      if(!cur || !cur.student) localStorage.setItem("georgian_exam_session", JSON.stringify({ student:null, testId:T }));
     }catch(e){}
   }
   location.href = FILES.app;
@@ -717,17 +838,22 @@ async function mitUrl(testFile){
   return null;
 }
 let STUDENT_BASE = null;   // დავალებების ჩამონათვალი (ერთხელ იტვირთება); მასალები ყოველ ჯერზე ახლიდან
-async function studentActs(){
+// მოცემული სიმრავლის (ერთი დავალების ან ყველა მიცემულის) შესასრულებელი ერთეულები
+async function actsFor(set){
   if(!STUDENT_BASE) STUDENT_BASE = (await visCatalog([])).filter(n => !/^m:(books|pres|mat)$/.test(n.key));
-  const STUDENT_CAT = STUDENT_BASE.concat(matNodes(MATERIALS));
+  const cat = STUDENT_BASE.concat(matNodes(MATERIALS));
   const out = [];
-  (function walk(nodes){ nodes.forEach(n => {
-    if(isHidden(n.key)) return;
-    if(n.act && !(n.act.t === "gram" && !(n.kids || []).some(k => !isHidden(k.key))) && !(n.act.t === "mit" && isHidden("m:mit"))) out.push(n.act);
-    if(n.kids) walk(n.kids);
-  }); })(STUDENT_CAT);
+  (function walk(nodes, block){ nodes.forEach(n => {
+    const b = block || n.key;
+    if(!inSet(n.key, set)) return;
+    if(n.act && !(n.act.t === "gram" && !(n.kids || []).some(k => inSet(k.key, set))))
+      out.push(Object.assign({ key: n.key, block: n.act.t === "mit" ? "m:mit" : b }, n.act));
+    if(n.kids) walk(n.kids, b);
+  }); })(cat, null);
   return out;
 }
+const studentActs = () => actsFor(ALLOWED);
+async function loadStudentActs(){ try{ STUDENT_BASE_ACTS = await studentActs(); paintDone(); }catch(e){} }
 async function showMit(){
   openList("თემის მითითებები", "დააჭირე და მითითება გადმოიწერება.");
   const acts = (await studentActs()).filter(a => a.t === "mit");
@@ -740,45 +866,72 @@ $("mode-books").onclick = () => showMats("books");
 $("mode-pres").onclick = () => showMats("pres");
 $("mode-mat").onclick = () => showMats("mat");
 $("mode-mit").onclick = showMit;
-$("list-back").onclick = () => show("s-mode");
-$("all-back").onclick = () => show("s-mode");
+$("list-back").onclick = goHome;
+$("all-back").onclick = () => { if($("all-back").dataset.to === "s-old") $("mode-old").click(); else goHome(); };
 function goSection(url){ try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){} location.href = url; }
-$("mode-all").onclick = async () => {
+// დავალების გვერდი: 1. წასაკითხი, 2. თხრობით სასწავლი, 3. წერითი (თემა, მითითებები, რედაქტირება, გააზრება, თემის გარეშე, გრამატიკა)
+async function showAssign(a, isOld){
+  $("all-h").textContent = (isOld ? "ძველი დავალება" : "ახალი დავალება") + " · " + fmtDate(a.date);
+  $("all-back").dataset.to = isOld ? "s-old" : "s-mode";
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
-  const acts = await studentActs();
-  const mits = await Promise.all(acts.filter(a => a.t === "mit").map(async a => ({ a, u: await mitUrl(a.file) })));
+  const acts = await actsFor(new Set(a.items || []));
+  const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file) })));
   const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
-  const sections = [
-    { h:"1. დასაწერი დავალებები", items:[] },
-    { h:"2. თხრობით სასწავლი", items:[] },
-    { h:"3. წასაკითხი", items:[] }
-  ];
-  const btn = (kind, text, fn) => { const b = document.createElement("button"); b.type = "button"; const d = document.createElement("span");
-    const k = document.createElement("span"); k.className = "kind"; k.textContent = kind; d.append(k, document.createTextNode(text)); b.appendChild(d); b.onclick = fn; return b; };
-  const link = (kind, text, url, isHtml) => { const a = fileLink(url, "", "", isHtml); const d = a.querySelector("span");
-    const k = document.createElement("span"); k.className = "kind"; k.textContent = kind; d.append(k, document.createTextNode(text)); return a; };
-  ["gaz","red","gram","tema","mit","only"].forEach(t => acts.filter(a => a.t === t).forEach(a => {
-    if(t === "gaz") sections[0].items.push(btn(KIND[t], a.text, () => { state.work = CHAPTERS[a.idx].work; setWorkTitle(); renderChapters(); startTest(a.idx); }));
-    else if(t === "red") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("red", a.n)));
-    else if(t === "gram") sections[0].items.push(btn(KIND[t], a.text, () => goSection("gramatika/#" + a.id)));
-    else if(t === "tema") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("tema", a.id)));
-    else if(t === "only") sections[0].items.push(btn(KIND[t], a.text, () => openFiles("only", a.id)));
-    else if(t === "mit"){ const m = mits.find(x => x.a === a); if(m && m.u) sections[0].items.push(link(KIND[t], a.text, m.u)); }
-  }));
-  acts.filter(a => a.t === "file").forEach(a => {
-    const m = a.m, html = /\.html?$/i.test(m.file);
-    sections[m.cat === "mat" ? 1 : 2].items.push(link(MAT_CAT[m.cat], m.title, matUrl(m), html));
+  const sections = [ { h:"1. წასაკითხი", items:[] }, { h:"2. თხრობით სასწავლი", items:[] }, { h:"3. წერითი დავალებები", items:[] } ];
+  const label = (el, kind, text) => { const d = el.querySelector("span") || el.appendChild(document.createElement("span"));
+    d.textContent = ""; const k = document.createElement("span"); k.className = "kind"; k.textContent = kind; d.append(k, document.createTextNode(text)); };
+  const btn = (key, kind, text, fn) => { const b = document.createElement("button"); b.type = "button"; b.className = "item"; label(b, kind, text); b.onclick = fn; return { key, el:b }; };
+  const link = (key, kind, text, url, isHtml) => { const a = fileLink(url, "", "", isHtml); label(a, kind, text); return { key, el:a }; };
+  acts.filter(x => x.t === "file").forEach(x => {
+    const m = x.m, html = /\.html?$/i.test(m.file);
+    sections[m.cat === "mat" ? 1 : 0].items.push(link(x.key, MAT_CAT[m.cat], m.title, matUrl(m), html));
   });
+  ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
+    const W = sections[2].items;
+    if(t === "gaz") W.push(btn(x.key, KIND[t], x.text, () => { state.work = CHAPTERS[x.idx].work; setWorkTitle(); renderChapters(); startTest(x.idx); }));
+    else if(t === "red") W.push(btn(x.key, KIND[t], x.text, () => openFiles("red", x.n)));
+    else if(t === "gram") W.push(btn(x.key, KIND[t], x.text, () => goSection("gramatika/#" + x.id)));
+    else if(t === "tema") W.push(btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id)));
+    else if(t === "only") W.push(btn(x.key, KIND[t], x.text, () => openFiles("only", x.id)));
+    else if(t === "mit"){ const m = mits.find(z => z.x === x); if(m && m.u) W.push(link(x.key, KIND[t], x.text, m.u)); }
+  }));
   box.innerHTML = "";
-  sections.forEach(sec => {
+  let n = 0, sn = 0;
+  const filled = sections.filter(sec => sec.items.length);
+  if(!filled.length) box.innerHTML = "<p class='lead'>ამ დავალებაში ჯერ არაფერია.</p>";
+  filled.forEach(sec => {
     const d = document.createElement("div"); d.className = "allsec";
-    const h = document.createElement("h3"); h.textContent = sec.h; d.appendChild(h);
-    if(!sec.items.length){ const p = document.createElement("p"); p.className = "none"; p.textContent = "ახლა არაფერია."; d.appendChild(p); }
-    else { const ol = document.createElement("ol"); sec.items.forEach(x => { const li = document.createElement("li"); li.appendChild(x); ol.appendChild(li); }); d.appendChild(ol); }
+    const h = document.createElement("h3"); h.textContent = (++sn) + ". " + sec.h.replace(/^\d+\.\s*/, ""); d.appendChild(h);
+    {
+      const ol = document.createElement("ol");
+      sec.items.forEach(it => {
+        const li = document.createElement("li"); li.classList.toggle("done", DONE.has(it.key));
+        const no = document.createElement("span"); no.className = "no"; no.textContent = (++n) + ".";
+        it.el.insertBefore(no, it.el.firstChild);
+        const tk = document.createElement("button"); tk.type = "button"; tk.className = "tick"; tk.textContent = "✓";
+        tk.title = "მონიშნე, როცა გააკეთებ"; tk.setAttribute("aria-label", "გაკეთებულად მონიშვნა");
+        tk.onclick = () => { const on = !DONE.has(it.key); setDone(it.key, on); li.classList.toggle("done", on); };
+        li.append(it.el, tk); ol.appendChild(li);
+      });
+      d.appendChild(ol);
+    }
     box.appendChild(d);
   });
+}
+$("mode-new").onclick = () => { const a = ASSIGNS[ASSIGNS.length - 1]; if(a) showAssign(a, false); };
+$("mode-old").onclick = () => {
+  const box = $("old-list"); box.innerHTML = "";
+  ASSIGNS.slice(0, -1).reverse().forEach(a => {
+    const b = document.createElement("a"); b.href = "#"; 
+    const sp = document.createElement("span"); sp.textContent = fmtDate(a.date);
+    const bb = document.createElement("b"); bb.textContent = "გახსნა →";
+    b.append(sp, bb); b.onclick = e => { e.preventDefault(); showAssign(a, true); };
+    box.appendChild(b);
+  });
+  show("s-old");
 };
-$("back-mode").onclick = () => { state.work = null; setWorkTitle(); show("s-mode"); };
+$("old-back").onclick = goHome;
+$("back-mode").onclick = goHome;
 
 /* მასწავლებლის გვერდი: მოსწავლეების დამატება/წაშლა */
 let students = [];
@@ -796,7 +949,7 @@ function renderStudents(){
   list.forEach(n => {
     const li = document.createElement("li");
     const sp = document.createElement("span"); sp.textContent = n;
-    const g = groupOf(n); if(g){ const t = document.createElement("span"); t.className = "gtag"; t.textContent = "· " + g.name; sp.appendChild(t); }
+    const g = groupOf(n); const t = document.createElement("span"); t.className = "gtag"; t.textContent = g ? "· " + g.name : "· ჯგუფის გარეშე"; sp.appendChild(t);
     const b = document.createElement("button"); b.className = "del"; b.textContent = "წაშლა";
     b.onclick = () => openModal("წავშალო სიიდან?", n + " ვეღარ შევა აპლიკაციაში.", "გაუქმება", "წაშლა", () => removeStudent(n));
     li.append(sp, b); $("slist").appendChild(li);
@@ -805,56 +958,39 @@ function renderStudents(){
 async function openAdmin(){
   $("work-title").textContent = "მასწავლებლის გვერდი";
   state.name = ""; setWho();
-  try{ sessionStorage.removeItem(SESSION_KEY); }catch(e){}
+  try{ sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(USER_KEY); }catch(e){}
   show("s-admin"); adminMsg("", true);
   $("list-title").textContent = "სია იტვირთება…"; $("slist").innerHTML = "";
   try{
     const r = await api({ action:"list", key: adminKey });
     if(!r.ok) throw new Error(r.error);
-    DIRTY = false; CATALOG = null; TARGET = "default";
+    markDirty(false); CATALOG = null; EDIT = null;
     fillAdmin(r);
   }catch(e){ adminMsg(netErr(e), false); }
 }
 
-/* ===== ჯგუფები და დავალებების ჩვენება/დამალვა (მასწავლებელი) ===== */
-let CFG = { hidden: new Set(), groups: [], materials: [] };   // groups: [{id, name, members:Set(სახელები), hidden:Set}]
-let TARGET = "default", DIRTY = false, CATALOG = null, NODES = {};
+/* ===== ჯგუფები და დავალებების მიცემა (მასწავლებელი) ===== */
+let CFG = { groups: [], materials: [] };   // groups: [{id, name, members:Set(სახელები), assigns:[{id, date, items}]}]
+let DIRTY = false, CATALOG = null, NODES = {}, AS_GROUP = null, EDIT = null;   // EDIT: { aid (null = ახალი), set:Set }
+const byDate = (a, b) => String(a.date).localeCompare(String(b.date));
 function loadCfg(r){
-  CFG.hidden = new Set(r.hidden || []);
-  CFG.groups = (r.groups || []).map(g => ({ id:g.id, name:g.name, members:new Set(g.members || []), hidden:new Set(g.hidden || []) }));
+  CFG.groups = (r.groups || []).map(g => ({ id:g.id, name:g.name, members:new Set(g.members || []), assigns:(g.assigns || []).slice().sort(byDate) }));
   CFG.materials = (r.materials || []).slice();
-  if(TARGET !== "default" && !CFG.groups.some(g => g.id === TARGET)) TARGET = "default";
+  if(!CFG.groups.some(g => g.id === AS_GROUP)) AS_GROUP = CFG.groups[0] ? CFG.groups[0].id : null;
 }
-function curSet(){ const g = CFG.groups.find(x => x.id === TARGET); return g ? g.hidden : CFG.hidden; }
 function groupOf(name){ return CFG.groups.find(g => g.members.has(name)); }
-function markDirty(on){ DIRTY = on; visCount(); }
-function renderTargets(){
-  const sel = $("vis-target"); sel.innerHTML = "";
-  const o = document.createElement("option"); o.value = "default"; o.textContent = "ჯგუფის გარეშე მოსწავლეები (საერთო)"; sel.appendChild(o);
-  CFG.groups.forEach(g => { const x = document.createElement("option"); x.value = g.id; x.textContent = "ჯგუფი: " + g.name + " (" + g.members.size + ")"; sel.appendChild(x); });
-  sel.value = TARGET;
-  // საიდან გადმოვიტანოთ: ყველა, გარდა ახლა არჩეულისა
-  const from = $("vis-from"), prev = from.value; from.innerHTML = "";
-  Array.from(sel.options).forEach(op => { if(op.value !== TARGET){ const x = op.cloneNode(true); from.appendChild(x); } });
-  if(Array.from(from.options).some(o => o.value === prev)) from.value = prev;
-  $("vis-copy").disabled = !from.options.length;
-}
-$("vis-target").onchange = () => { TARGET = $("vis-target").value; renderTargets(); renderTree(); };
-$("vis-copy").onclick = () => {
-  const fromId = $("vis-from").value; if(!fromId) return;
-  const src = fromId === "default" ? CFG.hidden : (CFG.groups.find(g => g.id === fromId) || {}).hidden;
-  if(!src) return;
-  const fromName = $("vis-from").options[$("vis-from").selectedIndex].text;
-  const toName = $("vis-target").options[$("vis-target").selectedIndex].text;
-  openModal("გადმოვიტანო?", "„" + toName + "“ მიიღებს ზუსტად იმავე დავალებებს, რაც აქვს „" + fromName + "“. აქამდე მონიშნული შეიცვლება.", "გაუქმება", "გადმოტანა", () => {
-    const dst = curSet(); dst.clear(); src.forEach(k => dst.add(k));
-    markDirty(true); renderTree();
-    $("vis-msg").textContent = "გადმოტანილია. ახლა შეცვალე მხოლოდ განსხვავება და დააჭირე „შენახვას“."; $("vis-msg").className = "msg ok";
-  });
-};
+const curGroup = () => CFG.groups.find(g => g.id === AS_GROUP);
+function markDirty(on){ DIRTY = on; $("asave").classList.toggle("hidden", !on); }
+// ჩანართები
+document.querySelectorAll(".atabs button").forEach(b => b.onclick = () => {
+  document.querySelectorAll(".atabs button").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".apane").forEach(pn => pn.classList.toggle("hidden", pn.id !== b.dataset.tab));
+});
 function renderGroups(){
   const host = $("groups"); const open = new Set(Array.from(host.querySelectorAll("details[open]")).map(d => d.dataset.id));
   host.innerHTML = "";
+  const lonely = students.filter(n => !groupOf(n));
+  $("nogroup-warn").textContent = lonely.length ? "ჯგუფის გარეშეა " + lonely.length + " მოსწავლე — ისინი დავალებებს ვერ დაინახავენ: " + lonely.join(", ") : "";
   if(!CFG.groups.length){ const p = document.createElement("p"); p.className = "lead"; p.style.margin = "0"; p.textContent = "ჯგუფები ჯერ არ არის."; host.appendChild(p); }
   CFG.groups.forEach(g => {
     const d = document.createElement("details"); d.dataset.id = g.id; if(open.has(g.id)) d.open = true;
@@ -862,11 +998,11 @@ function renderGroups(){
     const body = document.createElement("div"); body.className = "gbody";
     const row = document.createElement("div"); row.className = "row";
     const nm = document.createElement("input"); nm.className = "ginput"; nm.value = g.name; nm.setAttribute("aria-label","ჯგუფის სახელი");
-    nm.onchange = () => { const v = nm.value.replace(/\s+/g," ").trim(); if(v){ g.name = v; markDirty(true); renderGroups(); renderTargets(); renderStudents(); } else nm.value = g.name; };
+    nm.onchange = () => { const v = nm.value.replace(/\s+/g," ").trim(); if(v){ g.name = v; markDirty(true); renderGroups(); renderAsGroups(); renderStudents(); } else nm.value = g.name; };
     const del = document.createElement("button"); del.className = "btn ghost small"; del.style.marginTop = "0"; del.textContent = "ჯგუფის წაშლა";
-    del.onclick = () => openModal("წავშალო ჯგუფი „" + g.name + "“?", "მოსწავლეები სიაში დარჩებიან და საერთო პარამეტრებს დაინახავენ. ცვლილება „შენახვის“ შემდეგ შევა ძალაში.", "გაუქმება", "წაშლა", () => {
-      CFG.groups = CFG.groups.filter(x => x !== g); if(TARGET === g.id) TARGET = "default";
-      markDirty(true); renderGroups(); renderTargets(); renderStudents(); renderTree();
+    del.onclick = () => openModal("წავშალო ჯგუფი „" + g.name + "“?", "მისი მიცემული დავალებებიც წაიშლება. მოსწავლეები სიაში დარჩებიან, მაგრამ დავალებებს ვერ დაინახავენ, სანამ სხვა ჯგუფში არ გადაიყვან. ცვლილება „შენახვის“ შემდეგ შევა ძალაში.", "გაუქმება", "წაშლა", () => {
+      CFG.groups = CFG.groups.filter(x => x !== g); if(AS_GROUP === g.id) AS_GROUP = CFG.groups[0] ? CFG.groups[0].id : null;
+      markDirty(true); renderGroups(); renderAsGroups(); renderStudents(); renderAssign();
     });
     row.append(nm, del); body.appendChild(row);
     const ml = document.createElement("div"); ml.className = "mlist";
@@ -879,7 +1015,7 @@ function renderGroups(){
       if(other && other !== g){ const o = document.createElement("span"); o.className = "other"; o.textContent = " · ახლა ჯგუფშია: " + other.name; sp.appendChild(o); }
       cb.onchange = () => {
         if(cb.checked){ CFG.groups.forEach(x => x.members.delete(n)); g.members.add(n); } else g.members.delete(n);
-        markDirty(true); renderGroups(); renderTargets(); renderStudents();
+        markDirty(true); renderGroups(); renderAsGroups(); renderStudents();
       };
       lab.append(cb, sp); ml.appendChild(lab);
     });
@@ -889,12 +1025,69 @@ function renderGroups(){
 $("add-group").onclick = () => {
   const v = $("new-group").value.replace(/\s+/g," ").trim();
   if(!v){ $("new-group").focus(); return; }
-  const g = { id:"g" + Date.now(), name:v, members:new Set(), hidden:new Set(CFG.hidden) };   // იწყება საერთოს ასლით
-  CFG.groups.push(g); $("new-group").value = ""; TARGET = g.id;
-  markDirty(true); renderGroups(); renderTargets(); renderTree();
+  const g = { id:"g" + Date.now(), name:v, members:new Set(), assigns:[] };
+  CFG.groups.push(g); $("new-group").value = ""; AS_GROUP = g.id;
+  markDirty(true); renderGroups(); renderAsGroups(); renderAssign();
   const d = $("groups").querySelector('details[data-id="' + g.id + '"]'); if(d) d.open = true;
 };
 $("new-group").addEventListener("keydown", e => { if(e.key === "Enter") $("add-group").click(); });
+
+/* --- დავალების მიცემა --- */
+function renderAsGroups(){
+  const sel = $("as-group"); sel.innerHTML = "";
+  CFG.groups.forEach(g => { const o = document.createElement("option"); o.value = g.id; o.textContent = g.name + " (" + g.members.size + " მოსწავლე)"; sel.appendChild(o); });
+  if(AS_GROUP) sel.value = AS_GROUP;
+  const from = $("as-from"), prev = from.value; from.innerHTML = "";
+  CFG.groups.filter(g => g.id !== AS_GROUP && g.assigns.length).forEach(g => { const o = document.createElement("option"); o.value = g.id; o.textContent = g.name + " — " + fmtDate(g.assigns[g.assigns.length - 1].date); from.appendChild(o); });
+  if(Array.from(from.options).some(o => o.value === prev)) from.value = prev;
+  $("as-copy").disabled = !from.options.length;
+  document.querySelector("#as-editor .copyrow").classList.toggle("hidden", !from.options.length);
+  $("as-none").classList.toggle("hidden", CFG.groups.length > 0);
+  $("as-body").classList.toggle("hidden", !CFG.groups.length);
+}
+$("as-group").onchange = () => { AS_GROUP = $("as-group").value; EDIT = null; renderAsGroups(); renderAssign(); };
+function renderAssign(){
+  const g = curGroup(), host = $("as-list"); host.innerHTML = "";
+  $("as-editor").classList.toggle("hidden", !EDIT); $("as-new").classList.toggle("hidden", !!EDIT);
+  if(!g) return;
+  if(!g.assigns.length){ const p = document.createElement("p"); p.className = "lead"; p.style.margin = "0"; p.textContent = "ამ ჯგუფს ჯერ დავალება არ მისცემია."; host.appendChild(p); }
+  g.assigns.slice().reverse().forEach((a, i) => {
+    const row = document.createElement("div"); row.className = "arow" + (i === 0 ? " cur" : "");
+    const t = document.createElement("span"); t.innerHTML = "<b></b> · "; t.firstChild.textContent = (i === 0 ? "ახალი" : "ძველი") + " — " + fmtDate(a.date);
+    t.appendChild(document.createTextNode((a.items || []).length + " მონიშნული"));
+    const acts = document.createElement("span"); acts.className = "acts";
+    const ed = document.createElement("button"); ed.type = "button"; ed.textContent = "შეცვლა";
+    ed.onclick = () => { EDIT = { aid:a.id, set:new Set(a.items || []) }; openEditor(); };
+    const del = document.createElement("button"); del.type = "button"; del.className = "danger"; del.textContent = "წაშლა";
+    del.onclick = () => openModal("წავშალო ეს დავალება?", fmtDate(a.date) + " — მოსწავლეები მას აღარ დაინახავენ (" + (i === 0 ? "ახალი გახდება წინა დავალება" : "ძველებიდან ამოიშლება") + ").", "გაუქმება", "წაშლა", () => {
+      g.assigns = g.assigns.filter(x => x !== a); if(EDIT && EDIT.aid === a.id) EDIT = null; saveAll("დავალება წაიშალა.");
+    });
+    acts.append(ed, del); row.append(t, acts); host.appendChild(row);
+  });
+}
+function openEditor(){
+  $("as-ed-h").textContent = EDIT.aid ? "დავალების შეცვლა" : "ახალი დავალება — ჯგუფი „" + (curGroup() || {}).name + "“";
+  $("as-give").textContent = EDIT.aid ? "ცვლილებების შენახვა" : "მიცემა (ახალ დავალებად)";
+  renderAssign(); renderTree();
+  $("as-editor").scrollIntoView({ block:"start", behavior:"smooth" });
+}
+$("as-new").onclick = () => { EDIT = { aid:null, set:new Set() }; openEditor(); };
+$("as-cancel").onclick = () => { EDIT = null; renderAssign(); };
+$("as-clear").onclick = () => { EDIT.set.clear(); refreshChecks(); };
+$("as-copy").onclick = () => {
+  const src = CFG.groups.find(g => g.id === $("as-from").value); if(!src || !src.assigns.length) return;
+  EDIT.set = new Set(src.assigns[src.assigns.length - 1].items || []); refreshChecks();
+  $("vis-msg").textContent = "გადმოტანილია „" + src.name + "“-ის ახალი დავალება. შეცვალე განსხვავება და დააჭირე „მიცემას“."; $("vis-msg").className = "msg ok";
+};
+$("as-give").onclick = () => {
+  const g = curGroup(); if(!g || !EDIT) return;
+  const items = Array.from(EDIT.set);
+  if(!items.length){ $("vis-msg").textContent = "არაფერია მონიშნული."; $("vis-msg").className = "msg bad"; return; }
+  if(EDIT.aid){ const a = g.assigns.find(x => x.id === EDIT.aid); if(a) a.items = items; }
+  else g.assigns.push({ id:"a" + Date.now().toString(36), date:new Date().toISOString(), items });
+  const msg = EDIT.aid ? "დავალება შეიცვალა." : "დავალება მიეცა ჯგუფს „" + g.name + "“. წინა დავალება გადავიდა „ძველებში“.";
+  EDIT = null; saveAll(msg);
+};
 async function fetchText(u){ const r = await fetch(u, { cache:"no-store" }); if(!r.ok) throw new Error(u); return r.text(); }
 async function visCatalog(mats){
   const cat = [];
@@ -950,14 +1143,32 @@ function matNodes(mats){
   return ["books","pres","mat"].map(c => ({ key:"m:" + c, label: MAT_CAT[c],
     kids: (mats || []).filter(m => m.cat === c).map(m => ({ key:"mat:" + m.id, label: m.title, act:{ t:"file", m, text: m.title } })) }));
 }
-function visNode(n, depth, parentKey){
-  const set = curSet();
+// მონიშვნის ერთეული: კონკრეტული დავალება/ტექსტი/მასალა („გააზრება და თემის“ ტექსტს შიგნით მითითებაც აქვს)
+const isItem = n => n.key.indexOf("m:") !== 0 && (!n.kids || !n.kids.length || (n.act && n.act.t === "tema"));
+function itemKeys(n){ const out = []; (function w(x){ if(isItem(x)) out.push(x.key); (x.kids || []).forEach(w); })(n); return out; }
+function givenMap(){   // ამ ჯგუფს ადრე უკვე მიცემული: გასაღები → თარიღი
+  const g = curGroup(), m = {};
+  if(g) g.assigns.forEach(a => { if(EDIT && a.id === EDIT.aid) return; (a.items || []).forEach(k => { m[k] = a.date; }); });
+  return m;
+}
+function visNode(n, depth, given){
   const lab = document.createElement("label"); lab.className = "it";
-  const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !set.has(n.key);
+  const cb = document.createElement("input"); cb.type = "checkbox";
   const sp = document.createElement("span"); sp.textContent = n.label + (n.err ? " (სია ვერ ჩაიტვირთა)" : "");
-  sp.classList.toggle("off", !cb.checked);
-  NODES[n.key] = { cb, sp, parent: parentKey };
-  cb.onchange = () => setVisible(n.key, cb.checked, true);
+  const keys = itemKeys(n);
+  const gv = isItem(n) ? given[n.key] : null;
+  if(gv){ const b = document.createElement("span"); b.className = "given"; b.textContent = "უკვე მიეცა: " + fmtDate(gv); sp.appendChild(b); }
+  else if(!isItem(n)){ const c = keys.filter(k => given[k]).length; if(c){ const b = document.createElement("span"); b.className = "given"; b.textContent = "უკვე მიეცა: " + c; sp.appendChild(b); } }
+  NODES[n.key] = { n, cb, sp, keys };
+  cb.onchange = () => {
+    const set = EDIT.set, on = cb.checked;
+    if(isItem(n)){
+      on ? set.add(n.key) : set.delete(n.key);
+      if(n.act && n.act.t === "tema"){ on ? set.add(n.key + ":mit") : set.delete(n.key + ":mit"); }   // მითითება ავტომატურად მიებმება
+      if(n.act && n.act.t === "mit" && on) set.add(n.key.replace(/:mit$/, ""));
+    } else keys.forEach(k => { on ? set.add(k) : set.delete(k); if(on && /^tema:[^:]+$/.test(k)) set.add(k + ":mit"); });
+    refreshChecks();
+  };
   lab.append(cb, sp);
   if(!n.kids || !n.kids.length){ return lab; }
   const d = document.createElement("details"); if(depth === 0) d.className = "top";
@@ -965,45 +1176,49 @@ function visNode(n, depth, parentKey){
   const arr = document.createElement("span"); arr.className = "arr"; arr.textContent = "▸";
   lab.addEventListener("click", e => e.stopPropagation());   // მონიშვნა სიას არ ჩამოშლის
   sm.append(arr, lab); d.appendChild(sm);
-  const tools = document.createElement("div"); tools.className = "tools";
-  const all = (show) => { d.querySelectorAll(".kids input[type=checkbox]").forEach(x => { if(x.checked !== show){ x.checked = show; x.dispatchEvent(new Event("change")); } }); };
-  const b1 = document.createElement("button"); b1.type = "button"; b1.textContent = "შიგნით ყველას ჩვენება"; b1.onclick = () => all(true);
-  const b2 = document.createElement("button"); b2.type = "button"; b2.textContent = "შიგნით ყველას დამალვა"; b2.onclick = () => all(false);
-  tools.append(b1, b2); d.appendChild(tools);
   const kids = document.createElement("div"); kids.className = "kids";
-  n.kids.forEach(k => kids.appendChild(visNode(k, depth + 1, n.key)));
+  n.kids.forEach(k => kids.appendChild(visNode(k, depth + 1, given)));
   d.appendChild(kids);
   return d;
 }
-// ჩვენება/დამალვა; ჩართვისას ზედა ბლოკებიც ირთვება (თორემ შიდა დავალება არ გამოჩნდებოდა)
-function setVisible(key, on, up){
-  const set = curSet(), N = NODES[key];
-  on ? set.delete(key) : set.add(key);
-  if(N){ N.cb.checked = on; N.sp.classList.toggle("off", !on); }
-  if(on && up && N && N.parent && set.has(N.parent)) setVisible(N.parent, true, true);
-  markDirty(true);
-}
-$("vis-all-on").onclick = () => Object.keys(NODES).forEach(k => setVisible(k, true, false));
-$("vis-all-off").onclick = () => Object.keys(NODES).forEach(k => setVisible(k, false, false));
-function visCount(){
-  const set = curSet();
-  const n = Array.from(set).filter(k => NODES[k]).length;
-  const all = Object.keys(NODES).length;
-  $("vis-count").textContent = (n ? "ჩანს " + (all - n) + " / " + all : "ყველაფერი ჩანს") + (DIRTY ? " · შეუნახავი ცვლილებებია" : "");
-  $("vis-count").classList.toggle("dirty", DIRTY);
+function refreshChecks(){
+  const set = EDIT ? EDIT.set : new Set();
+  Object.keys(NODES).forEach(k => {
+    const N = NODES[k];
+    let on, some = false;
+    if(isItem(N.n)) on = set.has(k);
+    else { const c = N.keys.filter(x => set.has(x)).length; on = N.keys.length > 0 && c === N.keys.length; some = c > 0 && !on; }
+    N.cb.checked = on; N.cb.indeterminate = some; N.sp.classList.toggle("off", !on && !some);
+  });
+  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => NODES[k]).length;
 }
 async function renderTree(){
-  if(!CATALOG){ $("vis-tree").innerHTML = '<p class="lead">სია იტვირთება…</p>'; CATALOG = await visCatalog(CFG.materials); }
-  const open = new Set(Array.from($("vis-tree").querySelectorAll("details[open] > summary label.it span")).map(x => x.textContent));
+  if(!EDIT) return;
+  if(!CATALOG){ $("vis-tree").innerHTML = '<p class="lead">სია იტვირთება…</p>'; CATALOG = (await visCatalog(CFG.materials)).filter(n => n.key !== "m:mit"); }
+  const open = new Set(Array.from($("vis-tree").querySelectorAll("details[open] > summary label.it span")).map(x => x.firstChild ? x.firstChild.textContent : ""));
   NODES = {}; $("vis-tree").innerHTML = "";
-  CATALOG.forEach(n => $("vis-tree").appendChild(visNode(n, 0, null)));
-  $("vis-tree").querySelectorAll("details > summary label.it span").forEach(x => { if(open.has(x.textContent)) x.closest("details").open = true; });
-  visCount();
+  const given = givenMap();
+  CATALOG.forEach(n => $("vis-tree").appendChild(visNode(n, 0, given)));
+  $("vis-tree").querySelectorAll("details > summary label.it span").forEach(x => { if(x.firstChild && open.has(x.firstChild.textContent)) x.closest("details").open = true; });
+  refreshChecks();
 }
 function fillAdmin(r){
   if(r.students) students = r.students;
   loadCfg(r);
-  renderStudents(); renderGroups(); renderTargets(); renderMats(); renderTree();
+  renderStudents(); renderGroups(); renderAsGroups(); renderAssign(); renderMats();
+  if(EDIT) renderTree();
+}
+async function saveAll(okMsg){
+  const btn = $("vis-save"); btn.disabled = true; $("as-give").disabled = true;
+  $("vis-msg").textContent = "ინახება…"; $("vis-msg").className = "msg";
+  try{
+    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials,
+      groups: CFG.groups.map(g => ({ id:g.id, name:g.name, members:Array.from(g.members), assigns:g.assigns })) });
+    if(!r.ok) throw new Error(r.error || "სკრიპტის შეცდომა");
+    markDirty(false); fillAdmin(r);
+    $("vis-msg").textContent = okMsg || "შენახულია."; $("vis-msg").className = "msg ok";
+  }catch(e){ $("vis-msg").textContent = netErr(e); $("vis-msg").className = "msg bad"; markDirty(true); }
+  finally{ btn.disabled = false; $("as-give").disabled = false; }
 }
 function renderMats(){
   const host = $("mats"); host.innerHTML = "";
@@ -1022,7 +1237,7 @@ function renderMats(){
         f.className = "mfile " + (ok ? "ok" : "bad");
       }).catch(() => {});
       const del = document.createElement("button"); del.className = "del"; del.textContent = "წაშლა";
-      del.onclick = () => { CFG.materials = CFG.materials.filter(x => x !== m); CATALOG = null; markDirty(true); renderMats(); renderTree(); };
+      del.onclick = () => { CFG.materials = CFG.materials.filter(x => x !== m); CATALOG = null; markDirty(true); renderMats(); if(EDIT) renderTree(); };
       row.append(info, del); box.appendChild(row);
     });
     host.appendChild(box);
@@ -1036,19 +1251,9 @@ $("mat-add").onclick = () => {
   if(!/\.[a-z0-9]{2,5}$/i.test(file)) file += (cat === "pres" ? ".html" : ".pdf");
   CFG.materials.push({ id:"x" + Date.now().toString(36), cat, title, file });
   $("mat-title").value = ""; $("mat-file").value = "";
-  CATALOG = null; markDirty(true); renderMats(); renderTree();
+  CATALOG = null; markDirty(true); renderMats(); if(EDIT) renderTree();
 };
-$("vis-save").onclick = async () => {
-  const btn = $("vis-save"); btn.disabled = true; btn.textContent = "ინახება…";
-  try{
-    const r = await api({ action:"saveConfig", key: adminKey, hidden: Array.from(CFG.hidden), materials: CFG.materials,
-      groups: CFG.groups.map(g => ({ id:g.id, name:g.name, members:Array.from(g.members), hidden:Array.from(g.hidden) })) });
-    if(!r.ok) throw new Error(r.error || "სკრიპტის შეცდომა");
-    DIRTY = false; fillAdmin(r);
-    $("vis-msg").textContent = "შენახულია."; $("vis-msg").className = "msg ok";
-  }catch(e){ $("vis-msg").textContent = netErr(e); $("vis-msg").className = "msg bad"; }
-  finally{ btn.disabled = false; btn.textContent = "შენახვა"; }
-};
+$("vis-save").onclick = () => saveAll();
 $("add-students").onclick = async () => {
   const names = $("new-students").value.split(/\n/).map(x => x.replace(/\t/g," ").replace(/\s+/g," ").trim()).filter(Boolean);
   if(!names.length){ adminMsg("ჩაწერე ერთი ან რამდენიმე „სახელი გვარი“.", false); return; }
@@ -1069,13 +1274,13 @@ async function removeStudent(n){
     const r = await api({ action:"remove", key: adminKey, name: n });
     if(!r.ok) throw new Error(r.error);
     students = r.students; CFG.groups.forEach(g => g.members.delete(n));
-    renderStudents(); renderGroups(); renderTargets(); adminMsg("წაიშალა: " + n, true);
+    renderStudents(); renderGroups(); renderAsGroups(); adminMsg("წაიშალა: " + n, true);
   }catch(e){ adminMsg(netErr(e), false); }
 }
 $("filter").addEventListener("input", renderStudents);
-function adminLeave(){ DIRTY = false; adminKey = null; students = []; $("slist").innerHTML = ""; $("new-students").value = ""; setWorkTitle(); show("s-name"); }
+function adminLeave(){ markDirty(false); EDIT = null; adminKey = null; students = []; $("slist").innerHTML = ""; $("new-students").value = ""; setWorkTitle(); show("s-name"); }
 $("admin-exit").onclick = () => DIRTY
-  ? openModal("გავიდე შენახვის გარეშე?", "ჯგუფებსა და დავალებებში შეუნახავი ცვლილებები დაიკარგება.", "დარჩენა", "გასვლა", adminLeave)
+  ? openModal("გავიდე შენახვის გარეშე?", "ჯგუფებსა ან მასალებში შეუნახავი ცვლილებები დაიკარგება.", "დარჩენა", "გასვლა", adminLeave)
   : adminLeave();
 $("back-work").onclick = () => { state.work = null; setWorkTitle(); show("s-work"); };
 
@@ -1097,7 +1302,7 @@ function renderChapters(){
   CHAPTERS.forEach((c, idx) => {
   if(c.work !== state.work || isHidden("gaz:" + c.id)) return;
   const b = document.createElement("button");
-  b.className = "chap";
+  b.className = "chap" + (DONE.has("gaz:" + c.id) ? " done" : ""); b.dataset.key = "gaz:" + c.id;
   b.innerHTML = `<span class="num${/^[IVXLC–]+$/.test(c.roman) ? (c.roman.includes("–") ? " long" : "") : " word"}">${c.roman}</span><span class="cap">${c.sub || (c.roman.includes("–") ? "თავები" : "თავი")}</span>`;
   b.onclick = () => startTest(idx);
   $("chapters").appendChild(b);
@@ -1133,7 +1338,11 @@ function startTest(idx){
   state.chap = CHAPTERS[idx];
   $("open-text").classList.toggle("hidden", !state.chap.text);
   state.answers = new Array(state.chap.questions.length).fill(null);
-  state.i = 0;
+  state.i = 0; state.done = false;
+  const sv = gazSaved()[state.chap.id];   // შენახული პასუხები (დახურვის შემდეგაც)
+  if(sv && Array.isArray(sv.answers) && sv.answers.length === state.answers.length){
+    state.answers = sv.answers; state.i = Math.min(Math.max(0, sv.i | 0), state.answers.length - 1);
+  }
   $("t-roman").textContent = state.chap.roman;
   const isRoman = /^[IVXLC–]+$/.test(state.chap.roman);
   $("t-roman").classList.toggle("long", isRoman && state.chap.roman.length > 4);
@@ -1202,39 +1411,26 @@ $("m-yes").onclick = () => { $("modal").classList.add("hidden"); const a = modal
 
 /* თავის შეცვლა ტესტის დროს */
 function leaveChapter(){
-  state.chap = null; state.answers = []; state.i = 0;
   save();
-  show("s-chap");
+  state.chap = null; state.answers = []; state.i = 0;
+  if(!state.work) return goHome();
+  renderChapters(); show("s-chap");
 }
-$("change-chap").onclick = () => {
-  if(state.answers.some(a => a !== null)){
-    openModal("სხვა თავი აირჩიო?", "ამ თავზე მონიშნული პასუხები წაიშლება.", "დარჩენა", "თავის შეცვლა", leaveChapter);
-  } else {
-    leaveChapter();
-  }
-};
+$("change-chap").onclick = leaveChapter;   // პასუხები შენახულია — დაბრუნებისას ისევ დახვდება
+$("clear-chap").onclick = () => openModal("გავასუფთავო?", "ამ თავის ყველა მონიშნული პასუხი წაიშლება.", "დაბრუნება", "გასუფთავება", () => {
+  const all = gazSaved(); delete all[state.chap.id]; lsSet(GAZ_KEY(), all);
+  state.answers = new Array(state.chap.questions.length).fill(null); state.i = 0; render();
+});
 
-/* პროგრესის შენახვა: ტელეფონზე ბრაუზერი ზოგჯერ ფონში გვერდს თავიდან ტვირთავს */
-const SAVE_KEY = "hagiography-progress";
+/* პასუხების შენახვა: თითოეული თავისთვის ცალკე, ამ მოწყობილობაზე, სანამ მოსწავლე არ გაასუფთავებს */
+const GAZ_KEY = () => "lit-gaz:" + state.name;
+const gazSaved = () => lsGet(GAZ_KEY(), {});
 function save(){
-  try{
-    if(state.chap && !state.done && state.name) localStorage.setItem(SAVE_KEY, JSON.stringify({name:state.name,id:state.chap.id,answers:state.answers,i:state.i}));
-    else localStorage.removeItem(SAVE_KEY);
-  }catch(e){}
-}
-function restore(){
-  let s=null;
-  try{ s = JSON.parse(localStorage.getItem(SAVE_KEY) || "null"); }catch(e){}
-  if(!s) return;
-  const idx = CHAPTERS.findIndex(c => c.id === s.id);
-  if(idx < 0) return;
-  if(!s.name) return;
-  state.name = s.name; setWho();
-  state.work = CHAPTERS[idx].work; setWorkTitle(); renderChapters();
-  startTest(idx);
-  if(Array.isArray(s.answers) && s.answers.length === state.answers.length) state.answers = s.answers;
-  state.i = Math.min(Math.max(0, s.i|0), state.answers.length-1);
-  render();
+  if(!state.chap || !state.name) return;
+  const all = gazSaved();
+  if(state.answers.some(a => a !== null)) all[state.chap.id] = { answers: state.answers, i: state.i };
+  else delete all[state.chap.id];
+  lsSet(GAZ_KEY(), all);
 }
 
 /* 4. გაგზავნა */
@@ -1256,7 +1452,7 @@ async function send(){
     const out = await api(payload);
     if(!out.ok) throw new Error(out.error || "სკრიპტის შეცდომა");
     state.done = true;
-    save();
+    setDone("gaz:" + c.id, true);   // გაგზავნილი თავი მოსწავლესთან მწვანდება
     $("sending").classList.add("hidden"); $("sent").classList.remove("hidden");
     $("sent-text").textContent = `${state.name.split(" ")[0]}, შენი პასუხები (${WORKS[c.work].title}, ${c.title}) მასწავლებელს გაეგზავნა.`;
   }catch(e){
@@ -1267,16 +1463,20 @@ async function send(){
   }
 }
 $("retry").onclick = send;
-$("again").onclick = () => { state.chap = null; state.done = false; save(); show("s-chap"); };
+$("again").onclick = () => { state.chap = null; state.done = false; renderChapters(); show("s-chap"); };
 
 
-applyHidden();
-restore();
-if(!state.chap){
+// გაშვება: თუ მოსწავლე ამ მოწყობილობაზე უკვე შესულია — პირდაპირ მის დავალებებზე
+(function start(){
   let sn = "";
-  try{ sn = sessionStorage.getItem(SESSION_KEY) || ""; }catch(e){}
-  if(sn){ state.name = sn; setWho(); show("s-mode"); refreshHidden(); }
-}
+  try{ sn = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(USER_KEY) || ""; }catch(e){}
+  if(!sn){ applyHidden(); return; }
+  signIn(sn);
+  const cached = lsGet("lit-assigns:" + sn, null);   // ბოლოს ნანახი — სანამ სკრიპტი უპასუხებს
+  setAssigns(cached ? cached.assigns : [], cached ? cached.materials : []);
+  goHome();
+  refreshHidden();
+})();
 
 /* ===== აპლიკაციად დაყენება (Android: Install, iPhone: Add to Home Screen) ===== */
 const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
@@ -1304,10 +1504,7 @@ if("serviceWorker" in navigator && location.protocol === "https:"){
   window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 }
 
-/* გვერდის შემთხვევით დახურვისგან დაცვა ტესტის დროს */
-window.addEventListener("beforeunload", e => {
-  if(state.chap && !state.done && state.answers.some(a=>a!==null)){ e.preventDefault(); e.returnValue=""; }
-});
+/* პასუხები ინახება ავტომატურად, ამიტომ დახურვისას გაფრთხილება აღარ არის საჭირო */
 </script>
 </body>
 </html>

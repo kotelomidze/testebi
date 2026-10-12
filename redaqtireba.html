@@ -38,9 +38,14 @@
         var LIT_NAME = '';
         try { LIT_NAME = sessionStorage.getItem('lit-session-name') || ''; } catch (e) {}
         if (!LIT_NAME) location.replace('./');
-  var LIT_HIDDEN = [];
-  try { LIT_HIDDEN = JSON.parse(sessionStorage.getItem('lit-hidden') || '[]'); } catch (e) {}
-  function LIT_HID(k) { return LIT_HIDDEN.indexOf(k) > -1; }   // მასწავლებლის მიერ დამალული
+  // ჩანს მხოლოდ ის, რაც მასწავლებელმა ჯგუფს მისცა (ახალი და ძველი დავალებები)
+  var LIT_ALLOWED = [];
+  try { LIT_ALLOWED = JSON.parse(sessionStorage.getItem('lit-allowed') || '[]'); } catch (e) {}
+  function LIT_HID(k) {
+    if (LIT_ALLOWED.indexOf(k) > -1) return false;
+    for (var i = 0; i < LIT_ALLOWED.length; i++) if (LIT_ALLOWED[i].indexOf(k + ":") === 0) return false;
+    return true;
+  }
     </script>
     <a href="./" style="display:inline-block;margin:12px 0 0 16px;padding:8px 14px;border:1.5px solid #c7d2fe;border-radius:12px;color:#4f46e5;font-weight:700;font-size:14px;text-decoration:none;background:#fff">← მთავარი მენიუ</a>
     <div id="root"></div>
@@ -449,7 +454,7 @@
 
             useEffect(() => {
                 const warn = (e) => {
-                    if (edited && status !== 'success') { e.preventDefault(); e.returnValue = ''; }
+                    /* ნამუშევარი ინახება — გაფრთხილება აღარ არის საჭირო */
                 };
                 window.addEventListener('beforeunload', warn);
                 return () => window.removeEventListener('beforeunload', warn);
@@ -462,10 +467,14 @@
                 }
             }, [idx, answers, taskN, mode]);
 
+            // მოსწავლის ნამუშევარი ინახება ტელეფონში (დახურვის შემდეგაც), სანამ თვითონ არ გაასუფთავებს
+            const saveKey = (n) => 'lit-red:' + LIT_NAME + ':' + n;
+            const loadSaved = (n) => { try { return JSON.parse(localStorage.getItem(saveKey(n)) || 'null'); } catch (e) { return null; } };
             const openTask = (t) => {
+                const sv = loadSaved(t.n);
                 setTaskN(t.n);
-                setAnswers(getSents(t.wrong));
-                setStudentText(t.wrong);
+                setAnswers(sv && Array.isArray(sv.answers) ? sv.answers : getSents(t.wrong));
+                setStudentText(sv && typeof sv.text === 'string' ? sv.text : t.wrong);
                 setIdx(0);
                 setStatus('idle');
             };
@@ -476,11 +485,21 @@
                 if (t) openTask(t);
             }, []);
 
-            const backToList = () => {
-                if (edited && status !== 'success' &&
-                    !window.confirm('ჩასწორებები არ არის გაგზავნილი და დაიკარგება. მაინც დაბრუნდებით სიაში?')) return;
+            const backToList = () => {   // ნამუშევარი შენახულია, ამიტომ გაფრთხილება აღარ სჭირდება
                 setTaskN(null);
                 setStatus('idle');
+            };
+            useEffect(() => {
+                if (!task) return;
+                try {
+                    if (edited) localStorage.setItem(saveKey(task.n), JSON.stringify({ text: studentText, answers: answers }));
+                    else localStorage.removeItem(saveKey(task.n));
+                } catch (e) {}
+            }, [studentText, answers, taskN]);
+            const clearTask = () => {
+                if (!window.confirm('ამ დავალების ჩასწორებები წაიშლება და ტექსტი თავდაპირველ სახეს დაუბრუნდება. გავასუფთავო?')) return;
+                try { localStorage.removeItem(saveKey(task.n)); } catch (e) {}
+                setStudentText(task.wrong); setAnswers(getSents(task.wrong)); setIdx(0);
             };
 
             const setAnswer = (v) => {
@@ -642,6 +661,7 @@
                                     onClick={backToList}
                                     className="shrink-0 bg-white px-3 sm:px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95"
                                 >← სია</button>
+                            <button onClick={clearTask} className="shrink-0 bg-white px-3 py-2.5 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-500 text-sm">გასუფთავება</button>
                                 <h1 className="text-lg sm:text-xl font-bold text-slate-800 truncate">დავალება {task.n}</h1>
                             </div>
                             <div className="hidden sm:flex bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-100 items-center gap-3 shrink-0">
@@ -695,6 +715,7 @@
                                 onClick={backToList}
                                 className="shrink-0 bg-white px-3 sm:px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-600 hover:text-indigo-600 hover:border-indigo-200 transition-all active:scale-95"
                             >← სია</button>
+                        <button onClick={clearTask} className="shrink-0 bg-white px-3 py-2.5 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-500 text-sm">გასუფთავება</button>
                             <h1 className="text-lg sm:text-xl font-bold text-slate-800 truncate">დავალება {task.n}</h1>
                         </div>
                         <div className="hidden sm:flex bg-white px-5 py-2.5 rounded-2xl shadow-sm border border-slate-100 items-center gap-3 shrink-0">
