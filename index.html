@@ -356,14 +356,15 @@
 
     <!-- მასალები -->
     <div class="apane hidden" id="ap-mats">
-      <p class="lead" style="margin-bottom:14px">ჯერ ფაილი ატვირთე GitHub-ზე შესაბამის საქაღალდეში (მთავარ გვერდზე): წიგნები → <b>wignebi</b>, პრეზენტაციები → <b>prezentaciebi</b>, სასწავლო მასალა → <b>masala</b>. მერე აქ დაამატე სათაური და ფაილის ზუსტი სახელი (✓ = ნაპოვნია). დამატებულ მასალას ჯგუფს „დავალების მიცემაში“ მისცემ.</p>
-      <div class="mform">
+      <p class="lead" style="margin-bottom:14px">ფაილი ატვირთე GitHub-ზე შესაბამის საქაღალდეში (მთავარ გვერდზე): წიგნები → <b>wignebi</b>, პრეზენტაციები → <b>prezentaciebi</b>, სასწავლო მასალა → <b>masala</b>. 1–2 წუთში აქ <b>თავისით გამოჩნდება</b>, სათაურად ფაილის სახელით (სათაურს აქვე შეცვლი). მერე ჯგუფს „დავალების მიცემაში“ მისცემ.</p>
+      <div id="mats" class="mats"></div>
+      <details style="margin-top:18px"><summary style="cursor:pointer;font-weight:600">ხელით დამატება (საჭირო არ არის, თუ ფაილი ზემოთ ჩანს)</summary>
+      <div class="mform" style="margin-top:10px">
         <select id="mat-cat" class="gselect"><option value="books">წიგნი (საქაღალდე wignebi)</option><option value="pres">პრეზენტაცია (საქაღალდე prezentaciebi)</option><option value="mat">სასწავლო მასალა (საქაღალდე masala)</option></select>
         <input id="mat-title" class="ginput" placeholder="სათაური, მაგ. „შუშანიკის წამება“" autocomplete="off">
         <input id="mat-file" class="ginput" placeholder="ფაილის სახელი (ცარიელი = სათაური.pdf)" autocomplete="off">
         <div class="row"><button class="btn" id="mat-add">მასალის დამატება</button></div>
-      </div>
-      <div id="mats" class="mats"></div>
+      </div></details>
     </div>
 
     <div class="row asave hidden" id="asave"><button class="btn" id="vis-save">ცვლილებების შენახვა</button><span class="dirty">შეუნახავი ცვლილებებია (ჯგუფები / მასალები)</span></div>
@@ -574,6 +575,21 @@ let MATERIALS = [];
 const MAT_DIR = { books:"wignebi", pres:"prezentaciebi", mat:"masala" };
 const MAT_CAT = { books:"წიგნები", pres:"პრეზენტაციები", mat:"სასწავლო მასალა" };
 const matUrl = m => MAT_DIR[m.cat] + "/" + encodeURIComponent(m.file);
+/* ფაილები საქაღალდეებიდან ავტომატურად: files.json-ს Cloudflare ქმნის ყოველი ატვირთვისას (list-files.js) */
+let AUTO_FILES = null, RAW_MATS = [];
+const DIR_CAT = { wignebi:"books", prezentaciebi:"pres", masala:"mat" };
+async function loadAutoFiles(){
+  try{ const r = await fetch("files.json", { cache:"no-store" }); if(r.ok) AUTO_FILES = (await r.json()).files || {}; }catch(e){}
+}
+// ხელით დამატებული/გადარქმეული + საქაღალდეებში ნაპოვნი ფაილები (სათაური = ფაილის სახელი გაფართოების გარეშე)
+function mergedMaterials(reg){
+  const out = (reg || []).slice(), has = new Set(out.map(m => m.cat + "/" + m.file));
+  if(AUTO_FILES) Object.keys(DIR_CAT).forEach(d => (AUTO_FILES[d] || []).forEach(f => {
+    const cat = DIR_CAT[d]; if(has.has(cat + "/" + f)) return;
+    out.push({ id:"f-" + cat + "-" + f, cat, title: f.replace(/\.[^.]+$/, ""), file: f, auto:true });
+  }));
+  return out;
+}
 const lsGet = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; }catch(e){ return d; } };
 const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
 // გასაღები ჩანს თუ არა მოცემულ სიმრავლეში (ჯგუფური გასაღებები — თუ შიგნით რამე ჩანს)
@@ -593,12 +609,13 @@ function inSet(k, set){
 }
 const isHidden = k => !inSet(k, ALLOWED);
 function setAssigns(a, mats){
-  if(Array.isArray(mats)) MATERIALS = mats;
+  if(Array.isArray(mats)) RAW_MATS = mats;
+  MATERIALS = mergedMaterials(RAW_MATS);
   ASSIGNS = (Array.isArray(a) ? a : []).slice().sort((x, y) => String(x.date).localeCompare(String(y.date)));
   ALLOWED = new Set(); ASSIGNS.forEach(x => (x.items || []).forEach(k => ALLOWED.add(k)));
   // სხვა გვერდები (გრამატიკა, რედაქტირება, თემები) ამას კითხულობენ
   try{ sessionStorage.setItem("lit-allowed", JSON.stringify(Array.from(ALLOWED))); }catch(e){}
-  if(state.name) lsSet("lit-assigns:" + state.name, { assigns: ASSIGNS, materials: MATERIALS });
+  if(state.name) lsSet("lit-assigns:" + state.name, { assigns: ASSIGNS, materials: RAW_MATS });
   STUDENT_BASE_ACTS = null;
   applyHidden();
 }
@@ -965,6 +982,7 @@ async function openAdmin(){
     const r = await api({ action:"list", key: adminKey });
     if(!r.ok) throw new Error(r.error);
     markDirty(false); CATALOG = null; EDIT = null;
+    await loadAutoFiles();
     fillAdmin(r);
   }catch(e){ adminMsg(netErr(e), false); }
 }
@@ -1085,7 +1103,7 @@ $("as-give").onclick = () => {
   if(!items.length){ $("vis-msg").textContent = "არაფერია მონიშნული."; $("vis-msg").className = "msg bad"; return; }
   if(EDIT.aid){ const a = g.assigns.find(x => x.id === EDIT.aid); if(a) a.items = items; }
   else g.assigns.push({ id:"a" + Date.now().toString(36), date:new Date().toISOString(), items });
-  const msg = EDIT.aid ? "დავალება შეიცვალა." : "დავალება მიეცა ჯგუფს „" + g.name + "“. წინა დავალება გადავიდა „ძველებში“.";
+  const msg = EDIT.aid ? "დავალება შეიცვალა." : "დავალება მიეცა ჯგუფს „" + g.name + "“." + (g.assigns.length > 1 ? " წინა დავალება გადავიდა „ძველებში“." : "");
   EDIT = null; saveAll(msg);
 };
 async function fetchText(u){ const r = await fetch(u, { cache:"no-store" }); if(!r.ok) throw new Error(u); return r.text(); }
@@ -1194,7 +1212,7 @@ function refreshChecks(){
 }
 async function renderTree(){
   if(!EDIT) return;
-  if(!CATALOG){ $("vis-tree").innerHTML = '<p class="lead">სია იტვირთება…</p>'; CATALOG = (await visCatalog(CFG.materials)).filter(n => n.key !== "m:mit"); }
+  if(!CATALOG){ $("vis-tree").innerHTML = '<p class="lead">სია იტვირთება…</p>'; CATALOG = (await visCatalog(mergedMaterials(CFG.materials))).filter(n => n.key !== "m:mit"); }
   const open = new Set(Array.from($("vis-tree").querySelectorAll("details[open] > summary label.it span")).map(x => x.firstChild ? x.firstChild.textContent : ""));
   NODES = {}; $("vis-tree").innerHTML = "";
   const given = givenMap();
@@ -1222,23 +1240,46 @@ async function saveAll(okMsg){
 }
 function renderMats(){
   const host = $("mats"); host.innerHTML = "";
+  if(!AUTO_FILES){
+    const w = document.createElement("p"); w.className = "err";
+    w.textContent = "ფაილების ავტომატური სია ჯერ არ არის ჩართული (files.json ვერ მოიძებნა). Cloudflare-ში Build command-ად ჩაწერე: node list-files.js — მერე ფაილები აქ თავისით გამოჩნდება.";
+    host.appendChild(w);
+  }
+  const all = mergedMaterials(CFG.materials);
   ["books","pres","mat"].forEach(c => {
-    const list = CFG.materials.filter(m => m.cat === c);
-    const h = document.createElement("p"); h.className = "mcat"; h.textContent = MAT_CAT[c] + " (" + list.length + ")"; host.appendChild(h);
+    const list = all.filter(m => m.cat === c);
+    const h = document.createElement("p"); h.className = "mcat"; h.textContent = MAT_CAT[c] + " — საქაღალდე " + MAT_DIR[c] + " (" + list.length + ")"; host.appendChild(h);
     if(!list.length) return;
     const box = document.createElement("div"); box.className = "mbox";
     list.forEach(m => {
       const row = document.createElement("div"); row.className = "mrow";
-      const info = document.createElement("span"); info.textContent = m.title;
-      const f = document.createElement("span"); f.className = "mfile"; f.textContent = MAT_DIR[c] + "/" + m.file + " — მოწმდება…"; info.appendChild(f);
-      fetch(matUrl(m), { method:"HEAD", cache:"no-store" }).then(h => {
-        const ok = h.ok && !/text\/html/i.test(h.headers.get("content-type") || "") || (h.ok && /\.html?$/i.test(m.file));
-        f.textContent = MAT_DIR[c] + "/" + m.file + (ok ? " — ✓ ფაილი ნაპოვნია" : " — ✗ ფაილი ვერ მოიძებნა (შეამოწმე სახელი და საქაღალდე)");
-        f.className = "mfile " + (ok ? "ok" : "bad");
-      }).catch(() => {});
-      const del = document.createElement("button"); del.className = "del"; del.textContent = "წაშლა";
-      del.onclick = () => { CFG.materials = CFG.materials.filter(x => x !== m); CATALOG = null; markDirty(true); renderMats(); if(EDIT) renderTree(); };
-      row.append(info, del); box.appendChild(row);
+      const info = document.createElement("span"); info.style.flex = "1 1 auto";
+      const ti = document.createElement("input"); ti.className = "ginput"; ti.style.cssText = "width:100%;min-height:40px;padding:6px 10px"; ti.value = m.title;
+      ti.setAttribute("aria-label", "სათაური — " + m.file);
+      ti.onchange = () => {   // სათაურის შეცვლა (ფაილი და მიცემული დავალებები უცვლელი რჩება)
+        const v = ti.value.replace(/\s+/g, " ").trim(); if(!v){ ti.value = m.title; return; }
+        const reg = CFG.materials.find(x => x.id === m.id);
+        if(reg) reg.title = v; else CFG.materials.push({ id:m.id, cat:m.cat, title:v, file:m.file });
+        CATALOG = null; markDirty(true); renderMats();
+      };
+      const f = document.createElement("span"); f.className = "mfile"; info.append(ti, f);
+      if(m.auto) { f.textContent = "📁 " + m.file + " — ✓ ნაპოვნია საქაღალდეში"; f.className = "mfile ok"; }
+      else {
+        f.textContent = m.file + " — მოწმდება…";
+        fetch(matUrl(m), { method:"HEAD", cache:"no-store" }).then(h => {
+          const ok = h.ok && !/text\/html/i.test(h.headers.get("content-type") || "") || (h.ok && /\.html?$/i.test(m.file));
+          f.textContent = "📁 " + m.file + (ok ? " — ✓ ნაპოვნია" : " — ✗ ფაილი ვერ მოიძებნა");
+          f.className = "mfile " + (ok ? "ok" : "bad");
+        }).catch(() => {});
+      }
+      row.appendChild(info);
+      if(!m.auto){
+        const del = document.createElement("button"); del.className = "del"; del.textContent = "წაშლა";
+        del.title = "ჩანაწერის წაშლა (თუ ფაილი საქაღალდეშია, ის თავისით დაბრუნდება)";
+        del.onclick = () => { CFG.materials = CFG.materials.filter(x => x !== m); CATALOG = null; markDirty(true); renderMats(); if(EDIT) renderTree(); };
+        row.appendChild(del);
+      }
+      box.appendChild(row);
     });
     host.appendChild(box);
   });
@@ -1477,6 +1518,7 @@ $("again").onclick = () => { state.chap = null; state.done = false; renderChapte
   goHome();
   refreshHidden();
 })();
+loadAutoFiles().then(() => { if(state.name) setAssigns(ASSIGNS, RAW_MATS); });
 
 /* ===== აპლიკაციად დაყენება (Android: Install, iPhone: Add to Home Screen) ===== */
 const standalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
