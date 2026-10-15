@@ -616,14 +616,28 @@ function inSet(k, set){
   if(/^gaz:[a-z]+$/.test(k) && WORKS[k.slice(4)]) return CHAPTERS.some(ch => ch.work === k.slice(4) && set.has("gaz:" + ch.id));
   return any(x => x.indexOf(k + ":") === 0);
 }
-const isHidden = k => !inSet(k, ALLOWED);
+// გახსნილი დავალება (ახალი ან კონკრეტული ძველი): მხოლოდ მისი ერთეულები ჩანს ფაილებში, თავებში და სხვა გვერდებზე
+let SCOPE_ID = null;
+try{ SCOPE_ID = sessionStorage.getItem("lit-scope") || null; }catch(e){}
+function scopeSet(){
+  const a = SCOPE_ID && ASSIGNS.find(x => x.id === SCOPE_ID);
+  return a ? new Set(a.items || []) : ALLOWED;
+}
+function writeScope(){   // სხვა გვერდები (გრამატიკა, რედაქტირება, თემები) ამას კითხულობენ
+  try{ sessionStorage.setItem("lit-allowed", JSON.stringify(Array.from(scopeSet()))); }catch(e){}
+}
+function useScope(a){
+  SCOPE_ID = a ? a.id : null;
+  try{ SCOPE_ID ? sessionStorage.setItem("lit-scope", SCOPE_ID) : sessionStorage.removeItem("lit-scope"); }catch(e){}
+  writeScope();
+}
+const isHidden = k => !inSet(k, scopeSet());
 function setAssigns(a, mats){
   if(Array.isArray(mats)) RAW_MATS = mats;
   MATERIALS = mergedMaterials(RAW_MATS);
   ASSIGNS = (Array.isArray(a) ? a : []).slice().sort((x, y) => String(x.date).localeCompare(String(y.date)));
   ALLOWED = new Set(); ASSIGNS.forEach(x => (x.items || []).forEach(k => ALLOWED.add(k)));
-  // სხვა გვერდები (გრამატიკა, რედაქტირება, თემები) ამას კითხულობენ
-  try{ sessionStorage.setItem("lit-allowed", JSON.stringify(Array.from(ALLOWED))); }catch(e){}
+  writeScope();
   if(state.name) lsSet("lit-assigns:" + state.name, { assigns: ASSIGNS, materials: RAW_MATS });
   STUDENT_BASE_ACTS = null;
   applyHidden();
@@ -639,7 +653,7 @@ function fmtDate(d){   // „12 ოქტომბერი, 14:05“ (წელ
 }
 function applyHidden(){
   let shown = 0;
-  Object.keys(MODE_BTNS).forEach(id => { const h = isHidden(MODE_BTNS[id]); $(id).classList.toggle("hidden", h); if(!h) shown++; });
+  Object.keys(MODE_BTNS).forEach(id => { const h = !inSet(MODE_BTNS[id], ALLOWED); $(id).classList.toggle("hidden", h); if(!h) shown++; });
   $("mode-none").classList.toggle("hidden", ASSIGNS.length > 0);
   $("assign-btns").classList.toggle("hidden", !ASSIGNS.length);
   $("mode-old").classList.toggle("hidden", ASSIGNS.length < 2);
@@ -737,8 +751,8 @@ function signIn(name){
 function goHome(){ state.work = null; setWorkTitle(); show("s-mode"); loadStudentActs(); }
 $("home-btn").onclick = goHome;
 $("back-name").onclick = () => openModal("სხვა სახელით შესვლა?", "ამ მოწყობილობაზე შესვლა გაუქმდება. შენი შენახული პასუხები არ წაიშლება.", "დარჩენა", "გასვლა", () => {
-  state.name = ""; setWho(); clearPick(); ASSIGNS = []; ALLOWED = new Set();
-  try{ sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem("lit-allowed"); localStorage.removeItem(USER_KEY); }catch(e){}
+  state.name = ""; setWho(); clearPick(); ASSIGNS = []; ALLOWED = new Set(); SCOPE_ID = null;
+  try{ sessionStorage.removeItem(SESSION_KEY); sessionStorage.removeItem("lit-allowed"); sessionStorage.removeItem("lit-scope"); localStorage.removeItem(USER_KEY); }catch(e){}
   show("s-name");
 });
 /* დავალების ტიპი: გააზრება (ეს ტესტი) ან რედაქტირება (ცალკე გვერდი redaqtireba.html) */
@@ -898,6 +912,7 @@ function goSection(url){ try{ sessionStorage.setItem(SESSION_KEY, state.name); }
 async function showAssign(a, isOld){
   $("all-h").textContent = (isOld ? "ძველი დავალება" : "ახალი დავალება") + " · " + fmtDate(a.date);
   $("all-back").dataset.to = isOld ? "s-old" : "s-mode";
+  useScope(a); applyHidden();
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
   const acts = await actsFor(new Set(a.items || []));
   const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file) })));
