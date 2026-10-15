@@ -149,6 +149,15 @@
   .vis input[type=checkbox]{width:20px;height:20px;flex:0 0 20px;margin:2px 0 0;accent-color:var(--lapis)}
   .vis .off{color:var(--muted);text-decoration:line-through}
   .vis .top>summary{font-weight:600}
+  .vis .lf{display:flex;align-items:flex-start}
+  .vis .lf>label.it{flex:1;min-width:0}
+  .vis summary label.it{min-width:0}
+  .vis label.it>span{min-width:0;overflow-wrap:anywhere}
+  .vis .xoff{flex:0 0 auto;background:none;border:0;color:var(--muted);font-size:.8rem;padding:6px 8px;margin:4px 6px 0 0;min-height:32px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+  .vis summary .xoff{margin:0}
+  .vis .dis{opacity:.5}
+  .vis .dis .xoff{opacity:1;color:var(--lapis);font-weight:600}
+  .vis-root .showoff{display:flex;align-items:center;gap:6px;font-size:.9rem;color:var(--muted);border:0;padding:0 4px;min-height:40px;cursor:pointer}
   .vis .tools{display:flex;gap:8px;flex-wrap:wrap;padding:2px 12px 8px 38px}
   .vis .tools button{background:none;border:1px solid var(--line);border-radius:6px;padding:4px 10px;font-size:.85rem;color:var(--lapis);min-height:32px}
   .vis-save{position:sticky;bottom:0;background:var(--bg);padding:10px 0;margin-top:6px;z-index:5}
@@ -318,12 +327,12 @@
 
         <div id="as-editor" class="hidden">
           <h3 id="as-ed-h"></h3>
-          <p class="lead" style="margin-bottom:10px">მონიშნე, რაც უნდა გააკეთონ. ▸-ით ჩამოშლი. ნარინჯისფერი „უკვე მიეცა“ ნიშნავს, რომ ეს ამ ჯგუფს უკვე მიეცა ადრე — მაინც შეგიძლია ხელახლა მისცე.</p>
+          <p class="lead" style="margin-bottom:10px">მონიშნე, რაც უნდა გააკეთონ. ▸-ით ჩამოშლი. ნარინჯისფერი „უკვე მიეცა“ ნიშნავს, რომ ეს ამ ჯგუფს უკვე მიეცა ადრე — მაინც შეგიძლია ხელახლა მისცე. „გათიშვა“ დავალებას ამ სიიდან დამალავს (მოსწავლეებთან უკვე მიცემული არ იშლება); დასაბრუნებლად ჩართე „გათიშულების ჩვენება“.</p>
           <div class="copyrow">
             <label for="as-from">მონიშვნის გადმოტანა სხვა ჯგუფის ახალი დავალებიდან</label>
             <div class="row"><select id="as-from" class="gselect"></select><button type="button" class="btn ghost" id="as-copy">გადმოტანა</button></div>
           </div>
-          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button></div>
+          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
           <div id="vis-tree" class="vis"></div>
           <div class="row vis-save">
             <button class="btn" id="as-give">მიცემა</button>
@@ -380,8 +389,8 @@
       <button class="btn allbtn" id="mode-new">📋 ახალი დავალება<span class="sub" id="new-sub"></span></button>
       <button class="btn ghost allbtn" id="mode-old">🗂 ძველი დავალებები<span class="sub" id="old-sub"></span></button>
     </div>
-    <h3 class="blocks-h">ყველა მასალა და დავალება განყოფილებების მიხედვით</h3>
-    <div class="works">
+    <h3 class="blocks-h hidden">ყველა მასალა და დავალება განყოფილებების მიხედვით</h3>
+    <div class="works hidden" id="blocks">   <!-- განყოფილებების ღილაკები აღარ ჩანს: ყველაფერი „ახალ/ძველ დავალებაშია“ -->
       <button class="work" id="mode-books"><span class="wt">წიგნები</span><span class="wa">ნაწარმოებები PDF-ად</span></button>
       <button class="work" id="mode-pres"><span class="wt">პრეზენტაციები</span><span class="wa">თემების მიხედვით</span></button>
       <button class="work" id="mode-mat"><span class="wt">სასწავლო მასალა</span><span class="wa">თხრობით სასწავლი</span></button>
@@ -637,7 +646,6 @@ function applyHidden(){
   const cur = ASSIGNS[ASSIGNS.length - 1];
   $("new-sub").textContent = cur ? fmtDate(cur.date) : "";
   $("old-sub").textContent = ASSIGNS.length > 1 ? (ASSIGNS.length - 1) + " დავალება" : "";
-  document.querySelector(".blocks-h").classList.toggle("hidden", !shown);
   document.querySelectorAll(".work[data-work]").forEach(b => b.classList.toggle("hidden", isHidden("gaz:" + b.dataset.work)));
   if(state.work && !$("s-chap").classList.contains("hidden")) renderChapters();
   paintDone();
@@ -988,12 +996,13 @@ async function openAdmin(){
 }
 
 /* ===== ჯგუფები და დავალებების მიცემა (მასწავლებელი) ===== */
-let CFG = { groups: [], materials: [] };   // groups: [{id, name, members:Set(სახელები), assigns:[{id, date, items}]}]
+let CFG = { groups: [], materials: [], disabled: new Set() };   // disabled: სიიდან გათიშული დავალებები (მხოლოდ მასწავლებლის სიაში)   // groups: [{id, name, members:Set(სახელები), assigns:[{id, date, items}]}]
 let DIRTY = false, CATALOG = null, NODES = {}, AS_GROUP = null, EDIT = null;   // EDIT: { aid (null = ახალი), set:Set }
 const byDate = (a, b) => String(a.date).localeCompare(String(b.date));
 function loadCfg(r){
   CFG.groups = (r.groups || []).map(g => ({ id:g.id, name:g.name, members:new Set(g.members || []), assigns:(g.assigns || []).slice().sort(byDate) }));
   CFG.materials = (r.materials || []).slice();
+  if(Array.isArray(r.disabled)) CFG.disabled = new Set(r.disabled);
   if(!CFG.groups.some(g => g.id === AS_GROUP)) AS_GROUP = CFG.groups[0] ? CFG.groups[0].id : null;
 }
 function groupOf(name){ return CFG.groups.find(g => g.members.has(name)); }
@@ -1092,6 +1101,7 @@ function openEditor(){
 $("as-new").onclick = () => { EDIT = { aid:null, set:new Set() }; openEditor(); };
 $("as-cancel").onclick = () => { EDIT = null; renderAssign(); };
 $("as-clear").onclick = () => { EDIT.set.clear(); refreshChecks(); };
+$("show-off").onchange = () => { SHOW_OFF = $("show-off").checked; renderTree(); };
 $("as-copy").onclick = () => {
   const src = CFG.groups.find(g => g.id === $("as-from").value); if(!src || !src.assigns.length) return;
   EDIT.set = new Set(src.assigns[src.assigns.length - 1].items || []); refreshChecks();
@@ -1129,9 +1139,13 @@ async function visCatalog(mats){
   try{
     const t = await fetchText("gramatika/index.html");
     const topics = {}; let m;
-    const reT = /\{id:"(t\d+)", no:"([^"]+)", title:"([^"]+)"\}/g;
-    while((m = reT.exec(t))){ topics[m[1]] = { key:"gram:" + m[1], label: m[2] + " " + m[3], kids:[], act:{ t:"gram", id: m[1], text: m[2] + " " + m[3] } }; gram.kids.push(topics[m[1]]); }
-    const reE = /\bid:"([^"]+)",\s*topic:"(t\d+)"([^\n]*)\n\s*title:"([^"]*)"/g;
+    // თემები: {id:"t1", part:"morph", no:"1.1", title:"…"} (part — მორფოლოგია / სინტაქსი; ძველ ფაილში part არ იყო)
+    const reT = /\{id:"([a-z]\d+)",(?: part:"(\w+)",)? no:"([^"]+)", title:"([^"]+)"\}/g;
+    while((m = reT.exec(t))){
+      const txt = (m[2] === "syntax" ? "სინტაქსი: " : "") + m[3] + " " + m[4];
+      topics[m[1]] = { key:"gram:" + m[1], label: txt, kids:[], act:{ t:"gram", id: m[1], text: txt } }; gram.kids.push(topics[m[1]]);
+    }
+    const reE = /\bid:"([^"]+)",\s*topic:"([a-z]\d+)"([^\n]*)\n\s*title:"([^"]*)"/g;
     while((m = reE.exec(t))){
       const no = (m[3].match(/no:"([^"]+)"/) || [,""])[1];
       if(topics[m[2]]) topics[m[2]].kids.push({ key:"gram:" + m[2] + ":" + m[1], label: (no ? no + " — " : "") + m[4] });
@@ -1163,7 +1177,20 @@ function matNodes(mats){
 }
 // მონიშვნის ერთეული: კონკრეტული დავალება/ტექსტი/მასალა („გააზრება და თემის“ ტექსტს შიგნით მითითებაც აქვს)
 const isItem = n => n.key.indexOf("m:") !== 0 && (!n.kids || !n.kids.length || (n.act && n.act.t === "tema"));
-function itemKeys(n){ const out = []; (function w(x){ if(isItem(x)) out.push(x.key); (x.kids || []).forEach(w); })(n); return out; }
+const isOff = n => CFG.disabled.has(n.key);
+function itemKeys(n){ const out = []; (function w(x){ if(x !== n && isOff(x)) return; if(isItem(x)) out.push(x.key); (x.kids || []).forEach(w); })(n); return out; }
+let SHOW_OFF = false;
+function offBtn(n, depth){   // „გათიშვა“ / „ჩართვა“ (ზედა განყოფილებებს არა)
+  if(depth === 0 || (n.act && n.act.t === "mit")) return null;
+  const b = document.createElement("button"); b.type = "button"; b.className = "xoff";
+  b.textContent = isOff(n) ? "ჩართვა" : "გათიშვა";
+  b.title = isOff(n) ? "სიაში დაბრუნება" : "ამ სიიდან დამალვა";
+  b.onclick = e => { e.preventDefault(); e.stopPropagation();
+    isOff(n) ? CFG.disabled.delete(n.key) : CFG.disabled.add(n.key);
+    saveAll(isOff(n) ? "„" + n.label + "“ გაითიშა — სიაში აღარ გამოჩნდება." : "„" + n.label + "“ ისევ ჩართულია.");
+    renderTree(); };
+  return b;
+}
 function givenMap(){   // ამ ჯგუფს ადრე უკვე მიცემული: გასაღები → თარიღი
   const g = curGroup(), m = {};
   if(g) g.assigns.forEach(a => { if(EDIT && a.id === EDIT.aid) return; (a.items || []).forEach(k => { m[k] = a.date; }); });
@@ -1188,14 +1215,18 @@ function visNode(n, depth, given){
     refreshChecks();
   };
   lab.append(cb, sp);
-  if(!n.kids || !n.kids.length){ return lab; }
+  const ob = offBtn(n, depth), off = isOff(n);
+  if(!n.kids || !n.kids.length){
+    if(!ob) return lab;
+    const w = document.createElement("div"); w.className = "lf" + (off ? " dis" : ""); w.append(lab, ob); return w;
+  }
   const d = document.createElement("details"); if(depth === 0) d.className = "top";
   const sm = document.createElement("summary");
   const arr = document.createElement("span"); arr.className = "arr"; arr.textContent = "▸";
   lab.addEventListener("click", e => e.stopPropagation());   // მონიშვნა სიას არ ჩამოშლის
-  sm.append(arr, lab); d.appendChild(sm);
+  sm.append(arr, lab); if(ob) sm.appendChild(ob); if(off) d.classList.add("dis"); d.appendChild(sm);
   const kids = document.createElement("div"); kids.className = "kids";
-  n.kids.forEach(k => kids.appendChild(visNode(k, depth + 1, given)));
+  n.kids.forEach(k => { if(SHOW_OFF || !isOff(k)) kids.appendChild(visNode(k, depth + 1, given)); });
   d.appendChild(kids);
   return d;
 }
@@ -1217,6 +1248,7 @@ async function renderTree(){
   NODES = {}; $("vis-tree").innerHTML = "";
   const given = givenMap();
   CATALOG.forEach(n => $("vis-tree").appendChild(visNode(n, 0, given)));
+  $("off-count").textContent = CFG.disabled.size;
   $("vis-tree").querySelectorAll("details > summary label.it span").forEach(x => { if(x.firstChild && open.has(x.firstChild.textContent)) x.closest("details").open = true; });
   refreshChecks();
 }
@@ -1230,11 +1262,12 @@ async function saveAll(okMsg){
   const btn = $("vis-save"); btn.disabled = true; $("as-give").disabled = true;
   $("vis-msg").textContent = "ინახება…"; $("vis-msg").className = "msg";
   try{
-    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials,
+    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials, disabled: Array.from(CFG.disabled),
       groups: CFG.groups.map(g => ({ id:g.id, name:g.name, members:Array.from(g.members), assigns:g.assigns })) });
     if(!r.ok) throw new Error(r.error || "სკრიპტის შეცდომა");
     markDirty(false); fillAdmin(r);
     $("vis-msg").textContent = okMsg || "შენახულია."; $("vis-msg").className = "msg ok";
+    if(!Array.isArray(r.disabled) && CFG.disabled.size){ $("vis-msg").textContent = "გათიშვა არ შეინახა: Apps Script-ში ჩასვი ახალი Code.gs და გამოაქვეყნე (New version)."; $("vis-msg").className = "msg bad"; }
   }catch(e){ $("vis-msg").textContent = netErr(e); $("vis-msg").className = "msg bad"; markDirty(true); }
   finally{ btn.disabled = false; $("as-give").disabled = false; }
 }
