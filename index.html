@@ -803,9 +803,11 @@ async function themeCandidates(dir, pre){
         alts:[{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/" + dir + "-pdf/" + f },
               { name:j.sourceFile, url: dir + "/pdf/" + f }] }];
       // „გააზრება და თემა“: თემის მითითებაც (საქაღალდე temis-mititebebi, იგივე სახელით), თუ მიცემულია
-      if(pre === "tema" && !isHidden("tema:" + t.id + ":mit"))
-        out.push({ kind:"mit", label, alts:[{ name:"თემის მითითება — " + j.sourceFile, url:"temis-mititebebi/" + f },
-          { name:"თემის მითითება — " + j.sourceFile, url:"gaazreba-tema/temis-mititebebi/" + f }] });
+      if(pre === "tema" && !isHidden("tema:" + t.id + ":mit")){
+        const full = (t.author ? t.author + " — " : "") + (t.work || t.title || t.id) + (t.title ? " (" + t.title + ")" : "");   // როგორც სიაში
+        const mu = await mitUrl(t.file, full);
+        out.push({ kind:"mit", label, alts: mu ? [{ name:"თემის მითითება — " + decodeURIComponent(mu.split("/").pop()), url: mu }] : [] });
+      }
       return out;
     }catch(e){ return null; }
   }))).flat().filter(Boolean);
@@ -891,17 +893,30 @@ function showMats(cat){
   if(!list.length){ box.innerHTML = "<p>ჯერ არაფერია.</p>"; return; }
   list.forEach(m => box.appendChild(fileLink(matUrl(m), m.title, "PDF", /\.html?$/i.test(m.file))));
 }
-// თემის მითითება ჰქვია ისე, როგორც „გააზრება და თემის“ PDF-ს, და დევს საქაღალდეში temis-mititebebi
-async function mitUrl(testFile){
-  try{
-    const j = await (await fetch("gaazreba-tema/" + testFile, { cache:"no-store" })).json();
-    if(!j.sourceFile) return null;
-    const f = encodeURIComponent(j.sourceFile);
+// თემის მითითება: საქაღალდე temis-mititebebi. ფაილს შეიძლება ერქვას
+//   ა) როგორც სიაში ჩანს: „იაკობ ხუცესი — შუშანიკის წამება (დაყოლიება, დაბრუნდეს სასახლეში) (ტექსტი II).pdf“ (ან „(ტექსტი II)“-ის გარეშე);
+//   ბ) როგორც „გააზრება და თემის“ PDF: „გააზრება, 232 (იაკობ ხუცესი, შუშანიკის წამება).pdf“.
+// ტირეები, ბრჭყალები, მძიმეები და ჰარები შედარებისას არ ითვლება.
+const fnorm = x => String(x || "").replace(/\.pdf$/i, "").toLowerCase().replace(/[„“”"«»'`’]/g, "")
+  .replace(/[\u2010-\u2015\u2212-]/g, " ").replace(/[(),.:;…]/g, " ").replace(/\s+/g, " ").trim();
+let AUTO_P = null;
+async function mitUrl(testFile, label){
+  let src = null;
+  try{ src = (await (await fetch("gaazreba-tema/" + testFile, { cache:"no-store" })).json()).sourceFile || null; }catch(e){}
+  if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
+  const list = AUTO_FILES && AUTO_FILES["temis-mititebebi"];
+  if(list && list.length){
+    const want = new Set([label, String(label || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, ""), src].filter(Boolean).map(fnorm));
+    const hit = list.find(f => want.has(fnorm(f)));
+    if(hit) return "temis-mititebebi/" + encodeURIComponent(hit);
+  }
+  if(src){
+    const f = encodeURIComponent(src);
     for(const u of ["temis-mititebebi/" + f, "gaazreba-tema/temis-mititebebi/" + f]){
       try{ const h = await fetch(u, { method:"HEAD", cache:"no-store" });
         if(h.ok && /pdf/i.test(h.headers.get("content-type") || "pdf")) return u; }catch(e){}
     }
-  }catch(e){}
+  }
   return null;
 }
 let STUDENT_BASE = null;   // დავალებების ჩამონათვალი (ერთხელ იტვირთება); მასალები ყოველ ჯერზე ახლიდან
@@ -924,7 +939,7 @@ async function loadStudentActs(){ try{ STUDENT_BASE_ACTS = await studentActs(); 
 async function showMit(){
   openList("თემის მითითებები", "დააჭირე და მითითება გადმოიწერება.");
   const acts = (await studentActs()).filter(a => a.t === "mit");
-  const found = (await Promise.all(acts.map(async a => { const u = await mitUrl(a.file); return u ? { a, u } : null; }))).filter(Boolean);
+  const found = (await Promise.all(acts.map(async a => { const u = await mitUrl(a.file, a.text); return u ? { a, u } : null; }))).filter(Boolean);
   const box = $("list-items"); box.innerHTML = "";
   if(!found.length){ box.innerHTML = "<p>ჯერ არაფერია.</p>"; return; }
   found.forEach(f => box.appendChild(fileLink(f.u, f.a.text, "PDF")));
@@ -943,7 +958,7 @@ async function showAssign(a, isOld){
   useScope(a); applyHidden(); FROM_ASSIGN = { a, isOld };
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
   const acts = await actsFor(new Set(a.items || []));
-  const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file) })));
+  const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file, x.text) })));
   const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
   const sections = [ { h:"1. წასაკითხი", items:[] }, { h:"2. თხრობით სასწავლი", items:[] }, { h:"3. წერითი დავალებები", items:[] } ];
   const label = (el, kind, text) => { const d = el.querySelector("span") || el.appendChild(document.createElement("span"));
@@ -1368,6 +1383,30 @@ function renderMats(){
     });
     host.appendChild(box);
   });
+  renderMitCheck(host);
+}
+// თემის მითითებები: რომელ ფაილს რომელ თემას აბამს აპლიკაცია (შესამოწმებლად)
+async function renderMitCheck(host){
+  const sec = document.createElement("div"); host.appendChild(sec);
+  const h = document.createElement("p"); h.className = "mcat"; h.textContent = "თემის მითითებები — საქაღალდე temis-mititebebi"; sec.appendChild(h);
+  const list = (AUTO_FILES && AUTO_FILES["temis-mititebebi"]) || [];
+  if(!list.length){ const p = document.createElement("p"); p.className = "lead"; p.textContent = "ფაილები ჯერ არ არის."; sec.appendChild(p); return; }
+  const box = document.createElement("div"); box.className = "mbox"; sec.appendChild(box);
+  let temas = [];
+  try{ temas = ((await visCatalog([])).find(n => n.key === "m:tema") || { kids:[] }).kids; }catch(e){}
+  const hits = await Promise.all(temas.map(async n => ({ n, u: await mitUrl(n.act.id ? n.kids[0].act.file : "", n.label) })));
+  list.forEach(f => {
+    const u = "temis-mititebebi/" + encodeURIComponent(f);
+    const own = hits.filter(x => x.u === u).map(x => x.n.label);
+    const row = document.createElement("div"); row.className = "mrow";
+    const info = document.createElement("span"); info.style.flex = "1 1 auto";
+    const t = document.createElement("span"); t.textContent = "📁 " + f;
+    const m = document.createElement("span"); m.className = "mfile " + (own.length ? "ok" : "bad");
+    m.textContent = own.length ? "✓ მიბმულია: " + own.join("; ") : "✗ ვერცერთ თემას ვერ დაუკავშირდა — სახელი ისე დაარქვი, როგორც თემა ჩანს სიაში";
+    info.append(t, m); row.appendChild(info); box.appendChild(row);
+  });
+  const miss = hits.filter(x => !x.u).length;
+  if(miss){ const p = document.createElement("p"); p.className = "lead"; p.style.marginTop = "8px"; p.textContent = "მითითება ჯერ არ აქვს " + miss + " თემას (ეს ნორმალურია, თუ ყველას არ ჭირდება)."; sec.appendChild(p); }
 }
 $("mat-add").onclick = () => {
   const cat = $("mat-cat").value, title = $("mat-title").value.replace(/\s+/g," ").trim();
