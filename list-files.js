@@ -4,7 +4,9 @@
 const fs = require("fs");
 const path = require("path");
 
-const DIRS = ["wignebi", "prezentaciebi", "masala"];
+const DIRS = ["wignebi", "prezentaciebi", "masala",
+  // PDF-ების საქაღალდეები (შესამოწმებლად, რა ფაილია ატვირთული)
+  "temis-mititebebi", "gaazreba-tema-pdf", "gaazreba-pdf", "redaqtireba-pdf"];
 const out = { generated: new Date().toISOString(), files: {} };
 
 for (const d of DIRS) {

@@ -237,6 +237,14 @@
   .flist a span{min-width:0;overflow-wrap:anywhere}
   .flist a b{flex:0 0 auto;color:var(--lapis);font-size:.9rem;white-space:nowrap}
   .flist p{margin:0;color:var(--muted)}
+  .flist h4{margin:8px 0 0;font-size:1rem;color:var(--lapis)}
+  .flist h4:first-child{margin-top:0}
+  .flist a.mitf{border-left:6px solid #B06A10;background:#FFF8EC}
+  .flist a .ftag{display:block;font-size:.8rem;font-weight:700;color:#B06A10;margin-bottom:2px}
+  .flist a.temaf .ftag{color:var(--lapis)}
+  .allsec li.mitrow>a,.allsec li.mitrow>button.item{border-left:6px solid #B06A10}
+  .allsec li.mitrow .kind{color:#B06A10;font-weight:700}
+  .allsec .nofile{display:block;flex:1 1 auto;min-width:0;border:1.5px dashed var(--line);border-radius:8px;padding:10px 14px;color:var(--muted)}
   /* აპლიკაციად დაყენება */
   .install{margin-top:34px;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:16px 16px 14px}
   .install b{display:block;margin-bottom:4px}
@@ -748,7 +756,9 @@ function signIn(name){
   state.name = name; setWho(); loadDone();
   try{ sessionStorage.setItem(SESSION_KEY, name); localStorage.setItem(USER_KEY, name); }catch(e){}
 }
-function goHome(){ state.work = null; setWorkTitle(); show("s-mode"); loadStudentActs(); }
+let FROM_ASSIGN = null;   // { a, isOld } — „უკან“ ამ დავალების გვერდზე აბრუნებს
+function goHome(){ FROM_ASSIGN = null; state.work = null; setWorkTitle(); show("s-mode"); loadStudentActs(); }
+function backToAssign(){ if(FROM_ASSIGN) showAssign(FROM_ASSIGN.a, FROM_ASSIGN.isOld); else goHome(); }
 $("home-btn").onclick = goHome;
 $("back-name").onclick = () => openModal("სხვა სახელით შესვლა?", "ამ მოწყობილობაზე შესვლა გაუქმდება. შენი შენახული პასუხები არ წაიშლება.", "დარჩენა", "გასვლა", () => {
   state.name = ""; setWho(); clearPick(); ASSIGNS = []; ALLOWED = new Set(); SCOPE_ID = null;
@@ -770,7 +780,7 @@ const FILE_SETS = {
   red: { title:"რედაქტირება", app:"redaqtireba.html", candidates: async () => {
     const t = await (await fetch("redaqtireba.html", { cache:"no-store" })).text();
     const out = [], re = /"n":\s*(\d+),\s*"id":\s*"([^"]+)"/g; let m;
-    while((m = re.exec(t))) if(!isHidden("red:" + m[1]))
+    while((m = re.exec(t))) if(!isHidden("red:" + m[1]) && (!FILES || !FILES.target || String(FILES.target) === m[1]))
       out.push({ label:"დავალება " + m[1], alts: ["რედაქტირება " + m[2] + ".pdf", "რედაქტირება, " + m[2] + ".pdf", m[2] + ".pdf"]
         .map(n => ({ name:n, url:"redaqtireba-pdf/" + encodeURIComponent(n) })) });
     return out;
@@ -779,19 +789,26 @@ const FILE_SETS = {
   only: { title:"გააზრება თემის გარეშე", app:"gaazreba/", candidates: () => themeCandidates("gaazreba", "only") }
 };
 async function themeCandidates(dir, pre){
+  const T = FILES && FILES.target;   // „ყველა დავალებიდან“: მხოლოდ ეს ტექსტი
   const list = (JSON.parse(await (await fetch(dir + "/tests.json", { cache:"no-store" })).text()).tests || [])
-    .filter(t => !isHidden(pre + ":" + t.id));
+    .filter(t => !isHidden(pre + ":" + t.id) && (!T || t.id === T));
   return (await Promise.all(list.map(async t => {
     try{
       const j = await (await fetch(dir + "/" + t.file, { cache:"no-store" })).json();
       if(!j.sourceFile) return null;
       const f = encodeURIComponent(j.sourceFile);
       // PDF-ები მთავარ გვერდზე, საქაღალდეში „gaazreba-tema-pdf“ / „gaazreba-pdf“ (ან ძველებურად <dir>/pdf/)
-      return { label:(t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile),
+      const label = (t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile);
+      const out = [{ kind:"tema", label,
         alts:[{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/" + dir + "-pdf/" + f },
-              { name:j.sourceFile, url: dir + "/pdf/" + f }] };
+              { name:j.sourceFile, url: dir + "/pdf/" + f }] }];
+      // „გააზრება და თემა“: თემის მითითებაც (საქაღალდე temis-mititebebi, იგივე სახელით), თუ მიცემულია
+      if(pre === "tema" && !isHidden("tema:" + t.id + ":mit"))
+        out.push({ kind:"mit", label, alts:[{ name:"თემის მითითება — " + j.sourceFile, url:"temis-mititebebi/" + f },
+          { name:"თემის მითითება — " + j.sourceFile, url:"gaazreba-tema/temis-mititebebi/" + f }] });
+      return out;
     }catch(e){ return null; }
-  }))).filter(Boolean);
+  }))).flat().filter(Boolean);
 }
 function openFiles(key, target){   // target: კონკრეტული დავალება („ყველა დავალებიდან“)
   FILES = Object.assign({ key, target }, FILE_SETS[key]);
@@ -802,7 +819,7 @@ function openFiles(key, target){   // target: კონკრეტული დ
 $("mode-edit").onclick = () => openFiles("red");
 $("mode-theme").onclick = () => openFiles("tema");
 $("mode-only").onclick = () => openFiles("only");
-$("files-back").onclick = goHome;
+$("files-back").onclick = backToAssign;
 $("files-app").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
   const T = FILES.target;
@@ -810,8 +827,9 @@ $("files-app").onclick = () => {
   if(T){
     // „თემის“ აპლიკაციები: ტექსტი წინასწარ არჩეული დახვდება (თუ სხვა ტესტი არ არის დაწყებული)
     try{
-      const cur = JSON.parse(localStorage.getItem("georgian_exam_session") || "null");
-      if(!cur || !cur.student) localStorage.setItem("georgian_exam_session", JSON.stringify({ student:null, testId:T }));
+      const SK = FILES.key === "only" ? "georgian_exam_session_only" : "georgian_exam_session";   // ორ აპლიკაციას ცალ-ცალკე შენახვა აქვს
+      const cur = JSON.parse(localStorage.getItem(SK) || "null");
+      if(!cur || !cur.student) localStorage.setItem(SK, JSON.stringify({ student:null, testId:T }));
     }catch(e){}
   }
   location.href = FILES.app;
@@ -828,7 +846,7 @@ $("files-dl").onclick = async () => {
         try{
           const h = await fetch(v.url, { method:"HEAD", cache:"no-store" });
           if(h.ok && /pdf/i.test(h.headers.get("content-type") || "pdf"))
-            return { label:c.label, name:v.name, url:v.url, size: +h.headers.get("content-length") || 0 };
+            return { kind:c.kind, label:c.label, name:v.name, url:v.url, size: +h.headers.get("content-length") || 0 };
         }catch(e){}
       }
       return null;
@@ -836,11 +854,21 @@ $("files-dl").onclick = async () => {
     if(FILES !== F) return;
     box.innerHTML = "";
     if(!found.length){ box.innerHTML = "<p>ფაილები ჯერ არ არის. გამოიყენე „აპლიკაციიდან გაკეთება“.</p>"; return; }
-    found.forEach(f => {
-      const a = document.createElement("a"); a.href = f.url; a.setAttribute("download", f.name); a.target = "_blank"; a.rel = "noopener";
-      const sp = document.createElement("span"); sp.textContent = f.label;
-      const b = document.createElement("b"); b.textContent = "⬇ PDF" + (f.size ? " · " + (f.size / 1048576).toFixed(1) + " მბ" : "");
-      a.append(sp, b); box.appendChild(a);
+    const hasMit = cands.some(c => c.kind === "mit");
+    const groups = hasMit ? [["tema", "1. თემა (ტექსტი და დავალებები)"], ["mit", "2. თემის მითითება"]] : [[null, ""]];
+    groups.forEach(([k, h]) => {
+      const fs = found.filter(f => !k || f.kind === k);
+      if(h){ const hh = document.createElement("h4"); hh.textContent = h; box.appendChild(hh); }
+      if(!fs.length){ const p = document.createElement("p"); p.textContent = k === "mit" ? "თემის მითითების ფაილი ჯერ არ არის ატვირთული." : "ფაილი ჯერ არ არის."; box.appendChild(p); return; }
+      fs.forEach(f => {
+        const a = document.createElement("a"); a.href = f.url; a.setAttribute("download", f.name); a.target = "_blank"; a.rel = "noopener";
+        if(f.kind) a.className = f.kind === "mit" ? "mitf" : "temaf";
+        const sp = document.createElement("span");
+        if(f.kind){ const tg = document.createElement("span"); tg.className = "ftag"; tg.textContent = f.kind === "mit" ? "📋 თემის მითითება" : "📄 თემა"; sp.appendChild(tg); }
+        sp.appendChild(document.createTextNode(f.label));
+        const b = document.createElement("b"); b.textContent = "⬇ PDF" + (f.size ? " · " + (f.size / 1048576).toFixed(1) + " მბ" : "");
+        a.append(sp, b); box.appendChild(a);
+      });
     });
   }catch(e){ box.innerHTML = "<p>ფაილების სია ვერ ჩაიტვირთა. შეამოწმე ინტერნეტი.</p>"; }
 };
@@ -912,7 +940,7 @@ function goSection(url){ try{ sessionStorage.setItem(SESSION_KEY, state.name); }
 async function showAssign(a, isOld){
   $("all-h").textContent = (isOld ? "ძველი დავალება" : "ახალი დავალება") + " · " + fmtDate(a.date);
   $("all-back").dataset.to = isOld ? "s-old" : "s-mode";
-  useScope(a); applyHidden();
+  useScope(a); applyHidden(); FROM_ASSIGN = { a, isOld };
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
   const acts = await actsFor(new Set(a.items || []));
   const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file) })));
@@ -926,14 +954,23 @@ async function showAssign(a, isOld){
     const m = x.m, html = /\.html?$/i.test(m.file);
     sections[m.cat === "mat" ? 1 : 0].items.push(link(x.key, MAT_CAT[m.cat], m.title, matUrl(m), html));
   });
+  const mitRow = x => { const m = mits.find(z => z.x === x);
+    if(m && m.u){ const r = link(x.key, KIND.mit, x.text, m.u); r.mit = true; return r; }
+    const d = document.createElement("span"); d.className = "nofile"; label(d, KIND.mit, x.text + " — ფაილი ჯერ არ არის ატვირთული");
+    return { key:x.key, el:d, mit:true }; };
+  const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
   ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
     const W = sections[2].items;
+    if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;   // უკვე თავის თემასთანაა
     if(t === "gaz") W.push(btn(x.key, KIND[t], x.text, () => { state.work = CHAPTERS[x.idx].work; setWorkTitle(); renderChapters(); startTest(x.idx); }));
     else if(t === "red") W.push(btn(x.key, KIND[t], x.text, () => openFiles("red", x.n)));
     else if(t === "gram") W.push(btn(x.key, KIND[t], x.text, () => goSection("gramatika/#" + x.id)));
-    else if(t === "tema") W.push(btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id)));
+    else if(t === "tema"){
+      W.push(btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id)));
+      const mx = acts.find(z => z.t === "mit" && z.key === x.key + ":mit"); if(mx) W.push(mitRow(mx));   // მითითება — თავისი თემის ქვემოთ
+    }
     else if(t === "only") W.push(btn(x.key, KIND[t], x.text, () => openFiles("only", x.id)));
-    else if(t === "mit"){ const m = mits.find(z => z.x === x); if(m && m.u) W.push(link(x.key, KIND[t], x.text, m.u)); }
+    else if(t === "mit") W.push(mitRow(x));
   }));
   box.innerHTML = "";
   let n = 0, sn = 0;
@@ -945,7 +982,7 @@ async function showAssign(a, isOld){
     {
       const ol = document.createElement("ol");
       sec.items.forEach(it => {
-        const li = document.createElement("li"); li.classList.toggle("done", DONE.has(it.key));
+        const li = document.createElement("li"); li.classList.toggle("done", DONE.has(it.key)); if(it.mit) li.classList.add("mitrow");
         const no = document.createElement("span"); no.className = "no"; no.textContent = (++n) + ".";
         it.el.insertBefore(no, it.el.firstChild);
         const tk = document.createElement("button"); tk.type = "button"; tk.className = "tick"; tk.textContent = "✓";
@@ -971,7 +1008,7 @@ $("mode-old").onclick = () => {
   show("s-old");
 };
 $("old-back").onclick = goHome;
-$("back-mode").onclick = goHome;
+$("back-mode").onclick = backToAssign;
 
 /* მასწავლებლის გვერდი: მოსწავლეების დამატება/წაშლა */
 let students = [];
