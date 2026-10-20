@@ -292,20 +292,20 @@ function doPost(e) {
 
   // სამუშაო დრო: ითვლება მხოლოდ მაშინ, როცა გვერდი ღიაა და ჩანს (დახურული აპლიკაციის საათები აღარ ემატება)
   window.LIT_ACTIVE = (function (KEY) {
-    var AK = 'lit-active:' + KEY, last = Date.now(), vis = document.visibilityState !== 'hidden';
+    var last = Date.now(), vis = document.visibilityState !== 'hidden';
     function start() { try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); return s && s.student && s.startedAt ? s.startedAt : null; } catch (e) { return null; } }
-    function rec() { try { return JSON.parse(localStorage.getItem(AK) || 'null'); } catch (e) { return null; } }
+    function rec(S) { try { return JSON.parse(localStorage.getItem('lit-active:' + KEY + ':' + S) || 'null'); } catch (e) { return null; } }
     function tick() {
       var now = Date.now(), d = now - last; last = now;
       var S = start(); if (!S) return;
-      var r = rec(); if (!r || r.start !== S) r = { start: S, ms: 0 };
+      var r = rec(S); if (!r || r.start !== S) r = { start: S, ms: 0 };
       if (vis) r.ms += Math.min(Math.max(d, 0), 20000);   // ძილის რეჟიმი / დიდი შესვენება არ ითვლება
-      try { localStorage.setItem(AK, JSON.stringify(r)); } catch (e) {}
+      try { localStorage.setItem('lit-active:' + KEY + ':' + S, JSON.stringify(r)); } catch (e) {}
     }
     setInterval(tick, 5000);
     document.addEventListener('visibilitychange', function () { tick(); vis = document.visibilityState !== 'hidden'; last = Date.now(); });
     window.addEventListener('pagehide', tick);
-    return function (C) { tick(); var r = rec(); return r && r.start === C ? r.ms : 0; };
+    return function (C) { tick(); var r = rec(C); return r && r.start === C ? r.ms : 0; };
   })("georgian_exam_session");
   // ჩანს მხოლოდ ის, რაც მასწავლებელმა ჯგუფს მისცა (ახალი და ძველი დავალებები)
   var LIT_ALLOWED = [];
@@ -315,6 +315,25 @@ function doPost(e) {
     for (var i = 0; i < LIT_ALLOWED.length; i++) if (LIT_ALLOWED[i].indexOf(k + ":") === 0) return false;
     return true;
   }
+
+  // მასწავლებლის მიცემული ტექსტის გახსნა: სხვა ტექსტზე დაწყებული პასუხები ცალკე ინახება და ამ ტექსტზე დაბრუნებისას ბრუნდება.
+  // (ადრე: თუ დაწყებული იყო ტექსტი, რომელიც ახლა სიაში აღარ ჩანს, აპლიკაცია „ტექსტი იტვირთება…“-ზე იჭედებოდა)
+  (function (KEY, PRE) {
+    try {
+      var T = sessionStorage.getItem('lit-target') || ''; sessionStorage.removeItem('lit-target');
+      var me = (LIT_FIRST + ' ' + LIT_LAST).trim();
+      var who = function (s) { return s && s.student ? ((s.student.firstName || '') + ' ' + (s.student.lastName || '')).trim() : ''; };
+      var cur = JSON.parse(localStorage.getItem(KEY) || 'null');
+      var stash = function (s) { if (s && s.student && s.testId && who(s) === me) localStorage.setItem(KEY + ':' + s.testId, JSON.stringify(s)); };
+      var take = function (id) { var k = KEY + ':' + id, s = JSON.parse(localStorage.getItem(k) || 'null'); localStorage.removeItem(k); return s && who(s) === me ? s : null; };
+      if (!T && cur && cur.testId && LIT_HID(PRE + ':' + cur.testId)) T = '-';   // დაწყებული ტექსტი აღარ არის მიცემული
+      if (T && (!cur || cur.testId !== T)) {
+        stash(cur);
+        var next = T === '-' ? null : (take(T) || { student: null, testId: T });
+        if (next) localStorage.setItem(KEY, JSON.stringify(next)); else localStorage.removeItem(KEY);
+      }
+    } catch (e) {}
+  })("georgian_exam_session", "tema");
       // დამალული ტექსტები სიიდან ამოდის (tests.json იფილტრება ჩატვირთვისას)
       (function () {
         if (!window.fetch) return;

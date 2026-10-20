@@ -171,6 +171,14 @@
   .aslist .arow .acts{display:flex;gap:6px;flex-wrap:wrap}
   .aslist .arow .acts button{background:var(--paper);border:1.5px solid var(--line);border-radius:6px;padding:6px 10px;font-size:.88rem;min-height:36px;color:var(--lapis)}
   .aslist .arow .acts button.danger{color:#A3291C;border-color:#E2B4AE}
+  .aslist .aview{flex:1 1 100%;border-top:1px solid var(--line);margin-top:4px;padding-top:8px}
+  .aslist .aview .avh{margin:8px 0 4px;font-weight:700;color:var(--lapis)}
+  .aslist .aview .avh:first-child{margin-top:0}
+  .aslist .aview ol{margin:0;padding-left:1.6em}
+  .aslist .aview li{margin:0 0 6px;overflow-wrap:anywhere}
+  .aslist .aview .avk{display:block;font-size:.8rem;color:var(--muted)}
+  .aslist .aview li.avsub{list-style:none;margin-top:-4px}
+  .aslist .aview li.avsub .avk{color:#B06A10;font-weight:700}
   .given{color:#B06A10;font-size:.82rem;font-weight:600;margin-left:6px;white-space:nowrap}
   .asave{position:sticky;bottom:0;background:var(--bg);padding:10px 0;z-index:6}
   #as-editor .vis-save{flex-wrap:nowrap;gap:8px}
@@ -826,14 +834,8 @@ $("files-app").onclick = () => {
   try{ sessionStorage.setItem(SESSION_KEY, state.name); }catch(e){}
   const T = FILES.target;
   if(T && FILES.key === "red"){ location.href = FILES.app + "#n=" + T; return; }
-  if(T){
-    // „თემის“ აპლიკაციები: ტექსტი წინასწარ არჩეული დახვდება (თუ სხვა ტესტი არ არის დაწყებული)
-    try{
-      const SK = FILES.key === "only" ? "georgian_exam_session_only" : "georgian_exam_session";   // ორ აპლიკაციას ცალ-ცალკე შენახვა აქვს
-      const cur = JSON.parse(localStorage.getItem(SK) || "null");
-      if(!cur || !cur.student) localStorage.setItem(SK, JSON.stringify({ student:null, testId:T }));
-    }catch(e){}
-  }
+  // „თემის“ აპლიკაციები: რომელი ტექსტი გახსნას (თვითონ ინახავს სხვა ტექსტზე დაწყებულ პასუხებს და ამ ტექსტისას აბრუნებს)
+  try{ T ? sessionStorage.setItem("lit-target", T) : sessionStorage.removeItem("lit-target"); }catch(e){}
   location.href = FILES.app;
 };
 $("files-dl").onclick = async () => {
@@ -921,9 +923,9 @@ async function mitUrl(testFile, label){
 }
 let STUDENT_BASE = null;   // დავალებების ჩამონათვალი (ერთხელ იტვირთება); მასალები ყოველ ჯერზე ახლიდან
 // მოცემული სიმრავლის (ერთი დავალების ან ყველა მიცემულის) შესასრულებელი ერთეულები
-async function actsFor(set){
+async function actsFor(set, mats){
   if(!STUDENT_BASE) STUDENT_BASE = (await visCatalog([])).filter(n => !/^m:(books|pres|mat)$/.test(n.key));
-  const cat = STUDENT_BASE.concat(matNodes(MATERIALS));
+  const cat = STUDENT_BASE.concat(matNodes(mats || MATERIALS));
   const out = [];
   (function walk(nodes, block){ nodes.forEach(n => {
     const b = block || n.key;
@@ -1150,14 +1152,46 @@ function renderAssign(){
     const t = document.createElement("span"); t.innerHTML = "<b></b> · "; t.firstChild.textContent = (i === 0 ? "ახალი" : "ძველი") + " — " + fmtDate(a.date);
     t.appendChild(document.createTextNode((a.items || []).length + " მონიშნული"));
     const acts = document.createElement("span"); acts.className = "acts";
+    const vw = document.createElement("button"); vw.type = "button"; vw.textContent = "ნახვა";
+    const pane = document.createElement("div"); pane.className = "aview hidden";
+    vw.onclick = () => { const open = pane.classList.toggle("hidden") === false; vw.textContent = open ? "დამალვა" : "ნახვა"; if(open) renderAssignView(pane, a); };
     const ed = document.createElement("button"); ed.type = "button"; ed.textContent = "შეცვლა";
     ed.onclick = () => { EDIT = { aid:a.id, set:new Set(a.items || []) }; openEditor(); };
     const del = document.createElement("button"); del.type = "button"; del.className = "danger"; del.textContent = "წაშლა";
     del.onclick = () => openModal("წავშალო ეს დავალება?", fmtDate(a.date) + " — მოსწავლეები მას აღარ დაინახავენ (" + (i === 0 ? "ახალი გახდება წინა დავალება" : "ძველებიდან ამოიშლება") + ").", "გაუქმება", "წაშლა", () => {
       g.assigns = g.assigns.filter(x => x !== a); if(EDIT && EDIT.aid === a.id) EDIT = null; saveAll("დავალება წაიშალა.");
     });
-    acts.append(ed, del); row.append(t, acts); host.appendChild(row);
+    acts.append(vw, ed, del); row.append(t, acts, pane); host.appendChild(row);
   });
+}
+// მასწავლებლისთვის: რა მიეცა ამ დავალებით — ისე, როგორც მოსწავლე ხედავს (1. წასაკითხი, 2. თხრობით, 3. წერითი)
+async function renderAssignView(pane, a){
+  pane.innerHTML = "<p class='lead'>იტვირთება…</p>";
+  try{
+    const acts = await actsFor(new Set(a.items || []), mergedMaterials(CFG.materials));
+    const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
+    const secs = [["წასაკითხი", []], ["თხრობით სასწავლი", []], ["წერითი დავალებები", []]];
+    acts.filter(x => x.t === "file").forEach(x => secs[x.m.cat === "mat" ? 1 : 0][1].push([MAT_CAT[x.m.cat], x.m.title]));
+    const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
+    ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
+      if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
+      secs[2][1].push([KIND[t], x.text]);
+      if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) secs[2][1].push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
+    }));
+    pane.innerHTML = "";
+    let n = 0, sn = 0;
+    secs.filter(z => z[1].length).forEach(([h, items]) => {
+      const hh = document.createElement("p"); hh.className = "avh"; hh.textContent = (++sn) + ". " + h; pane.appendChild(hh);
+      const ol = document.createElement("ol");
+      items.forEach(([k, txt]) => { const li = document.createElement("li");
+        const kk = document.createElement("span"); kk.className = "avk"; kk.textContent = k.trim();
+        if(k.indexOf("↳") > -1){ li.className = "avsub"; li.append(kk); }
+        else { li.value = ++n; li.append(kk, document.createTextNode(txt)); }
+        ol.appendChild(li); });
+      pane.appendChild(ol);
+    });
+    if(!sn) pane.innerHTML = "<p class='lead'>ამ დავალებაში არაფერია.</p>";
+  }catch(e){ pane.innerHTML = "<p class='err'>სია ვერ ჩაიტვირთა.</p>"; }
 }
 function openEditor(){
   $("as-ed-h").textContent = EDIT.aid ? "დავალების შეცვლა" : "ახალი დავალება — ჯგუფი „" + (curGroup() || {}).name + "“";
