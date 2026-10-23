@@ -448,7 +448,7 @@ function editor(it, k, cardEl){
   if(it.warn && it.warn.length){ const u = el("ul", "warns"); it.warn.forEach(w => u.appendChild(el("li", "", "⚠ " + w))); box.appendChild(u); }
   const grp = (title, hint) => { const g = el("div", "grp"); const b = el("b", "", title); g.appendChild(b); if(hint) g.appendChild(el("div", "saving", hint)); box.appendChild(g); return g; };
   // სტროფი
-  const g1 = grp("სტროფი და აფორიზმი", "მონიშნე სტრიქონები, რომლებიც აფორიზმში შევა. ქვემოთ ტექსტს ხელითაც შეამოკლებ (მაგ., სტრიქონის ნაწილი).");
+  const g1 = grp("სტროფი და აფორიზმი", "მონიშნე სტრიქონები, რომლებიც აფორიზმში შევა. ქვემოთ ტექსტს ხელითაც შეამოკლებ (მაგ., სტრიქონის ნაწილი). თუ აფორიზმში სიტყვას შეცვლი, შენახვისას სტროფშიც იგივე ჩაიწერება.");
   const stRow = el("div"); stRow.style.cssText = "display:flex;gap:8px;align-items:center;margin:6px 0";
   const stIn = el("input", "t"); stIn.type = "number"; stIn.value = v.st; stIn.style.maxWidth = "120px"; stIn.oninput = () => { v.st = parseInt(stIn.value, 10) || v.st; };
   stRow.append(el("span", "lbl", "სტროფის ნომერი:"), stIn); g1.appendChild(stRow);
@@ -495,6 +495,7 @@ function editor(it, k, cardEl){
     if(!v.aph.trim()){ alertMsg(row, "აფორიზმის ტექსტი ცარიელია."); return; }
     if(!v.cc.trim() || !v.mc.trim() || v.cd.some(x => !x.trim()) || v.md.some(x => !x.trim())){ alertMsg(row, "ყველა ვარიანტი უნდა იყოს შევსებული."); return; }
     v.aph = v.aph.split("\n").map(s => s.trim()).filter(Boolean).join("\n");
+    syncLines(v);   // აფორიზმში სიტყვა თუ შეცვალე — სტროფშიც იგივე ჩაიწერება
     const vals = Object.assign({}, v); if(!vals.note.trim()) vals.note = "";
     if(await saveSet({ [it.id]: patchFor(it, vals) })){ OPEN.delete(it.id); renderAdmin(); }
   };
@@ -521,6 +522,24 @@ function editor(it, k, cardEl){
   }
   box.appendChild(row);
   return box;
+}
+// აფორიზმის სტრიქონი სტროფში ვერ მოიძებნა (სიტყვა შეიცვალა) → სტროფის ყველაზე მსგავს სტრიქონს ვცვლით, სასვენი ნიშნები რჩება
+const letters = x => String(x).replace(/[^ა-ჰ]/g, "");
+function simil(a, b){   // საერთო ბიგრამების წილი
+  const g = x => { const o = {}; for(let i = 0; i < x.length - 1; i++){ const k = x.substr(i, 2); o[k] = (o[k] || 0) + 1; } return o; };
+  const A = g(a), B = g(b); let c = 0, t = 0; Object.keys(A).forEach(k => { c += Math.min(A[k], B[k] || 0); t += A[k]; }); Object.keys(B).forEach(k => t += B[k]);
+  return t ? 2 * c / t : 0;
+}
+function syncLines(v){
+  v.lines = v.lines.slice();
+  v.aph.split("\n").forEach(al => {
+    const L = letters(al); if(L.length < 6 || v.lines.some(sl => letters(sl).indexOf(L) > -1)) return;
+    let best = -1, sc = 0; v.lines.forEach((sl, i) => { const x = simil(L, letters(sl)); if(x > sc){ sc = x; best = i; } });
+    if(best < 0 || sc < 0.5) return;
+    const sl = v.lines[best], lead = (sl.match(/^[^ა-ჰ]*/) || [""])[0], tail = (sl.match(/[^ა-ჰ]*$/) || [""])[0];
+    v.lines[best] = lead + al.replace(/^[^ა-ჰ]+/, "").replace(/[^ა-ჰ]+$/, "") + tail;
+    if(v.bold.indexOf(best) < 0) v.bold = v.bold.concat(best).sort((a, b) => a - b);
+  });
 }
 function alertMsg(row, text){ const m = el("div", "msg bad", text); row.after(m); setTimeout(() => m.remove(), 4000); }
 async function doSplit(it, v, n){
