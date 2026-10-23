@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>აფორიზმები — კოტეს დავალება</title>
+<link rel="icon" type="image/png" href="../icons/favicon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600&family=Noto+Serif+Georgian:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EDF0F3; --paper:#FFFFFF; --ink:#1B2433; --muted:#5D6878;
+    --lapis:#2B4C7E; --lapis-soft:#E3EAF4; --ochre:#B07D22; --ochre-soft:#FBF1DE; --line:#CBD3DD;
+    --red:#B3261E; --red-soft:#FCE8E6; --green:#1E7B34; --green-soft:#E6F4EA;
+    --serif:"Noto Serif Georgian", "Sylfaen", Georgia, serif;
+    --sans:"Noto Sans Georgian", "Sylfaen", system-ui, sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.6;min-height:100vh}
+  button{font:inherit;cursor:pointer;touch-action:manipulation}
+  .wrap{max-width:760px;margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) 16px calc(40px + env(safe-area-inset-bottom,0px))}
+  .wrap.wide{max-width:1000px}
+  header.top{border-bottom:2px solid var(--ink);padding-bottom:12px;margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+  header.top h1{font-family:var(--serif);font-weight:700;font-size:1.45rem;margin:0;line-height:1.2}
+  header.top .who{color:var(--muted);font-size:.95rem}
+  h2{font-family:var(--serif);font-weight:700;font-size:1.5rem;line-height:1.25;margin:0 0 8px}
+  h3{font-family:var(--serif);margin:0 0 8px}
+  p.lead{color:var(--muted);margin:0 0 20px}
+  .hidden{display:none !important}
+  .btn{background:var(--lapis);color:#fff;border:0;border-radius:6px;padding:11px 22px;font-weight:600;min-height:46px;-webkit-appearance:none;appearance:none}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:transparent;color:var(--lapis);border:1.5px solid var(--lapis)}
+  .btn.ghost:hover{background:var(--lapis-soft)}
+  .btn.green{background:var(--green)}
+  .btn.small{padding:6px 12px;min-height:36px;font-size:.9rem}
+  .back{display:inline-block;margin:0 0 14px;padding:7px 14px;border:1.5px solid var(--line);border-radius:10px;color:var(--lapis);font-weight:600;font-size:.95rem;text-decoration:none;background:var(--paper)}
+  .card{background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:20px 18px;margin-bottom:16px}
+  .tag{display:inline-block;background:var(--lapis-soft);color:var(--lapis);border-radius:6px;padding:3px 10px;font-size:.88rem;font-weight:600;margin-bottom:14px}
+  .msg{padding:10px 14px;border-radius:8px;margin:12px 0;font-weight:600}
+  .msg.ok{background:var(--green-soft);color:var(--green)}
+  .msg.bad{background:var(--red-soft);color:var(--red)}
+  .msg.warn{background:var(--ochre-soft);color:#7a5410}
+
+  /* ტესტი */
+  .bar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .count{font-weight:700;color:var(--lapis)}
+  .dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
+  .dots button{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--paper);color:var(--muted);font-size:.85rem;font-weight:600;padding:0}
+  .dots button.done{background:var(--lapis-soft);border-color:var(--lapis);color:var(--lapis)}
+  .dots button.cur{background:var(--lapis);border-color:var(--lapis);color:#fff}
+  .step{border-top:1px solid var(--line);padding-top:16px;margin-top:16px}
+  .step:first-of-type{border-top:0;margin-top:0;padding-top:0}
+  .step h4{margin:0 0 10px;font-size:1rem;display:flex;gap:8px;align-items:center}
+  .step h4 .n{flex:0 0 26px;height:26px;border-radius:50%;background:var(--lapis);color:#fff;display:grid;place-items:center;font-size:.85rem}
+  .verse{font-family:var(--serif);font-size:1.12rem;line-height:2.1;background:#F7F8FA;border-left:3px solid var(--ochre);padding:12px 14px;border-radius:6px;overflow-wrap:anywhere}
+  .verse input{font:inherit;font-weight:700;color:var(--lapis);width:9.5em;max-width:60vw;border:0;border-bottom:2px solid var(--lapis);background:var(--paper);text-align:center;padding:0 4px;border-radius:4px 4px 0 0}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:520px){ .pair{grid-template-columns:1fr} }
+  label.f{display:block;font-weight:600;font-size:.92rem;margin-bottom:4px;color:var(--muted)}
+  input.t, textarea.t, select.t{width:100%;font:inherit;font-size:16px;padding:9px 11px;border:1.5px solid var(--line);border-radius:7px;background:var(--paper);color:var(--ink)}
+  textarea.t{resize:vertical;min-height:64px;line-height:1.45}
+  input.t:focus, textarea.t:focus, select.t:focus{outline:none;border-color:var(--lapis)}
+  .opts{display:flex;flex-direction:column;gap:9px}
+  .opt{display:flex;gap:11px;align-items:flex-start;padding:11px 13px;border:1.5px solid var(--line);border-radius:8px;cursor:pointer;background:var(--paper);position:relative}
+  .opt:hover{border-color:var(--lapis)}
+  .opt input{position:absolute;opacity:0;pointer-events:none}
+  .opt .letter{flex:0 0 28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-weight:600;color:var(--muted);font-size:.9rem}
+  .opt.sel{border-color:var(--lapis);background:var(--lapis-soft)}
+  .opt.sel .letter{background:var(--lapis);border-color:var(--lapis);color:#fff}
+  .opt span:last-child{min-width:0;overflow-wrap:anywhere}
+  .nav{display:flex;justify-content:space-between;gap:10px;margin-top:20px;flex-wrap:wrap}
+
+  /* რედაქტორი */
+  .tools{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 0;border-bottom:1px solid var(--line);margin-bottom:14px}
+  @media (max-width:700px){ .tools{position:static} }
+  .tools .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .tools .row + .row{margin-top:8px}
+  .tools select, .tools input[type=search]{font:inherit;font-size:15px;padding:7px 10px;border:1.5px solid var(--line);border-radius:7px;background:var(--paper);min-width:0}
+  .tools input[type=search]{flex:1 1 180px}
+  .stats{font-size:.9rem;color:var(--muted)}
+  .stats b{color:var(--ink)}
+  .chh{font-family:var(--serif);font-size:1.1rem;margin:22px 0 10px;padding:8px 12px;background:var(--ink);color:#fff;border-radius:8px}
+  .it{background:var(--paper);border:1.5px solid var(--line);border-radius:10px;padding:14px 14px;margin-bottom:10px}
+  .it.off{opacity:.6;background:#F4F5F7}
+  .it.gone{opacity:.5;background:#F4F5F7;border-style:dashed}
+  .it .head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+  .it .no{font-weight:700;color:var(--lapis);margin-right:4px}
+  .it .ap{font-family:var(--serif);font-weight:700;white-space:pre-line;flex:1 1 300px;min-width:0}
+  .it .sub{font-size:.85rem;color:var(--muted);margin-top:2px;font-family:var(--sans);font-weight:400}
+  .it .acts{display:flex;gap:6px;flex-wrap:wrap}
+  .badge{display:inline-block;font-size:.75rem;font-weight:700;border-radius:5px;padding:1px 7px;margin:4px 4px 0 0;font-family:var(--sans)}
+  .b-hid{background:#E6E8EC;color:#3b4350}
+  .b-rem{background:var(--red-soft);color:var(--red)}
+  .b-todo{background:var(--ochre-soft);color:#7a5410}
+  .b-ed{background:var(--lapis-soft);color:var(--lapis)}
+  .b-split{background:#EDE7F6;color:#4527A0}
+  .b-warn{background:#FFF3CD;color:#7a5410}
+  .b-part{background:#E0F2F1;color:#00695C}
+  .ed{margin-top:14px;border-top:1px dashed var(--line);padding-top:14px}
+  .ed .grp{margin-bottom:14px}
+  .ed .grp > b{display:block;margin-bottom:6px}
+  .stz{font-family:var(--serif);background:#F7F8FA;border-radius:6px;padding:8px 10px}
+  .stz label{display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer}
+  .stz label input{margin-top:6px;flex:0 0 auto;width:18px;height:18px}
+  .stz label.on span{font-weight:700}
+  .warns{margin:8px 0 0;padding:0;list-style:none}
+  .warns li{background:#FFF3CD;color:#6b4a0e;border-radius:6px;padding:6px 10px;font-size:.88rem;margin-top:6px}
+  .note{font-size:.88rem;background:#FFFBEA;border-left:3px solid var(--ochre);padding:6px 10px;margin-top:8px;white-space:pre-line}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:620px){ .two{grid-template-columns:1fr} }
+  .ed .opt3 textarea{margin-bottom:6px}
+  .ed .lbl{font-size:.82rem;color:var(--muted);font-weight:600;margin:4px 0 2px;display:block}
+  .ed .lbl.ok{color:var(--green)} .ed .lbl.no{color:var(--red)}
+  .saving{font-size:.85rem;color:var(--muted)}
+  .help{font-size:.9rem;color:var(--muted);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 14px;margin-bottom:12px}
+  .help summary{cursor:pointer;font-weight:600;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <header class="top">
+    <h1>„ვეფხისტყაოსანი“ — აფორიზმები</h1>
+    <div class="who" id="who"></div>
+  </header>
+  <div id="app"><p class="lead">იტვირთება…</p></div>
+</div>
+<script src="../config.js"></script>
+<script>
+"use strict";
+const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbycuDAMQrAPEoa3rjtgf69Z-1rqwVIbyNB6fGyWSfpj6JDtny4HGZAMS6dMd93Lt8FU2w/exec";
+const SEND_URL = ((typeof SCRIPT_URL !== "undefined" && /\/exec$/.test(String(SCRIPT_URL).trim())) ? String(SCRIPT_URL) : DEFAULT_URL).trim();
+const $ = id => document.getElementById(id);
+const APP = $("app");
+const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
+const LET = ["ა","ბ","გ","დ"];
+const lsGet = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; }catch(e){ return d; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
+async function api(body){
+  const res = await fetch(SEND_URL, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+  const text = await res.text();
+  try{ return JSON.parse(text); }
+  catch(e){ throw new Error("სკრიპტმა მოულოდნელი პასუხი დააბრუნა. შეამოწმე, რომ Apps Script-ში ახალი Code.gs ჩასმული და გამოქვეყნებულია (New version)."); }
+}
+const netErr = e => (e && e.message && e.message !== "Failed to fetch" && e.message !== "Load failed") ? e.message : "სკრიპტთან დაკავშირება ვერ მოხერხდა. შეამოწმე ინტერნეტი.";
+const oldScript = r => r && r.ok === false && /უცნობი თავი|წვდომა/.test(r.error || "") && !/aph/.test(r.error || "");
+
+
+/* ======================= მოსწავლე ======================= */
+async function startStudent(){
+  let name = "";
+  try{ name = sessionStorage.getItem("lit-session-name") || localStorage.getItem("lit-user") || ""; }catch(e){}
+  let allowed = [];
+  try{ allowed = JSON.parse(sessionStorage.getItem("lit-allowed") || "[]"); }catch(e){}
+  const chapters = allowed.map(k => (/^aph:(\d+)$/.exec(k) || [])[1]).filter(Boolean).map(Number).sort((a, b) => a - b);
+  APP.innerHTML = "";
+  const back = el("a", "back", "← დავალებაზე დაბრუნება"); back.href = "../";
+  back.onclick = () => { try{ sessionStorage.setItem("lit-return", "assign"); }catch(e){} };
+  APP.appendChild(back);
+  if(!name){ APP.appendChild(el("p", "lead", "ჯერ მთავარ გვერდზე შედი შენი სახელით და გვარით.")); return; }
+  $("who").textContent = name;
+  if(!chapters.length){ APP.appendChild(el("p", "lead", "ამ დავალებაში აფორიზმები არ არის.")); return; }
+  const RUN_KEY = "aph-run:" + name + ":" + chapters.join(",");
+  let run = lsGet(RUN_KEY, null);
+  if(!run || !Array.isArray(run.items)){
+    const box = el("p", "lead", "აფორიზმები იტვირთება…"); APP.appendChild(box);
+    try{
+      const r = await api({ action:"aphGet", name, chapters });
+      if(!r || !r.ok) throw new Error(oldScript(r) || !r ? "Apps Script ჯერ ძველი ვერსიაა — მასწავლებელმა ახალი Code.gs უნდა გამოაქვეყნოს." : r.error);
+      run = { items: r.items, chapters: r.chapters || [], ans: {}, idx: 0, at: Date.now() };
+      if(!run.items.length){ box.textContent = "ამ თავებში აფორიზმები ჯერ არ არის."; return; }
+      lsSet(RUN_KEY, run);
+    }catch(e){ box.className = "msg bad"; box.textContent = netErr(e); return; }
+    box.remove();
+  }
+  const save = () => lsSet(RUN_KEY, run);
+  const A = id => run.ans[id] || (run.ans[id] = { w:"", sp:"", ls:"", c:null, m:null });
+  const filled = it => { const a = run.ans[it.id]; return a ? [a.w.trim(), a.sp.trim(), a.ls.trim(), a.c != null, a.m != null].filter(Boolean).length : 0; };
+  const root = el("div"); APP.appendChild(root);
+
+  function render(){
+    const i = Math.max(0, Math.min(run.idx, run.items.length - 1)), it = run.items[i], a = A(it.id);
+    root.innerHTML = "";
+    const bar = el("div", "bar");
+    bar.append(el("span", "lead", "შეავსე ყველა ველი. თითო აფორიზმი — 5 ქულა."), el("span", "count", (i + 1) + " / " + run.items.length));
+    bar.firstChild.style.margin = "0";
+    root.appendChild(bar);
+    const dots = el("div", "dots");
+    run.items.forEach((x, k) => { const b = el("button", (k === i ? "cur" : filled(x) === 5 ? "done" : ""), String(k + 1)); b.type = "button";
+      b.title = filled(x) + " / 5 შევსებულია"; b.onclick = () => { run.idx = k; save(); render(); }; dots.appendChild(b); });
+    root.appendChild(dots);
+    const card = el("div", "card");
+    card.appendChild(el("span", "tag", "თავი " + it.ch + (run.chapters[it.ch - 1] ? ": " + run.chapters[it.ch - 1] : "") + " · სტროფი " + it.st));
+    // 1. გამოტოვებული სიტყვა
+    const s1 = el("div", "step"); s1.appendChild(stepH(1, "ჩაწერე გამოტოვებული სიტყვა"));
+    const v = el("div", "verse");
+    it.t.forEach((line, r) => {
+      const d = el("div");
+      line.forEach((tok, c) => {
+        if(tok === null){
+          if(it.pre) d.append(it.pre);
+          const inp = el("input"); inp.type = "text"; inp.value = a.w; inp.placeholder = "…?"; inp.autocomplete = "off"; inp.spellcheck = false;
+          inp.setAttribute("autocapitalize", "off"); inp.setAttribute("aria-label", "გამოტოვებული სიტყვა");
+          inp.oninput = () => { a.w = inp.value; save(); };
+          d.append(inp, (it.suf || "") + " ");
+        } else d.append(tok + " ");
+      });
+      v.appendChild(d);
+    });
+    s1.appendChild(v); card.appendChild(s1);
+    // 2. ვინ ვის
+    const s2 = el("div", "step"); s2.appendChild(stepH(2, "ვინ ამბობს და ვის ეუბნება? (ჩაწერე)"));
+    const pr = el("div", "pair");
+    [["sp", "ვინ ამბობს?"], ["ls", "ვის ეუბნება?"]].forEach(([k, lab]) => {
+      const w = el("div"); const l = el("label", "f", lab); const inp = el("input", "t"); inp.type = "text"; inp.value = a[k]; inp.autocomplete = "off";
+      inp.id = "inp-" + k; l.htmlFor = inp.id; inp.oninput = () => { a[k] = inp.value; save(); }; w.append(l, inp); pr.appendChild(w);
+    });
+    s2.appendChild(pr); card.appendChild(s2);
+    // 3–4. კონტექსტი, განმარტება
+    [["c", "ctx", 3, "რა ვითარებაში (როდის) ითქმის ეს სიტყვები?"], ["m", "mean", 4, "რას ნიშნავს ეს სიტყვები?"]].forEach(([k, src, n, h]) => {
+      const s = el("div", "step"); s.appendChild(stepH(n, h));
+      const box = el("div", "opts");
+      it[src].forEach((txt, j) => {
+        const lab = el("label", "opt" + (a[k] === j ? " sel" : ""));
+        const inp = el("input"); inp.type = "radio"; inp.name = k + "-" + it.id; inp.checked = a[k] === j;
+        inp.onchange = () => { a[k] = j; save(); box.querySelectorAll(".opt").forEach((o, q) => o.classList.toggle("sel", q === j)); };
+        lab.append(inp, el("span", "letter", LET[j]), el("span", "", txt)); box.appendChild(lab);
+      });
+      s.appendChild(box); card.appendChild(s);
+    });
+    root.appendChild(card);
+    const nav = el("div", "nav");
+    const prev = el("button", "btn ghost", "← წინა"); prev.type = "button"; prev.disabled = i === 0; prev.onclick = () => { run.idx = i - 1; save(); render(); scrollTo(0, 0); };
+    const next = el("button", "btn ghost", "შემდეგი →"); next.type = "button"; next.disabled = i === run.items.length - 1; next.onclick = () => { run.idx = i + 1; save(); render(); scrollTo(0, 0); };
+    const sub = el("button", "btn green", "დასრულება და გაგზავნა"); sub.type = "button"; sub.onclick = askSend;
+    const left = el("div"); left.style.cssText = "display:flex;gap:8px"; left.append(prev, next);
+    nav.append(left, sub); root.appendChild(nav);
+    const m = el("div"); m.id = "send-msg"; root.appendChild(m);
+  }
+  function stepH(n, text){ const h = el("h4"); h.append(el("span", "n", String(n)), el("span", "", text)); return h; }
+  function askSend(){
+    const empty = run.items.reduce((s, it) => s + (5 - filled(it)), 0);
+    const m = $("send-msg"); m.innerHTML = "";
+    if(empty){
+      const w = el("div", "msg warn", "შეუვსებელია " + empty + " ველი. მაინც გავგზავნო? ");
+      const y = el("button", "btn small", "კი, გაგზავნე"); y.type = "button"; y.onclick = send;
+      const n = el("button", "btn small ghost", "არა"); n.type = "button"; n.style.marginLeft = "6px"; n.onclick = () => { m.innerHTML = ""; };
+      w.append(document.createElement("br"), y, n); m.appendChild(w);
+    } else send();
+  }
+  async function send(){
+    const m = $("send-msg"); m.innerHTML = ""; const info = el("div", "msg warn", "იგზავნება…"); m.appendChild(info);
+    root.querySelectorAll("button").forEach(b => b.disabled = true);
+    const items = run.items.map(it => { const a = A(it.id);
+      return { id: it.id, seed: it.seed, w: a.w, sp: a.sp, ls: a.ls, c: a.c == null ? "" : it.ctx[a.c], m: a.m == null ? "" : it.mean[a.m] }; });
+    try{
+      const r = await api({ action:"aphSubmit", name, items, time: new Date().toLocaleString("ka-GE") });
+      if(!r || !r.ok) throw new Error(r && r.error);
+      lsDel(RUN_KEY);
+      const k = "lit-done:" + name, d = lsGet(k, []); const key = "aph:" + chapters.join(",");
+      if(d.indexOf(key) < 0){ d.push(key); lsSet(k, d); }
+      root.innerHTML = "";
+      const c = el("div", "card"); c.append(el("h2", "", "გაიგზავნა ✔"), el("p", "lead", "პასუხები მასწავლებელს გაეგზავნა. შედეგს ის ნახავს."));
+      const b = el("a", "btn", "დავალებაზე დაბრუნება"); b.href = "../"; b.style.textDecoration = "none"; b.style.display = "inline-block";
+      b.onclick = () => { try{ sessionStorage.setItem("lit-return", "assign"); }catch(e){} };
+      c.appendChild(b); root.appendChild(c); scrollTo(0, 0);
+    }catch(e){
+      info.className = "msg bad"; info.textContent = "ვერ გაიგზავნა: " + netErr(e) + " პასუხები შენახულია — სცადე ხელახლა.";
+      root.querySelectorAll("button").forEach(b => b.disabled = false);
+    }
+  }
+  render();
+}
+
+/* ======================= მასწავლებლის რედაქტორი ======================= */
+let KEYW = "", D = null, OPEN = new Set(), FILTER = "all", QUERY = "";
+const FIELDS = ["st", "aph", "lines", "bold", "sk", "lk", "sd", "ld", "cc", "cd", "mc", "md"];
+async function startAdmin(){
+  $("wrap").classList.add("wide");
+  $("who").textContent = "მასწავლებლის რედაქტორი";
+  try{ KEYW = sessionStorage.getItem("lit-aph-key") || ""; }catch(e){}
+  if(!KEYW){ try{ const x = JSON.parse(localStorage.getItem("lit-aph-key") || "null"); if(x && Date.now() - x.t < 120000) KEYW = x.k; localStorage.removeItem("lit-aph-key"); }catch(e){} }
+  if(KEYW){ try{ sessionStorage.setItem("lit-aph-key", KEYW); }catch(e){} return loadAdmin(); }
+  askKey();
+}
+function askKey(err){
+  APP.innerHTML = "";
+  const c = el("div", "card"); c.appendChild(el("h2", "", "შესვლა"));
+  c.appendChild(el("p", "lead", "ჩაწერე მასწავლებლის საიდუმლო სიტყვა."));
+  const i = el("input", "t"); i.type = "password"; i.autocomplete = "off";
+  const b = el("button", "btn", "შესვლა"); b.type = "button"; b.style.marginTop = "10px";
+  const go = () => { KEYW = i.value.trim(); if(!KEYW) return; try{ sessionStorage.setItem("lit-aph-key", KEYW); }catch(e){} loadAdmin(); };
+  b.onclick = go; i.onkeydown = e => { if(e.key === "Enter") go(); };
+  c.append(i, b); if(err) c.appendChild(el("div", "msg bad", err)); APP.appendChild(c); i.focus();
+}
+async function loadAdmin(){
+  APP.innerHTML = "<p class='lead'>იტვირთება…</p>";
+  try{
+    const r = await api({ action:"aphAdmin", key: KEYW });
+    if(!r || !r.ok){
+      if(r && /წვდომა/.test(r.error || "")){ try{ sessionStorage.removeItem("lit-aph-key"); }catch(e){} return askKey("სიტყვა არასწორია."); }
+      throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა: ჩასვი ახალი Code.gs და გამოაქვეყნე (New version).");
+    }
+    if(!Array.isArray(r.items)) throw new Error("Apps Script ჯერ ძველი ვერსიაა: ჩასვი ახალი Code.gs და გამოაქვეყნე (New version).");
+    D = r; D.baseById = {}; r.base.forEach(b => D.baseById[String(b.id)] = b);
+    renderAdmin();
+  }catch(e){ APP.innerHTML = ""; APP.appendChild(el("div", "msg bad", netErr(e))); }
+}
+const isAct = it => !it.hidden && !it.removed && !it.todo && !(it.split && it.split.length);
+const edited = it => { const p = D.edits[it.id]; if(!p) return false; if(it.parent) return true; return FIELDS.some(f => f in p && JSON.stringify(p[f]) !== JSON.stringify(D.baseById[it.id][f])); };
+function stateOf(it){
+  if(it.split && it.split.length) return "split";
+  if(it.removed) return "removed";
+  if(it.hidden) return "hidden";
+  if(it.todo) return "todo";
+  return "active";
+}
+const FILTERS = [["all","ყველა"],["active","მოსწავლეები ხედავენ"],["hidden","დამალული"],["removed","ამოღებული"],["split","გაყოფილი"],["todo","⚠ შესავსები"],["edited","შეცვლილი"],["note","შენიშვნით"],["warn","გასამოწმებელი (ნუმერაცია/ტექსტი)"]];
+function passes(it){
+  if(QUERY){ const q = QUERY.toLowerCase(); if(!(it.aph + " " + it.st + " " + (it.note || "") + " " + it.sd + " " + it.ld).toLowerCase().includes(q)) return false; }
+  switch(FILTER){
+    case "all": return true;
+    case "edited": return edited(it);
+    case "note": return !!(it.note && it.note.trim());
+    case "warn": return !!(it.warn && it.warn.length);
+    default: return stateOf(it) === FILTER;
+  }
+}
+function renderAdmin(){
+  const keepY = scrollY;
+  APP.innerHTML = "";
+  const help = el("details", "help");
+  help.innerHTML = "<summary>როგორ მუშაობს?</summary>" +
+    "<p style='margin:8px 0 0'><b>დამალვა</b> — მოსწავლეები ვეღარ ნახავენ, მაგრამ არ იშლება. <b>ამოღება</b> — არც ტესტში ჩანს და არც სუფთა ფაილში (აღდგენა შეიძლება). " +
+    "<b>რედაქტირება</b> — სტროფის სტრიქონების მონიშვნით აფორიზმს შეამოკლებ ან გააგრძელებ; ტექსტს ხელითაც ჩაასწორებ. " +
+    "<b>გაყოფა</b> — აფორიზმი იყოფა 2–4 ნაწილად; ყოველ ნაწილს ჯერ ძველი კონტექსტი და განმარტება აქვს და „⚠ შესავსებია“ ნიშანი — სანამ ამ ნიშანს არ მოხსნი, მოსწავლეები მას ვერ ნახავენ. " +
+    "ყველაფერი მაშინვე ინახება და ყველა მოწყობილობაზე აისახება.</p>";
+  APP.appendChild(help);
+  const tools = el("div", "tools");
+  const r1 = el("div", "row");
+  const sel = el("select"); FILTERS.forEach(([v, t]) => { const o = el("option", "", t); o.value = v; sel.appendChild(o); }); sel.value = FILTER;
+  sel.onchange = () => { FILTER = sel.value; renderAdmin(); };
+  const q = el("input"); q.type = "search"; q.placeholder = "ძიება (ტექსტი, სტროფი, პერსონაჟი)…"; q.value = QUERY;
+  let tmr; q.oninput = () => { clearTimeout(tmr); tmr = setTimeout(() => { QUERY = q.value.trim(); renderList(); }, 250); };
+  r1.append(sel, q);
+  const r2 = el("div", "row");
+  const wd = el("button", "btn small", "📄 სუფთა ფაილი (Word)"); wd.type = "button"; wd.onclick = () => cleanDocx(hidChk.checked);
+  const hidLab = el("label", "stats"); const hidChk = el("input"); hidChk.type = "checkbox"; hidLab.append(hidChk, " დამალულებიც ჩაერთოს");
+  const ch = el("button", "btn small ghost", "📝 ცვლილებების სია (Word)"); ch.type = "button"; ch.onclick = changesDocx;
+  const js = el("button", "btn small ghost", "⬇ ცვლილებები Claude-სთვის"); js.type = "button"; js.title = "ამ ფაილს გამომიგზავნი, თუ ჩემი დახმარება გინდა"; js.onclick = changesJson;
+  r2.append(wd, hidLab, ch, js);
+  const r3 = el("div", "row stats"); r3.id = "stats";
+  tools.append(r1, r2, r3); APP.appendChild(tools);
+  const list = el("div"); list.id = "list"; APP.appendChild(list);
+  renderList(); paintStats();
+  scrollTo(0, keepY);
+}
+function paintStats(){
+  const c = { all:0, active:0, hidden:0, removed:0, split:0, todo:0, edited:0 };
+  D.items.forEach(it => { c.all++; c[stateOf(it)]++; if(edited(it)) c.edited++; });
+  $("stats").innerHTML = "";
+  $("stats").append("სულ ", el("b", "", String(c.all)), " · მოსწავლეები ხედავენ ", el("b", "", String(c.active)),
+    " · დამალული ", el("b", "", String(c.hidden)), " · ამოღებული ", el("b", "", String(c.removed)),
+    " · გაყოფილი ", el("b", "", String(c.split)), " · ⚠ შესავსები ", el("b", "", String(c.todo)), " · შეცვლილი ", el("b", "", String(c.edited)));
+}
+function renderList(){
+  const list = $("list"); list.innerHTML = "";
+  let lastCh = null, shown = 0;
+  D.items.forEach((it, k) => {
+    if(!passes(it)) return;
+    if(it.ch !== lastCh){ lastCh = it.ch; list.appendChild(el("div", "chh", "თავი " + it.ch + ". " + (D.chapters[it.ch - 1] || ""))); }
+    list.appendChild(card(it, k)); shown++;
+  });
+  if(!shown) list.appendChild(el("p", "lead", "ამ ფილტრით ვერაფერი მოიძებნა."));
+}
+function card(it, k){
+  const st = stateOf(it);
+  const c = el("div", "it" + (st === "hidden" ? " off" : (st === "removed" || st === "split") ? " gone" : ""));
+  const head = el("div", "head");
+  const ap = el("div", "ap"); ap.append(el("span", "no", (k + 1) + "."), it.aph);
+  const sub = el("div", "sub", "სტროფი " + it.st + " · " + it.sd + " → " + it.ld);
+  ap.appendChild(sub);
+  const bd = el("div");
+  if(it.parent) bd.appendChild(el("span", "badge b-part", "ნაწილი (" + it.id + ")"));
+  if(st === "hidden") bd.appendChild(el("span", "badge b-hid", "დამალული"));
+  if(st === "removed") bd.appendChild(el("span", "badge b-rem", "ამოღებული"));
+  if(st === "split") bd.appendChild(el("span", "badge b-split", "გაყოფილია " + it.split.length + " ნაწილად"));
+  if(it.todo) bd.appendChild(el("span", "badge b-todo", "⚠ შესავსებია"));
+  if(edited(it) && !it.parent) bd.appendChild(el("span", "badge b-ed", "შეცვლილი"));
+  if(it.warn && it.warn.length) bd.appendChild(el("span", "badge b-warn", "გასამოწმებელი"));
+  ap.appendChild(bd);
+  const acts = el("div", "acts");
+  const mk = (t, cls, fn) => { const b = el("button", "btn small " + cls, t); b.type = "button"; b.onclick = fn; acts.appendChild(b); return b; };
+  if(st !== "split"){
+    if(!it.removed) mk(it.hidden ? "👁 გამოჩენა" : "🙈 დამალვა", "ghost", () => quick(it, { hidden: !it.hidden }));
+    mk(it.removed ? "↩ აღდგენა" : "🗑 ამოღება", "ghost", () => quick(it, { removed: !it.removed }));
+  } else mk("↩ გაყოფის გაუქმება", "ghost", () => unsplit(it));
+  mk(OPEN.has(it.id) ? "▲ დახურვა" : "✏ რედაქტირება", "", () => { OPEN.has(it.id) ? OPEN.delete(it.id) : OPEN.add(it.id); c.replaceWith(card(it, k)); });
+  head.append(ap, acts); c.appendChild(head);
+  if(it.note && it.note.trim() && !OPEN.has(it.id)) c.appendChild(el("div", "note", "📝 " + it.note));
+  if(OPEN.has(it.id)) c.appendChild(editor(it, k, c));
+  return c;
+}
+// საწყისთან შედარებით შეცვლილი ველები + ნიშნები
+function patchFor(it, vals){
+  if(it.parent) return Object.assign({}, D.edits[it.id] || {}, vals);
+  const b = D.baseById[it.id], cur = Object.assign({}, D.edits[it.id] || {}, vals), p = {};
+  Object.keys(cur).forEach(f => {
+    if(FIELDS.indexOf(f) > -1){ if(JSON.stringify(cur[f]) !== JSON.stringify(b[f])) p[f] = cur[f]; }
+    else if(cur[f] !== false && cur[f] !== "" && cur[f] != null && !(Array.isArray(cur[f]) && !cur[f].length)) p[f] = cur[f];
+  });
+  return Object.keys(p).length ? p : null;
+}
+async function saveSet(set, okText){
+  const s = el("div", "msg warn", "ინახება…"); s.style.cssText = "position:fixed;right:16px;bottom:16px;z-index:9;margin:0;box-shadow:0 2px 10px rgba(0,0,0,.15)";
+  document.body.appendChild(s);
+  try{
+    const r = await api({ action:"aphSave", key: KEYW, set });
+    if(!r || !r.ok) throw new Error(r && r.error);
+    D.edits = r.edits; rebuild();
+    s.className = "msg ok"; s.textContent = okText || "შენახულია ✔"; setTimeout(() => s.remove(), 1600);
+    return true;
+  }catch(e){ s.className = "msg bad"; s.textContent = "ვერ შეინახა: " + netErr(e); setTimeout(() => s.remove(), 5000); return false; }
+}
+function rebuild(){   // იგივე, რასაც სერვერი აკეთებს (aphMerged)
+  const E = D.edits, out = [];
+  D.base.forEach(b => {
+    const id = String(b.id), p = E[id] || {};
+    out.push(Object.assign({}, b, p, { id }));
+    (p.split || []).forEach(cid => { if(E[cid]) out.push(Object.assign({}, b, E[cid], { id: cid, parent: id, split: null, warn: [] })); });
+  });
+  D.items = out;
+}
+async function quick(it, vals){ if(await saveSet({ [it.id]: patchFor(it, vals) })) renderAdmin(); }
+async function unsplit(it){
+  if(!confirmBox("გაყოფის გაუქმება წაშლის ნაწილებს და მათში შეტანილ ცვლილებებს. გავაგრძელო?")) return;
+  const set = { [it.id]: patchFor(it, { split: [] }) }; (it.split || []).forEach(id => set[id] = null);
+  if(await saveSet(set, "გაყოფა გაუქმდა ✔")) renderAdmin();
+}
+function confirmBox(text){ return window.confirm(text); }
+function editor(it, k, cardEl){
+  const box = el("div", "ed");
+  const v = { st: it.st, aph: it.aph, lines: it.lines.slice(), bold: (it.bold || []).slice(), sk: it.sk, lk: it.lk, sd: it.sd, ld: it.ld,
+    cc: it.cc, cd: (it.cd || []).slice(), mc: it.mc, md: (it.md || []).slice(), note: it.note || "", todo: !!it.todo };
+  if(it.warn && it.warn.length){ const u = el("ul", "warns"); it.warn.forEach(w => u.appendChild(el("li", "", "⚠ " + w))); box.appendChild(u); }
+  const grp = (title, hint) => { const g = el("div", "grp"); const b = el("b", "", title); g.appendChild(b); if(hint) g.appendChild(el("div", "saving", hint)); box.appendChild(g); return g; };
+  // სტროფი
+  const g1 = grp("სტროფი და აფორიზმი", "მონიშნე სტრიქონები, რომლებიც აფორიზმში შევა. ქვემოთ ტექსტს ხელითაც შეამოკლებ (მაგ., სტრიქონის ნაწილი).");
+  const stRow = el("div"); stRow.style.cssText = "display:flex;gap:8px;align-items:center;margin:6px 0";
+  const stIn = el("input", "t"); stIn.type = "number"; stIn.value = v.st; stIn.style.maxWidth = "120px"; stIn.oninput = () => { v.st = parseInt(stIn.value, 10) || v.st; };
+  stRow.append(el("span", "lbl", "სტროფის ნომერი:"), stIn); g1.appendChild(stRow);
+  const stz = el("div", "stz");
+  const ta = el("textarea", "t"); ta.rows = 3; ta.value = v.aph; ta.oninput = () => { v.aph = ta.value; };
+  v.lines.forEach((line, i) => {
+    const lab = el("label", v.bold.indexOf(i) > -1 ? "on" : ""); const cb = el("input"); cb.type = "checkbox"; cb.checked = v.bold.indexOf(i) > -1;
+    cb.onchange = () => {
+      v.bold = cb.checked ? v.bold.concat(i).sort((a, b) => a - b) : v.bold.filter(x => x !== i);
+      lab.classList.toggle("on", cb.checked);
+      v.aph = v.bold.map(j => v.lines[j].trim()).join("\n"); ta.value = v.aph;
+    };
+    lab.append(cb, el("span", "", line)); stz.appendChild(lab);
+  });
+  g1.append(stz, el("span", "lbl", "აფორიზმის ტექსტი (ასე ნახავს მოსწავლე; ყოველი სტრიქონი — ახალ ხაზზე):"), ta);
+  // ვინ ვის
+  const g2 = grp("ვინ ამბობს და ვის ეუბნება");
+  const two = el("div", "two");
+  [["sd", "sk", "ვინ ამბობს (ასე ეწერება ფაილში)"], ["ld", "lk", "ვის ეუბნება"]].forEach(([d, kk, lab]) => {
+    const w = el("div"); const inp = el("input", "t"); inp.value = v[d]; inp.oninput = () => { v[d] = inp.value; };
+    const s = el("select", "t"); (D.people.indexOf(v[kk]) < 0 ? D.people.concat(v[kk]) : D.people).forEach(p => { const o = el("option", "", p); o.value = p; s.appendChild(o); });
+    s.value = v[kk]; s.onchange = () => { v[kk] = s.value; };
+    w.append(el("span", "lbl", lab), inp, el("span", "lbl", "სწორად ჩაითვლება ამ პერსონაჟის ყველა ფორმა:"), s); two.appendChild(w);
+  });
+  g2.appendChild(two);
+  // ვარიანტები
+  [["cc", "cd", "კონტექსტი (რა ვითარებაში ითქმის)"], ["mc", "md", "განმარტება (რას ნიშნავს)"]].forEach(([c, d, title]) => {
+    const g = grp(title); const w = el("div", "opt3");
+    const t0 = el("textarea", "t"); t0.value = v[c]; t0.oninput = () => { v[c] = t0.value; };
+    w.append(el("span", "lbl ok", "✔ სწორი"), t0);
+    v[d].forEach((x, j) => { const t = el("textarea", "t"); t.value = x; t.oninput = () => { v[d][j] = t.value; }; w.append(el("span", "lbl no", "✘ არასწორი " + (j + 1)), t); });
+    g.appendChild(w);
+  });
+  // შენიშვნა + შესავსები
+  const g5 = grp("შენიშვნა (მხოლოდ შენთვის — სუფთა ფაილში და მოსწავლესთან არ ჩანს)");
+  const nt = el("textarea", "t"); nt.value = v.note; nt.rows = 2; nt.oninput = () => { v.note = nt.value; }; g5.appendChild(nt);
+  const tl = el("label"); tl.style.cssText = "display:flex;gap:8px;align-items:center;margin-top:8px;cursor:pointer";
+  const tc = el("input"); tc.type = "checkbox"; tc.checked = v.todo; tc.onchange = () => { v.todo = tc.checked; };
+  tl.append(tc, el("span", "", "⚠ შესავსებია (სანამ მონიშნულია, მოსწავლეები ამას ვერ ნახავენ)")); g5.appendChild(tl);
+  // ღილაკები
+  const row = el("div"); row.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:6px";
+  const sv = el("button", "btn", "💾 შენახვა"); sv.type = "button";
+  sv.onclick = async () => {
+    if(!v.aph.trim()){ alertMsg(row, "აფორიზმის ტექსტი ცარიელია."); return; }
+    if(!v.cc.trim() || !v.mc.trim() || v.cd.some(x => !x.trim()) || v.md.some(x => !x.trim())){ alertMsg(row, "ყველა ვარიანტი უნდა იყოს შევსებული."); return; }
+    v.aph = v.aph.split("\n").map(s => s.trim()).filter(Boolean).join("\n");
+    const vals = Object.assign({}, v); if(!vals.note.trim()) vals.note = "";
+    if(await saveSet({ [it.id]: patchFor(it, vals) })){ OPEN.delete(it.id); renderAdmin(); }
+  };
+  row.appendChild(sv);
+  const cancel = el("button", "btn ghost", "გაუქმება"); cancel.type = "button"; cancel.onclick = () => { OPEN.delete(it.id); renderAdmin(); }; row.appendChild(cancel);
+  if(!it.parent && D.edits[it.id] && FIELDS.some(f => f in D.edits[it.id])){
+    const rs = el("button", "btn ghost", "↺ საწყისზე დაბრუნება"); rs.type = "button";
+    rs.onclick = async () => { if(!confirmBox("ტექსტი და ვარიანტები დაბრუნდება თავდაპირველზე (დამალვა/შენიშვნა დარჩება). გავაგრძელო?")) return;
+      const cur = Object.assign({}, D.edits[it.id]); FIELDS.forEach(f => delete cur[f]);
+      if(await saveSet({ [it.id]: Object.keys(cur).length ? cur : null }, "დაბრუნდა საწყისზე ✔")){ OPEN.delete(it.id); renderAdmin(); } };
+    row.appendChild(rs);
+  }
+  if(it.parent){
+    const del = el("button", "btn ghost", "🗑 ნაწილის წაშლა"); del.type = "button";
+    del.onclick = async () => { if(!confirmBox("ეს ნაწილი წაიშლება. გავაგრძელო?")) return;
+      const par = D.items.find(x => x.id === it.parent), rest = (par.split || []).filter(x => x !== it.id);
+      if(await saveSet({ [it.id]: null, [par.id]: patchFor(par, { split: rest }) }, "ნაწილი წაიშალა ✔")) renderAdmin(); };
+    row.appendChild(del);
+  } else {
+    const sp = el("select", "t"); sp.style.cssText = "width:auto";
+    [["", "✂ გაყოფა…"], ["2", "2 ნაწილად"], ["3", "3 ნაწილად"], ["4", "4 ნაწილად"]].forEach(([x, t]) => { const o = el("option", "", t); o.value = x; sp.appendChild(o); });
+    sp.onchange = () => { const n = +sp.value; sp.value = ""; if(n) doSplit(it, v, n); };
+    row.appendChild(sp);
+  }
+  box.appendChild(row);
+  return box;
+}
+function alertMsg(row, text){ const m = el("div", "msg bad", text); row.after(m); setTimeout(() => m.remove(), 4000); }
+async function doSplit(it, v, n){
+  if(!confirmBox("„" + v.aph.split("\n")[0] + "…“ გაიყოს " + n + " ნაწილად?\nთავდაპირველი აფორიზმი მოსწავლეებს აღარ გამოუჩნდებათ; ნაწილები „⚠ შესავსებია“ ნიშნით შეიქმნება.")) return;
+  const lines = v.aph.split("\n").map(s => s.trim()).filter(Boolean);
+  const set = {}, ids = [];
+  for(let j = 0; j < n; j++){
+    const id = it.id + "-" + (j + 1); ids.push(id);
+    let part = lines;
+    if(lines.length >= n){ const a = Math.round(j * lines.length / n), b = Math.round((j + 1) * lines.length / n); part = lines.slice(a, b); }
+    const bold = v.lines.map((l, i) => i).filter(i => part.some(p => v.lines[i].trim().indexOf(p) > -1 || p.indexOf(v.lines[i].trim()) > -1));
+    set[id] = { st: v.st, aph: part.join("\n"), lines: v.lines, bold, sk: v.sk, lk: v.lk, sd: v.sd, ld: v.ld, cc: v.cc, cd: v.cd, mc: v.mc, md: v.md, todo: true, note: "" };
+  }
+  set[it.id] = patchFor(it, { split: ids });
+  if(await saveSet(set, "გაიყო " + n + " ნაწილად ✔")){ OPEN.delete(it.id); ids.forEach(id => OPEN.add(id)); FILTER = "all"; renderAdmin(); }
+}
+
+/* ---------- Word (.docx) — ბიბლიოთეკის გარეშე ---------- */
+const xe = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+function run(text, o){
+  o = o || {};
+  const pr = '<w:rPr><w:rFonts w:ascii="Sylfaen" w:hAnsi="Sylfaen" w:cs="Sylfaen"/>' + (o.b ? "<w:b/>" : "") + (o.i ? "<w:i/>" : "") +
+    (o.color ? '<w:color w:val="' + o.color + '"/>' : "") + '<w:sz w:val="' + (o.sz || 22) + '"/></w:rPr>';
+  return String(text).split("\n").map((t, i) => (i ? "<w:r>" + pr + "<w:br/></w:r>" : "") + '<w:r>' + pr + '<w:t xml:space="preserve">' + xe(t) + "</w:t></w:r>").join("");
+}
+function para(runs, o){
+  o = o || {};
+  return "<w:p><w:pPr>" + (o.keep ? "<w:keepNext/>" : "") + '<w:spacing w:before="' + (o.before || 0) + '" w:after="' + (o.after == null ? 80 : o.after) + '"/>' +
+    (o.ind ? '<w:ind w:left="' + o.ind + '"/>' : "") + (o.shade ? '<w:shd w:val="clear" w:color="auto" w:fill="' + o.shade + '"/>' : "") +
+    (o.center ? '<w:jc w:val="center"/>' : "") + "</w:pPr>" + runs + "</w:p>";
+}
+function docxBlob(bodyXml){
+  const doc = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>' +
+    bodyXml + '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134" w:header="567" w:footer="567" w:gutter="0"/></w:sectPr></w:body></w:document>';
+  const files = {
+    "[Content_Types].xml": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>',
+    "_rels/.rels": '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+    "word/document.xml": doc
+  };
+  return new Blob([zipStore(files)], { type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+}
+const CRC = (() => { const t = new Uint32Array(256); for(let n = 0; n < 256; n++){ let c = n; for(let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u){ let c = 0xFFFFFFFF; for(let i = 0; i < u.length; i++) c = CRC[(c ^ u[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipStore(files){
+  const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+  Object.keys(files).forEach(name => {
+    const nm = enc.encode(name), data = enc.encode(files[name]), crc = crc32(data);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint32(14, crc, true); h.setUint32(18, data.length, true); h.setUint32(22, data.length, true); h.setUint16(26, nm.length, true);
+    parts.push(new Uint8Array(h.buffer), nm, data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true);
+    c.setUint32(16, crc, true); c.setUint32(20, data.length, true); c.setUint32(24, data.length, true); c.setUint16(28, nm.length, true); c.setUint32(42, off, true);
+    cen.push(new Uint8Array(c.buffer), nm);
+    off += 30 + nm.length + data.length;
+  });
+  const cenLen = cen.reduce((s, x) => s + x.length, 0), n = Object.keys(files).length;
+  const e = new DataView(new ArrayBuffer(22));
+  e.setUint32(0, 0x06054b50, true); e.setUint16(8, n, true); e.setUint16(10, n, true); e.setUint32(12, cenLen, true); e.setUint32(16, off, true);
+  return new Blob(parts.concat(cen, [new Uint8Array(e.buffer)]));
+}
+function download(blob, name){
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+}
+const KA_M = ["იანვარი","თებერვალი","მარტი","აპრილი","მაისი","ივნისი","ივლისი","აგვისტო","სექტემბერი","ოქტომბერი","ნოემბერი","დეკემბერი"];
+const today = () => { const d = new Date(); return d.getDate() + " " + KA_M[d.getMonth()] + " " + d.getFullYear(); };
+function cleanDocx(withHidden){
+  const items = D.items.filter(it => isAct(it) || (withHidden && it.hidden && !it.removed && !it.todo && !(it.split && it.split.length)));
+  let x = para(run("შოთა რუსთაველი — „ვეფხისტყაოსანი“", { b:1, sz:32 }), { center:1, after:60 }) +
+    para(run("აფორიზმები და შეგონებანი", { b:1, sz:28 }), { center:1, after:60 }) +
+    para(run(items.length + " აფორიზმი · " + today(), { sz:20, color:"666666" }), { center:1, after:300 });
+  let lastCh = null, n = 0;
+  items.forEach(it => {
+    if(it.ch !== lastCh){ lastCh = it.ch; x += para(run("თავი " + it.ch + ". " + (D.chapters[it.ch - 1] || ""), { b:1, sz:26, color:"2B4C7E" }), { before:280, after:120, keep:1 }); }
+    n++;
+    x += para(run(n + ". ", { b:1, sz:24 }) + run(it.aph, { b:1, sz:24 }), { before:160, after:40, keep:1 });
+    x += para(run("სტროფი " + it.st, { sz:18, color:"777777" }), { after:60, keep:1 });
+    x += para(it.lines.map((l, i) => run((i ? "\n" : "") + l, { b: (it.bold || []).indexOf(i) > -1, i: (it.bold || []).indexOf(i) < 0, sz:21 })).join(""), { ind:360, shade:"F3F4F6", after:80, keep:1 });
+    x += para(run("ვინ ვის: ", { b:1, sz:21 }) + run(it.sd + " → " + it.ld, { sz:21 }), { after:40 });
+    x += para(run("კონტექსტი: ", { b:1, sz:21 }) + run(it.cc, { sz:21 }), { after:40 });
+    x += para(run("მნიშვნელობა: ", { b:1, sz:21 }) + run(it.mc, { sz:21 }), { after:120 });
+  });
+  download(docxBlob(x), "აფორიზმები — სუფთა ფაილი.docx");
+}
+function changesDocx(){
+  let x = para(run("აფორიზმები — ცვლილებების სია", { b:1, sz:30 }), { after:60 }) + para(run(today(), { sz:20, color:"666666" }), { after:240 });
+  let n = 0;
+  D.items.forEach((it, k) => {
+    const p = D.edits[it.id], lines = [];
+    const st = stateOf(it);
+    if(it.parent) lines.push(["ახალი ნაწილი (გაყოფილი " + it.parent + "-დან)", ""]);
+    if(st === "hidden") lines.push(["დამალულია", ""]);
+    if(st === "removed") lines.push(["ამოღებულია", ""]);
+    if(st === "split") lines.push(["გაყოფილია " + it.split.length + " ნაწილად: " + it.split.join(", "), ""]);
+    if(it.todo) lines.push(["⚠ შესავსებია", ""]);
+    if(p && !it.parent){
+      const b = D.baseById[it.id];
+      const name = { st:"სტროფის ნომერი", aph:"აფორიზმი", sd:"ვინ ამბობს", ld:"ვის ეუბნება", sk:"ვინ ამბობს (პერსონაჟი)", lk:"ვის ეუბნება (პერსონაჟი)", cc:"კონტექსტი — სწორი", mc:"განმარტება — სწორი", cd:"კონტექსტი — არასწორები", md:"განმარტება — არასწორები", bold:"მონიშნული სტრიქონები", lines:"სტროფი" };
+      FIELDS.forEach(f => { if(f in p && JSON.stringify(p[f]) !== JSON.stringify(b[f]) && f !== "bold")
+        lines.push([name[f] + ":", "იყო: " + (Array.isArray(b[f]) ? b[f].join(" | ") : b[f]) + "\nახლა: " + (Array.isArray(p[f]) ? p[f].join(" | ") : p[f])]); });
+    }
+    if(it.parent) lines.push(["ტექსტი:", it.aph]);
+    if(it.note && it.note.trim()) lines.push(["შენიშვნა:", it.note]);
+    if(!lines.length) return;
+    n++;
+    x += para(run((k + 1) + ". ", { b:1 }) + run(it.aph.split("\n")[0] + (it.aph.indexOf("\n") > -1 ? " …" : ""), { b:1 }) + run("  (თავი " + it.ch + ", სტროფი " + it.st + ")", { sz:18, color:"777777" }), { before:200, after:60, keep:1 });
+    lines.forEach(([a, b]) => { x += para(run("• " + a + " ", { b:1, sz:21 }) + (b ? run(b, { sz:21 }) : ""), { ind:280, after:40 }); });
+  });
+  if(!n) x += para(run("ჯერ ცვლილება არ არის.", {}));
+  download(docxBlob(x), "აფორიზმები — ცვლილებები.docx");
+}
+function changesJson(){
+  const blob = new Blob([JSON.stringify({ date: new Date().toISOString(), edits: D.edits }, null, 1)], { type:"application/json" });
+  download(blob, "aforizmebi-cvlilebebi.json");
+}
+
+// გაშვება (ბოლოში — ყველა ცვლადი უკვე გამოცხადებულია)
+if(/^#admin/.test(location.hash)) startAdmin(); else startStudent();
+</script>
+</body>
+</html>

@@ -339,13 +339,14 @@
       <button type="button" data-tab="ap-groups">ჯგუფები</button>
       <button type="button" data-tab="ap-students">მოსწავლეები</button>
       <button type="button" data-tab="ap-mats">მასალები</button>
+      <button type="button" data-tab="ap-aph">აფორიზმები</button>
     </nav>
 
     <!-- დავალების მიცემა -->
     <div class="apane" id="ap-assign">
       <div class="field"><label for="as-group">ჯგუფი</label><select id="as-group" class="gselect"></select></div>
       <div id="as-none" class="lead hidden">ჯერ შექმენი ჯგუფი („ჯგუფები“ ჩანართში) და დაამატე მოსწავლეები.</div>
-      <label class="nobank"><input type="checkbox" id="nobank"><span><b>ბაზის კითხვების დამალვა ყველასთვის</b><br><small>„შუშანიკის“, „აბოს“ და „გრიგოლის“ ტესტებში ჩემი ბაზიდან აღებული კითხვები აღარ გამოჩნდება არც ერთ ჯგუფთან (შეფასებაც მათ გარეშე იქნება). მონიშვნის მოხსნით ისევ დაბრუნდება.</small></span></label>
+      <label class="nobank"><input type="checkbox" id="nobank"><span><b>ბაზის კითხვების დამალვა ყველასთვის</b><br><small>„შუშანიკის“, „აბოს“, „გრიგოლის“ და „ვეფხისტყაოსნის“ ტესტებში ჩემი ბაზიდან აღებული კითხვები აღარ გამოჩნდება არც ერთ ჯგუფთან (შეფასებაც მათ გარეშე იქნება). მონიშვნის მოხსნით ისევ დაბრუნდება.</small></span></label>
       <div id="as-body">
         <h3>ამ ჯგუფის დავალებები</h3>
         <div id="as-list" class="aslist"></div>
@@ -407,6 +408,11 @@
         <input id="mat-file" class="ginput" placeholder="ფაილის სახელი (ცარიელი = სათაური.pdf)" autocomplete="off">
         <div class="row"><button class="btn" id="mat-add">მასალის დამატება</button></div>
       </div></details>
+    </div>
+
+    <div class="apane hidden" id="ap-aph">
+      <p class="lead" style="margin-bottom:14px">„ვეფხისტყაოსნის“ აფორიზმების რედაქტორი: დამალვა, ამოღება, შემოკლება, გაყოფა, ვარიანტების ჩასწორება და სუფთა ფაილის (Word) გადმოწერა. ცვლილებები მაშინვე აისახება ყველასთან. მოსწავლეებს აფორიზმებს „დავალების მიცემაში“ აძლევ, თავების მიხედვით.</p>
+      <button class="btn" id="aph-open">აფორიზმების რედაქტორის გახსნა ↗</button>
     </div>
 
     <div class="row asave hidden" id="asave"><button class="btn" id="vis-save">ცვლილებების შენახვა</button><span class="dirty">შეუნახავი ცვლილებებია (ჯგუფები / მასალები)</span></div>
@@ -643,7 +649,7 @@ function inSet(k, set){
   const any = f => { for(const x of set) if(f(x)) return true; return false; };
   if(k.indexOf("m:") === 0){
     const c = k.slice(2);
-    if(c === "gaz" || c === "red" || c === "gram" || c === "only") return any(x => x.indexOf(c + ":") === 0);
+    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph") return any(x => x.indexOf(c + ":") === 0);
     if(c === "tema") return any(x => /^tema:[^:]+$/.test(x));
     if(c === "mit") return any(x => /^tema:.+:mit$/.test(x));
     if(MAT_DIR[c]) return MATERIALS.some(m => m.cat === c && set.has("mat:" + m.id));
@@ -1020,6 +1026,11 @@ async function showAssign(a, isOld){
     const d = document.createElement("span"); d.className = "nofile"; label(d, KIND.mit, x.text + " — ფაილი ჯერ არ არის ატვირთული");
     return { key:x.key, el:d, mit:true }; };
   const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
+  const aphs = acts.filter(x => x.t === "aph");
+  if(aphs.length){   // ყველა მონიშნული თავი — ერთი სავარჯიშო
+    const ns = aphs.map(x => x.n).sort((p, q) => p - q);
+    sections[2].items.push(btn("aph:" + ns.join(","), "აფორიზმები", "„ვეფხისტყაოსანი“ — " + (ns.length === 1 ? "თავი " + ns[0] : "თავები: " + ns.join(", ")), () => goSection("aforizmebi/")));
+  }
   ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
     const W = sections[2].items;
     if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;   // უკვე თავის თემასთანაა
@@ -1124,6 +1135,10 @@ function groupOf(name){ return CFG.groups.find(g => g.members.has(name)); }
 const curGroup = () => CFG.groups.find(g => g.id === AS_GROUP);
 function markDirty(on){ DIRTY = on; $("asave").classList.toggle("hidden", !on); }
 // ჩანართები
+$("aph-open").onclick = () => {   // ახალ ჩანართში — მასწავლებლის გვერდი ღია რჩება
+  try{ localStorage.setItem("lit-aph-key", JSON.stringify({ k: adminKey, t: Date.now() })); }catch(e){}
+  window.open("aforizmebi/#admin", "_blank");
+};
 document.querySelectorAll(".atabs button").forEach(b => b.onclick = () => {
   document.querySelectorAll(".atabs button").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll(".apane").forEach(pn => pn.classList.toggle("hidden", pn.id !== b.dataset.tab));
@@ -1220,6 +1235,8 @@ async function renderAssignView(pane, a){
     const NOTES = splitItems(a.items).notes;
     acts.filter(x => x.t === "file").forEach(x => secs[x.m.cat === "mat" ? 1 : 0][1].push([MAT_CAT[x.m.cat], x.m.title + (NOTES[x.key] ? " — 📌 " + NOTES[x.key] : "")]));
     const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
+    const aphN = acts.filter(x => x.t === "aph").map(x => x.n).sort((p, q) => p - q);
+    if(aphN.length) secs[2][1].push(["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]);
     ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
       secs[2][1].push([KIND[t], x.text]);
@@ -1277,6 +1294,13 @@ async function visCatalog(mats){
       return { key:"gaz:" + c.id, label: t, meta: (st ? st + " სტროფი · " : "") + qn + " კითხვა" + (nb ? (NOBANK ? " (ბაზის " + nb + " დამალულია)" : " (აქედან " + nb + " ბაზიდან)") : ""),
         act:{ t:"gaz", idx: CHAPTERS.indexOf(c), text: WORKS[w].title + " — " + t } }; })
   })) });
+  // 1ბ. აფორიზმები („ვეფხისტყაოსანი“): თავები — მოსწავლე ყველა მონიშნულ თავს ერთ სავარჯიშოდ აკეთებს
+  const aph = { key:"m:aph", label:"აფორიზმები („ვეფხისტყაოსანი“)", kids:[] };
+  try{
+    JSON.parse(await fetchText("aforizmebi/chapters.json")).forEach(c => aph.kids.push({ key:"aph:" + c.n, label: c.n + ". " + c.title, meta: c.count + " აფორიზმი",
+      act:{ t:"aph", n: c.n, text: c.n + ". " + c.title } }));
+  }catch(e){ aph.err = true; }
+  cat.push(aph);
   // 2. რედაქტირება: დავალებები
   const red = { key:"m:red", label:"რედაქტირება", kids:[] };
   try{
@@ -1763,6 +1787,11 @@ $("again").onclick = () => { state.chap = null; state.done = false; renderChapte
   setAssigns(cached ? cached.assigns : [], cached ? cached.materials : []);
   goHome();
   refreshHidden();
+  let ret = null; try{ ret = sessionStorage.getItem("lit-return"); sessionStorage.removeItem("lit-return"); }catch(e){}
+  if(ret === "assign"){   // აფორიზმებიდან დაბრუნება — იმავე დავალებაზე
+    const a = SCOPE_ID && ASSIGNS.find(x => x.id === SCOPE_ID);
+    if(a) showAssign(a, a !== ASSIGNS[ASSIGNS.length - 1]);
+  }
 })();
 loadAutoFiles().then(() => { if(state.name) setAssigns(ASSIGNS, RAW_MATS); });
 
