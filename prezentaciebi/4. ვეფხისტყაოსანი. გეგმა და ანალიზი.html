@@ -170,7 +170,28 @@ dialog::backdrop{background:rgba(15,23,42,.45)}
 .st-n{font-weight:800;color:var(--amber-d);font-size:13px}
 .st pre{margin:2px 0 0;white-space:pre-wrap;font:16px/1.6 'Noto Serif Georgian',Georgia,serif}
 
-footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48px}
+/* home + single-chapter view */
+#home{background:var(--card);border-radius:20px;box-shadow:0 20px 25px -5px rgba(0,0,0,.08);padding:28px 28px 30px;margin:8px 0 32px}
+#home>h2{margin:0 0 6px;font-size:30px;font-weight:800;color:var(--ink);padding-bottom:12px;border-bottom:2px solid color-mix(in srgb,var(--indigo) 30%,transparent)}
+.home-part{margin-top:22px}
+.hp-h{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;margin:0 0 12px;font-size:18px;font-weight:800;color:var(--indigo-d)}
+.hp-h small{font-weight:500;color:var(--muted);font-size:14px}
+.hp-n{font-size:12px;letter-spacing:.06em;color:#fff;background:var(--indigo);padding:2px 10px;border-radius:999px}
+.home-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.home-card{display:flex;align-items:center;gap:14px;padding:16px 18px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);text-decoration:none;font-weight:700;font-size:16px;line-height:1.35;transition:transform .15s,box-shadow .15s,border-color .15s}
+.home-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-h);border-color:color-mix(in srgb,var(--indigo) 40%,transparent)}
+.hc-e{flex:none;font-size:26px;width:36px;text-align:center}
+.hc-t b{color:var(--indigo)}
+body.reading .hero,body.reading #home,body.reading .block-banner{display:none}
+body.reading .chapter{display:none}
+body.reading .chapter.on{display:block;margin-top:20px}
+body:not(.reading) .chapter,body:not(.reading) .block-banner{display:none}
+.ch-part{font-size:13px;color:var(--muted);margin-bottom:8px}
+.ch-foot{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;padding:18px 28px 24px;border-top:1px dashed var(--line)}
+.ch-foot button{border:0;border-radius:10px;padding:10px 16px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;background:var(--indigo-50);color:var(--indigo)}
+.ch-foot button.primary{background:var(--indigo);color:#fff}
+.ch-foot button:disabled{visibility:hidden}
+@media (max-width:600px){.home-grid{grid-template-columns:1fr}#home{padding:20px 16px}.ch-foot{padding:16px}}
 @media (max-width:600px){#toc-btn .t{display:none}.nav-cur{flex-direction:column;gap:0;line-height:1.25}.nav-cur span{font-size:13px;max-width:100%}.pi-emoji{width:26px}.plan-item{gap:8px;padding:10px}.sub{padding:16px 16px 18px}.ch-head{padding:20px 16px 14px}.tasks li{padding-left:48px}}
 @media print{.nav,.an-tools{display:none}.chapter{break-inside:auto;box-shadow:none}details>.an-body{display:block}}
 </style>
@@ -189,6 +210,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </div>
 </header>
 <nav class="nav"><div class="wrap">
+  <button id="home-btn" title="მთავარი სარჩევი">🏠</button>
   <button id="prev" title="წინა თავი">‹</button>
   <div class="nav-cur" id="cur"><b id="cur-l">„ვეფხისტყაოსანი“</b><span id="cur-t"></span></div>
   <button id="next" title="შემდეგი თავი">›</button>
@@ -196,8 +218,10 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   <button id="theme" title="ფერის რეჟიმი">🌓</button>
 </div></nav>
 <main class="wrap" style="padding-bottom:48px">
+<section id="home"><h2>სარჩევი</h2><div class="home-part"><h2 class="hp-h">დასაწყისი <small>სტროფები 1–32</small></h2><div class="home-grid"><a class="home-card" href="#ch-PROLOGUE"><span class="hc-e">📜</span><span class="hc-t">დასაწყისი (პროლოგი)</span></a></div></div><div class="home-part"><h2 class="hp-h"><span class="hp-n">ნაწილი 1</span>თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე <small>თავები I–V</small></h2><div class="home-grid"><a class="home-card" href="#ch-I"><span class="hc-e">👑</span><span class="hc-t"><b>I.</b> როსტევან მეფისაგან თინათინისა გამეფება</span></a><a class="home-card" href="#ch-II"><span class="hc-e">🐎</span><span class="hc-t"><b>II.</b> როსტევან მეფისაგან და ავთანდილისაგან ნადირობა</span></a><a class="home-card" href="#ch-III"><span class="hc-e">🐯</span><span class="hc-t"><b>III.</b> ნახვა არაბთა მეფისაგან მის ყმისა ვეფხისტყაოსნისა</span></a><a class="home-card" href="#ch-IV"><span class="hc-e">📞</span><span class="hc-t"><b>IV.</b> თინათინისაგან ავთანდილის გაგზავნა მის ყმის საძებრად</span></a><a class="home-card" href="#ch-V"><span class="hc-e">✉️</span><span class="hc-t"><b>V.</b> წიგნი ავთანდილისა თვის ყმათა თანა</span></a></div></div><div class="home-part"><h2 class="hp-h"><span class="hp-n">ნაწილი 2</span>ავთანდილის ძებნა და ტარიელთან შეხვედრა <small>თავები VI–VIII</small></h2><div class="home-grid"><a class="home-card" href="#ch-VI"><span class="hc-e">🥀</span><span class="hc-t"><b>VI.</b> ავთანდილისაგან მის ყმისა ძებნად წასლვა</span></a><a class="home-card" href="#ch-VII"><span class="hc-e">🌳</span><span class="hc-t"><b>VII.</b> ამბავი ავთანდილისა, ასმათს რომ ეუბნების ქვაბს შიგან</span></a><a class="home-card" href="#ch-VIII"><span class="hc-e">🤝</span><span class="hc-t"><b>VIII.</b> შეყრა ტარიელისა და ავთანდილისა</span></a></div></div><div class="home-part"><h2 class="hp-h"><span class="hp-n">ნაწილი 3</span>ტარიელის ამბავი <small>თავები IX–XXVIII</small></h2><div class="home-grid"><a class="home-card" href="#ch-IX"><span class="hc-e">👑</span><span class="hc-t"><b>IX.</b> ტარიელისაგან თავის ამბვის მბობა ავთანდილთანა</span></a><a class="home-card" href="#ch-X"><span class="hc-e">💖</span><span class="hc-t"><b>X.</b> ამბავი ტარიელის გამიჯნურებისა</span></a><a class="home-card" href="#ch-XI-XIII"><span class="hc-e">📜</span><span class="hc-t"><b>XI–XIII.</b> წერილები: ნესტანი, ტარიელი, ხატაელები</span></a><a class="home-card" href="#ch-XIV-XV"><span class="hc-e">😡</span><span class="hc-t"><b>XIV–XV.</b> პირველი პაემანი და ხატაელთა პასუხი</span></a><a class="home-card" href="#ch-XVI"><span class="hc-e">😡</span><span class="hc-t"><b>XVI.</b> ტარიელისა და ნესტანის პირის-პირ შეყრა</span></a><a class="home-card" href="#ch-XVII"><span class="hc-e">🛡️</span><span class="hc-t"><b>XVII.</b> ტარიელისგან ხატაეთს წასვლა და დიდი ომი</span></a><a class="home-card" href="#ch-XVIII"><span class="hc-e">🛡️</span><span class="hc-t"><b>XVIII.</b> წიგნი ტარიელისა ინდოთ მეფის წინაშე და გამარჯვებით შემოქცევა</span></a><a class="home-card" href="#ch-XIX-XXI"><span class="hc-e">🛡️</span><span class="hc-t"><b>XIX–XXI.</b> რიდე და სამკლავე</span></a><a class="home-card" href="#ch-XXII"><span class="hc-e">👑</span><span class="hc-t"><b>XXII.</b> რჩევა ნესტან-დარეჯანის გათხოვებისა</span></a><a class="home-card" href="#ch-XXIII"><span class="hc-e">😡</span><span class="hc-t"><b>XXIII.</b> ტარიელისა და ნესტან-დარეჯანის თათბირი და გამორჩევა</span></a><a class="home-card" href="#ch-XXIV"><span class="hc-e">⚔️</span><span class="hc-t"><b>XXIV.</b> ხვარაზმშას შვილის მოსლვა და მოკვლა</span></a><a class="home-card" href="#ch-XXV"><span class="hc-e">🚢</span><span class="hc-t"><b>XXV.</b> ნესტან-დარეჯანის დაკარგვა</span></a><a class="home-card" href="#ch-XXVI-XXVII"><span class="hc-e">🗺️</span><span class="hc-t"><b>XXVI–XXVII.</b> ნურადინ-ფრიდონი</span></a><a class="home-card" href="#ch-XXVIII"><span class="hc-e">🛶</span><span class="hc-t"><b>XXVIII.</b> ფრიდონისაგან ნესტან-დარეჯანის ამბვის მბობა</span></a></div></div><div class="home-part"><h2 class="hp-h"><span class="hp-n">ნაწილი 4</span>ავთანდილის ფიცი და მეორედ გაპარვა <small>თავები XXIX–XXXIX</small></h2><div class="home-grid"><a class="home-card" href="#ch-XXIX"><span class="hc-e">🤝</span><span class="hc-t"><b>XXIX.</b> ამბავი ავთანდილისა არაბეთს შექცევისა</span></a><a class="home-card" href="#ch-XXX"><span class="hc-e">🤝</span><span class="hc-t"><b>XXX.</b> დათხოვა ავთანდილისა – ვაზირის საუბარი</span></a><a class="home-card" href="#ch-XXXI"><span class="hc-e">🤝</span><span class="hc-t"><b>XXXI.</b> ავთანდილისაგან შერმადინის საუბარი</span></a><a class="home-card" href="#ch-XXXII-XXXIII"><span class="hc-e">🤝</span><span class="hc-t"><b>XXXII–XXXIII.</b> ავთანდილის ანდერძი და ლოცვა</span></a><a class="home-card" href="#ch-XXXIV"><span class="hc-e">📯</span><span class="hc-t"><b>XXXIV.</b> ცნობა როსტევან მეფისაგან ავთანდილის გაპარვისა</span></a><a class="home-card" href="#ch-XXXV"><span class="hc-e">⛰️</span><span class="hc-t"><b>XXXV.</b> წასლვა ავთანდილისაგან ტარიელის შეყრად მეორედ</span></a><a class="home-card" href="#ch-XXXVI"><span class="hc-e">🐅</span><span class="hc-t"><b>XXXVI.</b> პოვნა ავთანდილისაგან დაბნედილის ტარიელისა</span></a><a class="home-card" href="#ch-XXXVII"><span class="hc-e">🐅</span><span class="hc-t"><b>XXXVII.</b> მბობა ტარიელისგან ლომ-ვეფხთ დახოცისა</span></a><a class="home-card" href="#ch-XXXVIII"><span class="hc-e">🐅</span><span class="hc-t"><b>XXXVIII.</b> ქვაბს მისლვა და ასმათის ნახვა</span></a><a class="home-card" href="#ch-XXXIX"><span class="hc-e">🤝</span><span class="hc-t"><b>XXXIX.</b> წასლვა ავთანდილისგან ფრიდონისასა</span></a></div></div><div class="home-part"><h2 class="hp-h"><span class="hp-n">ნაწილი 5</span>ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები <small>თავები XL–LXI</small></h2><div class="home-grid"><a class="home-card" href="#ch-XL"><span class="hc-e">👑</span><span class="hc-t"><b>XL.</b> მისლვა ავთანდილისგან ფრიდონისასა</span></a><a class="home-card" href="#ch-XLI"><span class="hc-e">🌊</span><span class="hc-t"><b>XLI.</b> ნესტანის საძებრად და ქარავანთა შეყრა</span></a><a class="home-card" href="#ch-XLII"><span class="hc-e">🏴‍☠️</span><span class="hc-t"><b>XLII.</b> ამბავი ავთანდილისა გულანშაროს მისლვისა</span></a><a class="home-card" href="#ch-XLIII-XLIV"><span class="hc-e">💌</span><span class="hc-t"><b>XLIII–XLIV.</b> ფატმანის გამიჯნურება და მისი წიგნი</span></a><a class="home-card" href="#ch-XLV"><span class="hc-e">💌</span><span class="hc-t"><b>XLV.</b> წიგნი ავთანდილისა ფატმანს თანა</span></a><a class="home-card" href="#ch-XLVI"><span class="hc-e">📜</span><span class="hc-t"><b>XLVI.</b> ფატმანისაგან ნესტან-დარეჯანის ამბის მბობა</span></a><a class="home-card" href="#ch-XLVII"><span class="hc-e">⚔️</span><span class="hc-t"><b>XLVII.</b> ნესტანის ქაჯთაგან შეპყრობა</span></a><a class="home-card" href="#ch-XLVIII-XLIX"><span class="hc-e">✉️</span><span class="hc-t"><b>XLVIII–XLIX.</b> წიგნები ფატმანისა და ნესტანისა</span></a><a class="home-card" href="#ch-L"><span class="hc-e">✉️</span><span class="hc-t"><b>L.</b> წიგნი ნესტან-დარეჯანისა საყვარელსა თანა</span></a><a class="home-card" href="#ch-LI"><span class="hc-e">🦁</span><span class="hc-t"><b>LI.</b> წიგნი ავთანდილისა ფრიდონთანა</span></a><a class="home-card" href="#ch-LII"><span class="hc-e">🦁</span><span class="hc-t"><b>LII.</b> წასლვა ავთანდილისა გულანშაროთ და ტარიელის შეყრა</span></a><a class="home-card" href="#ch-LIII"><span class="hc-e">🔥</span><span class="hc-t"><b>LIII.</b> ტარიელისა და ავთანდილისგან წასლვა ფრიდონისასა</span></a><a class="home-card" href="#ch-LIV-LVI"><span class="hc-e">🔥</span><span class="hc-t"><b>LIV–LVI.</b> სამი თათბირი და ქაჯეთის აღება</span></a><a class="home-card" href="#ch-LVII"><span class="hc-e">💍</span><span class="hc-t"><b>LVII.</b> ტარიელისგან ზღვათა მეფისას მისლვა</span></a><a class="home-card" href="#ch-LVIII"><span class="hc-e">💍</span><span class="hc-t"><b>LVIII.</b> ქორწილი ტარიელისა და ნესტან-დარეჯანისა ფრიდონისაგან</span></a><a class="home-card" href="#ch-LIX"><span class="hc-e">💍</span><span class="hc-t"><b>LIX.</b> სამთაგანვე ქვაბსა მისლვა და მუნით არაბეთს წასლვა</span></a><a class="home-card" href="#ch-LX-LXI"><span class="hc-e">💍</span><span class="hc-t"><b>LX–LXI.</b> ქორწილი ავთანდილისა და დასასრული</span></a></div></div></section>
 <div class="block-banner" id="part-1"><div class="bb-n">პროლოგი</div>დასაწყისი<div class="bb-sub">სტროფები 1–32</div></div><section class="chapter" id="ch-PROLOGUE" data-label="დასაწყისი (პროლოგი)" data-title="დასაწყისი (პროლოგი)">
     <header class="ch-head">
+      <div class="ch-part">დასაწყისი</div>
       <div class="ch-num">დასაწყისი (პროლოგი)</div>
       <h2>დასაწყისი</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="P1–32" title="სტროფების ნახვა">1–32</button></div>
@@ -354,6 +378,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <div class="block-banner" id="part-2"><div class="bb-n">ნაწილი 1</div>თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე<div class="bb-sub">თავები I–V</div></div><section class="chapter" id="ch-I" data-label="თავი I" data-title="როსტევან მეფისაგან თინათინისა გამეფება">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 1 · თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე</div>
       <div class="ch-num">თავი I</div>
       <h2>როსტევან მეფისაგან თინათინისა გამეფება</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="32–71" title="სტროფების ნახვა">32–71</button></div>
@@ -508,6 +533,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-II" data-label="თავი II" data-title="როსტევან მეფისაგან და ავთანდილისაგან ნადირობა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 1 · თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე</div>
       <div class="ch-num">თავი II</div>
       <h2>როსტევან მეფისაგან და ავთანდილისაგან ნადირობა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="72–83" title="სტროფების ნახვა">72–83</button></div>
@@ -541,6 +567,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-III" data-label="თავი III" data-title="ნახვა არაბთა მეფისაგან მის ყმისა ვეფხისტყაოსნისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 1 · თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე</div>
       <div class="ch-num">თავი III</div>
       <h2>ნახვა არაბთა მეფისაგან მის ყმისა ვეფხისტყაოსნისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="84–119" title="სტროფების ნახვა">84–119</button></div>
@@ -612,6 +639,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-IV" data-label="თავი IV" data-title="თინათინისაგან ავთანდილის გაგზავნა მის ყმის საძებრად">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 1 · თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე</div>
       <div class="ch-num">თავი IV</div>
       <h2>თინათინისაგან ავთანდილის გაგზავნა მის ყმის საძებრად</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="120–164" title="სტროფების ნახვა">120–164</button></div>
@@ -758,6 +786,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-V" data-label="თავი V" data-title="წიგნი ავთანდილისა თვის ყმათა თანა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 1 · თინათინის გამეფებიდან ავთანდილის გამგზავრებამდე</div>
       <div class="ch-num">თავი V</div>
       <h2>წიგნი ავთანდილისა თვის ყმათა თანა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="165–176" title="სტროფების ნახვა">165–176</button></div>
@@ -804,6 +833,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <div class="block-banner" id="part-3"><div class="bb-n">ნაწილი 2</div>ავთანდილის ძებნა და ტარიელთან შეხვედრა<div class="bb-sub">თავები VI–VIII</div></div><section class="chapter" id="ch-VI" data-label="თავი VI" data-title="ავთანდილისაგან მის ყმისა ძებნად წასლვა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 2 · ავთანდილის ძებნა და ტარიელთან შეხვედრა</div>
       <div class="ch-num">თავი VI</div>
       <h2>ავთანდილისაგან მის ყმისა ძებნად წასლვა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="177–229" title="სტროფების ნახვა">177–229</button></div>
@@ -921,6 +951,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-VII" data-label="თავი VII" data-title="ამბავი ავთანდილისა, ასმათს რომ ეუბნების ქვაბს შიგან">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 2 · ავთანდილის ძებნა და ტარიელთან შეხვედრა</div>
       <div class="ch-num">თავი VII</div>
       <h2>ამბავი ავთანდილისა, ასმათს რომ ეუბნების ქვაბს შიგან</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="230–279" title="სტროფების ნახვა">230–279</button></div>
@@ -1029,6 +1060,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-VIII" data-label="თავი VIII" data-title="შეყრა ტარიელისა და ავთანდილისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 2 · ავთანდილის ძებნა და ტარიელთან შეხვედრა</div>
       <div class="ch-num">თავი VIII</div>
       <h2>შეყრა ტარიელისა და ავთანდილისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="280–309" title="სტროფების ნახვა">280–309</button></div>
@@ -1140,6 +1172,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <div class="block-banner" id="part-4"><div class="bb-n">ნაწილი 3</div>ტარიელის ამბავი<div class="bb-sub">თავები IX–XXVIII</div></div><section class="chapter" id="ch-IX" data-label="თავი IX" data-title="ტარიელისაგან თავის ამბვის მბობა ავთანდილთანა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი IX</div>
       <h2>ტარიელისაგან თავის ამბვის მბობა ავთანდილთანა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="310–339" title="სტროფების ნახვა">310–339</button></div>
@@ -1196,6 +1229,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-X" data-label="თავი X" data-title="ამბავი ტარიელის გამიჯნურებისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი X</div>
       <h2>ამბავი ტარიელის გამიჯნურებისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="340–375" title="სტროფების ნახვა">340–375</button></div>
@@ -1245,6 +1279,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XI-XIII" data-label="თავები XI–XIII" data-title="წერილები: ნესტანი, ტარიელი, ხატაელები">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავები XI–XIII</div>
       <h2>წერილები: ნესტანი, ტარიელი, ხატაელები</h2><ul class="ch-titles"><li>წიგნი ნესტან-დარეჯანისა საყვარელსა თანა მიწერილი პირველი</li><li>წიგნი ტარიელისა საყვარელთანა</li><li>წიგნი ტარიელისა ხატაელთანა</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="376–390" title="სტროფების ნახვა">376–390</button></div>
@@ -1288,6 +1323,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XIV-XV" data-label="თავები XIV–XV" data-title="პირველი პაემანი და ხატაელთა პასუხი">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავები XIV–XV</div>
       <h2>პირველი პაემანი და ხატაელთა პასუხი</h2><ul class="ch-titles"><li>ნესტანისაგან ტარიელის ხმობა</li><li>წიგნი ხატაელთა მეფისა, ტარიელის წინაშე მიწერილი პასუხად</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="391–405" title="სტროფების ნახვა">391–405</button></div>
@@ -1313,6 +1349,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XVI" data-label="თავი XVI" data-title="ტარიელისა და ნესტანის პირის-პირ შეყრა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XVI</div>
       <h2>ტარიელისა და ნესტანის პირის-პირ შეყრა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="406–419" title="სტროფების ნახვა">406–419</button></div>
@@ -1348,6 +1385,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XVII" data-label="თავი XVII" data-title="ტარიელისგან ხატაეთს წასვლა და დიდი ომი">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XVII</div>
       <h2>ტარიელისგან ხატაეთს წასვლა და დიდი ომი</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="420–462" title="სტროფების ნახვა">420–462</button></div>
@@ -1427,6 +1465,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XVIII" data-label="თავი XVIII" data-title="წიგნი ტარიელისა ინდოთ მეფის წინაშე და გამარჯვებით შემოქცევა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XVIII</div>
       <h2>წიგნი ტარიელისა ინდოთ მეფის წინაშე და გამარჯვებით შემოქცევა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="463–489" title="სტროფების ნახვა">463–489</button></div>
@@ -1473,6 +1512,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XIX-XXI" data-label="თავები XIX–XXI" data-title="რიდე და სამკლავე">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავები XIX–XXI</div>
       <h2>რიდე და სამკლავე</h2><ul class="ch-titles"><li>წიგნი ნესტან-დარეჯანისა საყვარელსა თანა</li><li>ტარიელის ტირილი და დაბნედა</li><li>წიგნი ტარიელისა საყვარელსა თანა პასუხად</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="490–506" title="სტროფების ნახვა">490–506</button></div>
@@ -1493,6 +1533,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXII" data-label="თავი XXII" data-title="რჩევა ნესტან-დარეჯანის გათხოვებისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XXII</div>
       <h2>რჩევა ნესტან-დარეჯანის გათხოვებისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="507–516" title="სტროფების ნახვა">507–516</button></div>
@@ -1533,6 +1574,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXIII" data-label="თავი XXIII" data-title="ტარიელისა და ნესტან-დარეჯანის თათბირი და გამორჩევა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XXIII</div>
       <h2>ტარიელისა და ნესტან-დარეჯანის თათბირი და გამორჩევა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="517–547" title="სტროფების ნახვა">517–547</button></div>
@@ -1678,6 +1720,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXIV" data-label="თავი XXIV" data-title="ხვარაზმშას შვილის მოსლვა და მოკვლა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XXIV</div>
       <h2>ხვარაზმშას შვილის ინდოეთს მოსლვა საქორწილოდ და ტარიელისაგან მისი მოკვლა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="548–566" title="სტროფების ნახვა">548–566</button></div>
@@ -1771,6 +1814,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXV" data-label="თავი XXV" data-title="ნესტან-დარეჯანის დაკარგვა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XXV</div>
       <h2>ამბვის ცნობა ტარიელისაგან ნესტან-დარეჯანის დაკარგვისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="567–590" title="სტროფების ნახვა">567–590</button></div>
@@ -1855,6 +1899,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXVI-XXVII" data-label="თავები XXVI–XXVII" data-title="ნურადინ-ფრიდონი">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავები XXVI–XXVII</div>
       <h2>ნურადინ-ფრიდონი</h2><ul class="ch-titles"><li>ამბავი ნურადინ-ფრიდონისა, ოდეს ტარიელ შეეყარა</li><li>შველა ტარიელისაგან ფრიდონისა</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="591–621" title="სტროფების ნახვა">591–621</button></div>
@@ -1895,6 +1940,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXVIII" data-label="თავი XXVIII" data-title="ფრიდონისაგან ნესტან-დარეჯანის ამბვის მბობა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 3 · ტარიელის ამბავი</div>
       <div class="ch-num">თავი XXVIII</div>
       <h2>ფრიდონისაგან ნესტან-დარეჯანის ამბვის მბობა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="622–671" title="სტროფების ნახვა">622–671</button></div>
@@ -1970,6 +2016,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <div class="block-banner" id="part-5"><div class="bb-n">ნაწილი 4</div>ავთანდილის ფიცი და მეორედ გაპარვა<div class="bb-sub">თავები XXIX–XXXIX</div></div><section class="chapter" id="ch-XXIX" data-label="თავი XXIX" data-title="ამბავი ავთანდილისა არაბეთს შექცევისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXIX</div>
       <h2>ამბავი ავთანდილისა არაბეთს შექცევისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="672–727" title="სტროფების ნახვა">672–727</button></div>
@@ -2083,6 +2130,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXX" data-label="თავი XXX" data-title="დათხოვა ავთანდილისა – ვაზირის საუბარი">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXX</div>
       <h2>დათხოვა ავთანდილისა როსტევან მეფესთანა – ვაზირის საუბარი</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="728–773" title="სტროფების ნახვა">728–773</button></div>
@@ -2214,6 +2262,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXI" data-label="თავი XXXI" data-title="ავთანდილისაგან შერმადინის საუბარი">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXI</div>
       <h2>ავთანდილისაგან შერმადინის საუბარი</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="774–787" title="სტროფების ნახვა">774–787</button></div>
@@ -2238,6 +2287,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXII-XXXIII" data-label="თავები XXXII–XXXIII" data-title="ავთანდილის ანდერძი და ლოცვა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავები XXXII–XXXIII</div>
       <h2>ავთანდილის ანდერძი და ლოცვა</h2><ul class="ch-titles"><li>ავთანდილის ანდერძი</li><li>ლოცვა ავთანდილისა</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="788–812" title="სტროფების ნახვა">788–812</button></div>
@@ -2349,6 +2399,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXIV" data-label="თავი XXXIV" data-title="ცნობა როსტევან მეფისაგან ავთანდილის გაპარვისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXIV</div>
       <h2>ცნობა როსტევან მეფისაგან ავთანდილის გაპარვისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="813–829" title="სტროფების ნახვა">813–829</button></div>
@@ -2392,6 +2443,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXV" data-label="თავი XXXV" data-title="წასლვა ავთანდილისაგან ტარიელის შეყრად მეორედ">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXV</div>
       <h2>წასლვა ავთანდილისაგან ტარიელის შეყრად მეორედ</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="830–865" title="სტროფების ნახვა">830–865</button></div>
@@ -2479,6 +2531,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXVI" data-label="თავი XXXVI" data-title="პოვნა ავთანდილისაგან დაბნედილის ტარიელისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXVI</div>
       <h2>პოვნა ავთანდილისაგან დაბნედილის ტარიელისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="866–905" title="სტროფების ნახვა">866–905</button></div>
@@ -2620,6 +2673,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXVII" data-label="თავი XXXVII" data-title="მბობა ტარიელისგან ლომ-ვეფხთ დახოცისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXVII</div>
       <h2>მბობა ტარიელისგან ლომ-ვეფხთ დახოცისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="906–915" title="სტროფების ნახვა">906–915</button></div>
@@ -2649,6 +2703,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXVIII" data-label="თავი XXXVIII" data-title="ქვაბს მისლვა და ასმათის ნახვა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXVIII</div>
       <h2>ტარიელისაგან და ავთანდილისგან ქვაბს მისლვა და ასმათის ნახვა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="916–950" title="სტროფების ნახვა">916–950</button></div>
@@ -2688,6 +2743,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XXXIX" data-label="თავი XXXIX" data-title="წასლვა ავთანდილისგან ფრიდონისასა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 4 · ავთანდილის ფიცი და მეორედ გაპარვა</div>
       <div class="ch-num">თავი XXXIX</div>
       <h2>წასლვა ავთანდილისგან ფრიდონისასა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="951–967" title="სტროფების ნახვა">951–967</button></div>
@@ -2723,6 +2779,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <div class="block-banner" id="part-6"><div class="bb-n">ნაწილი 5</div>ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები<div class="bb-sub">თავები XL–LXI</div></div><section class="chapter" id="ch-XL" data-label="თავი XL" data-title="მისლვა ავთანდილისგან ფრიდონისასა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი XL</div>
       <h2>მისლვა ავთანდილისგან ფრიდონისასა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="968–1023" title="სტროფების ნახვა">968–1023</button></div>
@@ -2770,6 +2827,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLI" data-label="თავი XLI" data-title="ნესტანის საძებრად და ქარავანთა შეყრა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი XLI</div>
       <h2>წასლვა ავთანდილისგან ნესტან-დარეჯანის საძებრად და ქარავანთა შეყრა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1024–1059" title="სტროფების ნახვა">1024–1059</button></div>
@@ -2852,6 +2910,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLII" data-label="თავი XLII" data-title="ამბავი ავთანდილისა გულანშაროს მისლვისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი XLII</div>
       <h2>ამბავი ავთანდილისა გულანშაროს მისლვისა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1060–1079" title="სტროფების ნახვა">1060–1079</button></div>
@@ -2905,6 +2964,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLIII-XLIV" data-label="თავები XLIII–XLIV" data-title="ფატმანის გამიჯნურება და მისი წიგნი">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავები XLIII–XLIV</div>
       <h2>ფატმანის გამიჯნურება და მისი წიგნი</h2><ul class="ch-titles"><li>ფატმანისგან ავთანდილის გამიჯნურება</li><li>წიგნი ფატმანისა ავთანდილს თანა სამიჯნურო</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1080–1093" title="სტროფების ნახვა">1080–1093</button></div>
@@ -2960,6 +3020,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLV" data-label="თავი XLV" data-title="წიგნი ავთანდილისა ფატმანს თანა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი XLV</div>
       <h2>წიგნი ავთანდილისა ფატმანს თანა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1094–1119" title="სტროფების ნახვა">1094–1119</button></div>
@@ -3035,6 +3096,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLVI" data-label="თავი XLVI" data-title="ფატმანისაგან ნესტან-დარეჯანის ამბის მბობა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი XLVI</div>
       <h2>ფატმანისაგან ნესტან-დარეჯანის ამბის მბობა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1120–1211" title="სტროფების ნახვა">1120–1211</button></div>
@@ -3153,6 +3215,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLVII" data-label="თავი XLVII" data-title="ნესტანის ქაჯთაგან შეპყრობა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი XLVII</div>
       <h2>ამბავი ნესტან-დარეჯანის ქაჯთაგან შეპყრობისა ფატმანისგან მბობა ავთანდილთანა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1212–1268" title="სტროფების ნახვა">1212–1268</button></div>
@@ -3221,6 +3284,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-XLVIII-XLIX" data-label="თავები XLVIII–XLIX" data-title="წიგნები ფატმანისა და ნესტანისა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავები XLVIII–XLIX</div>
       <h2>წიგნები ფატმანისა და ნესტანისა</h2><ul class="ch-titles"><li>წიგნი ფატმანისა ნესტან-დარეჯანს თანა</li><li>წიგნი ნესტან-დარეჯანისა ფატმანს თანა</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1269–1290" title="სტროფების ნახვა">1269–1290</button></div>
@@ -3246,6 +3310,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-L" data-label="თავი L" data-title="წიგნი ნესტან-დარეჯანისა საყვარელსა თანა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი L</div>
       <h2>წიგნი ნესტან-დარეჯანისა საყვარელსა თანა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1291–1316" title="სტროფების ნახვა">1291–1316</button></div>
@@ -3282,6 +3347,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LI" data-label="თავი LI" data-title="წიგნი ავთანდილისა ფრიდონთანა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი LI</div>
       <h2>წიგნი ავთანდილისა ფრიდონთანა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1317–1325" title="სტროფების ნახვა">1317–1325</button></div>
@@ -3311,6 +3377,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LII" data-label="თავი LII" data-title="წასლვა ავთანდილისა გულანშაროთ და ტარიელის შეყრა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი LII</div>
       <h2>წასლვა ავთანდილისა გულანშაროთ და ტარიელის შეყრა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1326–1371" title="სტროფების ნახვა">1326–1371</button></div>
@@ -3368,6 +3435,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LIII" data-label="თავი LIII" data-title="ტარიელისა და ავთანდილისგან წასლვა ფრიდონისასა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი LIII</div>
       <h2>ტარიელისა და ავთანდილისგან წასლვა ფრიდონისასა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1372–1390" title="სტროფების ნახვა">1372–1390</button></div>
@@ -3398,6 +3466,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LIV-LVI" data-label="თავები LIV–LVI" data-title="სამი თათბირი და ქაჯეთის აღება">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავები LIV–LVI</div>
       <h2>სამი თათბირი და ქაჯეთის აღება</h2><ul class="ch-titles"><li>თათბირი ნურადინ-ფრიდონისა</li><li>თათბირი ავთანდილისა</li><li>თათბირი ტარიელისა</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1391–1425" title="სტროფების ნახვა">1391–1425</button></div>
@@ -3434,6 +3503,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LVII" data-label="თავი LVII" data-title="ტარიელისგან ზღვათა მეფისას მისლვა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი LVII</div>
       <h2>ტარიელისგან ზღვათა მეფისას მისლვა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1426–1460" title="სტროფების ნახვა">1426–1460</button></div>
@@ -3468,6 +3538,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LVIII" data-label="თავი LVIII" data-title="ქორწილი ტარიელისა და ნესტან-დარეჯანისა ფრიდონისაგან">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი LVIII</div>
       <h2>ქორწილი ტარიელისა და ნესტან-დარეჯანისა ფრიდონისაგან</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1461–1489" title="სტროფების ნახვა">1461–1489</button></div>
@@ -3497,6 +3568,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LIX" data-label="თავი LIX" data-title="სამთაგანვე ქვაბსა მისლვა და მუნით არაბეთს წასლვა">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავი LIX</div>
       <h2>სამთაგანვე ქვაბსა მისლვა და მუნით არაბეთს წასლვა</h2>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1490–1546" title="სტროფების ნახვა">1490–1546</button></div>
@@ -3531,6 +3603,7 @@ footer{text-align:center;color:var(--muted);font-size:13px;padding:24px 16px 48p
   </section>
 <section class="chapter" id="ch-LX-LXI" data-label="თავები LX–LXI" data-title="ქორწილი ავთანდილისა და დასასრული">
     <header class="ch-head">
+      <div class="ch-part">ნაწილი 5 · ნესტანის ძებნა, ქაჯეთის აღება და ქორწილები</div>
       <div class="ch-num">თავები LX–LXI</div>
       <h2>ქორწილი ავთანდილისა და დასასრული</h2><ul class="ch-titles"><li>ქორწილი ავთანდილისა და თინათინისა არაბთა მეფისაგან</li><li>დასასრული</li></ul>
       <div class="ch-range">სტროფები <button class="stz light" data-s="1547–1597" title="სტროფების ნახვა">1547–1597</button></div>
@@ -3591,36 +3664,42 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getE
 const toc=document.getElementById('toc');
 toc.addEventListener('click',e=>{ if(e.target===toc) toc.close(); });
 
-// chapter navigation
+// chapter navigation: one chapter at a time, home = big table of contents
 const chs=[...document.querySelectorAll('.chapter')];
-const nav=document.querySelector('.nav');
 const tocLinks=[...toc.querySelectorAll('.toc-grid a')];
 let cur=-1;
-function goTo(i){ if(i<0||i>=chs.length) return;
-  const y=chs[i].getBoundingClientRect().top+window.scrollY-nav.offsetHeight-10;
-  window.scrollTo({top:y,behavior:'smooth'}); }
-function update(){
-  const line=nav.offsetHeight+40; let i=-1;
-  for(let k=0;k<chs.length;k++){ if(chs[k].getBoundingClientRect().top<=line) i=k; else break; }
-  if(i===cur) return; cur=i;
+chs.forEach((c,i)=>{ const f=document.createElement('div'); f.className='ch-foot';
+  f.innerHTML=`<button data-go="${i-1}" ${i===0?'disabled':''}>‹ წინა თავი</button><button data-home>📑 სარჩევი</button><button class="primary" data-go="${i+1}" ${i===chs.length-1?'disabled':''}>შემდეგი თავი ›</button>`;
+  c.appendChild(f); });
+function render(){
+  const id=decodeURIComponent(location.hash.slice(1)); const i=chs.findIndex(c=>c.id===id);
+  cur=i; document.body.classList.toggle('reading', i>=0);
+  chs.forEach((c,k)=>c.classList.toggle('on',k===i));
   document.getElementById('cur-l').textContent = i<0 ? '„ვეფხისტყაოსანი“' : chs[i].dataset.label;
-  document.getElementById('cur-t').textContent = i<0 ? '' : chs[i].dataset.title;
+  document.getElementById('cur-t').textContent = i<0 ? 'სარჩევი' : chs[i].dataset.title;
   document.getElementById('prev').disabled = i<=0;
   document.getElementById('next').disabled = i>=chs.length-1;
+  document.getElementById('home-btn').disabled = i<0;
   tocLinks.forEach((l,k)=>l.classList.toggle('on',k===i));
+  window.scrollTo(0,0);
 }
-let ticking=false;
-window.addEventListener('scroll',()=>{ if(!ticking){ ticking=true; requestAnimationFrame(()=>{ticking=false;update();}); } },{passive:true});
-window.addEventListener('resize',update); update();
+function goTo(i){ if(i<0||i>=chs.length) return; location.hash=chs[i].id; }
+function goHome(){ history.pushState(null,'',location.pathname+location.search); render(); }
+window.addEventListener('hashchange',render);
+window.addEventListener('popstate',render);
+render();
+document.addEventListener('click',e=>{ const g=e.target.closest('[data-go]'); if(g){ goTo(+g.dataset.go); return; }
+  if(e.target.closest('[data-home]')) goHome(); });
+document.getElementById('home-btn').onclick=goHome;
 document.getElementById('prev').onclick=()=>goTo(cur-1);
-document.getElementById('next').onclick=()=>goTo(Math.max(cur+1,0));
+document.getElementById('next').onclick=()=>goTo(cur+1);
 const openToc=()=>{ toc.showModal(); const on=toc.querySelector('a.on'), box=toc.querySelector('.dlg-b'); if(on) box.scrollTop=Math.max(0,on.offsetTop-box.clientHeight/2); };
 document.getElementById('toc-btn').onclick=openToc;
 document.getElementById('cur').onclick=openToc;
 tocLinks.forEach((l,k)=>l.onclick=e=>{ e.preventDefault(); toc.close(); goTo(k); });
 document.addEventListener('keydown',e=>{ if(dlg.open||toc.open||e.target.matches('input,textarea')) return;
-  if(e.key==='ArrowRight'){ e.preventDefault(); goTo(Math.max(cur+1,0)); }
-  if(e.key==='ArrowLeft'){ e.preventDefault(); goTo(cur-1); } });
+  if(e.key==='ArrowRight'){ e.preventDefault(); goTo(cur+1); }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); if(cur>0) goTo(cur-1); } });
 
 // theme toggle
 const root=document.documentElement;
