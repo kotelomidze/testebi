@@ -218,12 +218,23 @@ dialog::backdrop{background:rgba(15,23,42,.45)}
 @media (max-width:600px){.qa-a{margin-left:0}}
 
 /* toggle for hiding/showing blue glossary highlights in Old Georgian text */
-.gw-toggle{border:1px solid color-mix(in srgb,var(--indigo) 35%,transparent);border-radius:8px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;background:var(--indigo-50);color:var(--indigo-d);transition:background .15s,color .15s}
-.gw-toggle:hover{background:var(--indigo);color:#fff}
+.gw-toggle,.arch-toggle{border:1px solid color-mix(in srgb,var(--indigo) 35%,transparent);border-radius:8px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:600;cursor:pointer;background:var(--indigo-50);color:var(--indigo-d);transition:background .15s,color .15s}
+.gw-toggle:hover,.arch-toggle:hover{background:var(--indigo);color:#fff}
 .gw-toggle.off{background:var(--card);color:var(--muted);border-color:var(--line)}
+.arch-toggle{background:var(--amber-50);color:var(--amber-d);border-color:color-mix(in srgb,var(--amber) 45%,transparent)}
+.arch-toggle:hover,.arch-toggle.on{background:var(--amber);color:#fff;border-color:var(--amber)}
 #dlg-b.gw-plain .gw{font-weight:400;color:inherit;border-bottom:0;padding:0;background:transparent;cursor:text}
 #dlg-b.gw-plain .gw:hover,#dlg-b.gw-plain .gw:focus-visible{background:transparent}
 #dlg-b.gw-plain .gw-note{display:none!important}
+
+/* Old Georgian letters reference box in modal */
+.arch-box{display:none;margin:0 0 14px;padding:12px 14px;background:var(--amber-50);border:1px solid color-mix(in srgb,var(--amber) 45%,transparent);border-left:4px solid var(--amber);border-radius:12px;color:var(--ink)}
+.arch-box.open{display:block}
+.arch-box-h{display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:14px;color:var(--amber-d);margin-bottom:8px}
+.arch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px}
+.arch-item{display:flex;align-items:center;gap:10px;padding:7px 10px;background:var(--card);border:1px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.35}
+.arch-let{flex:none;width:34px;height:34px;border-radius:8px;background:var(--indigo);color:#fff;font-family:'Noto Serif Georgian',serif;font-size:20px;font-weight:700;display:grid;place-items:center}
+.arch-item small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 
 /* home + single-chapter view */
 #home{background:var(--card);border-radius:20px;box-shadow:0 20px 25px -5px rgba(0,0,0,.08);padding:28px 28px 30px;margin:8px 0 32px}
@@ -389,6 +400,7 @@ function toggleGw(gw){
   gw.insertAdjacentElement('afterend', note);
 }
 let gwShow = true;
+let archOpen = false;
 try { const savedGw = localStorage.getItem('abo-gw'); if (savedGw === '0') gwShow = false; } catch(err) {}
 function showStanzas(spec){
   const pro = spec.startsWith('P'), off = pro ? 1 : 0, sp = spec.replace(/^P/,'');
@@ -400,7 +412,17 @@ function showStanzas(spec){
   const dlgB = document.getElementById('dlg-b');
   dlgB.classList.toggle('gw-plain', !gwShow);
   dlgB.innerHTML =
-    (anyPar ? `<div class="par-bar"><button class="par-all">${parAll ? '📖 თარგმანის დამალვა' : '📖 თარგმანის ჩვენება'}</button><button type="button" class="gw-toggle${gwShow ? '' : ' off'}" title="განმარტებული სიტყვების გალურჯების ჩართვა/გამორთვა">${gwShow ? '📘 ლექსიკონის მონიშვნის დამალვა' : '📘 ლექსიკონის მონიშვნის ჩვენება'}</button>${gwShow ? '<span class="gw-hint">💡 დააწკაპეთ ლურჯ სიტყვებს განმარტებისთვის</span>' : ''}</div>` : '') +
+    (anyPar ? `<div class="par-bar"><button class="par-all">${parAll ? '📖 თარგმანის დამალვა' : '📖 თარგმანის ჩვენება'}</button><button type="button" class="gw-toggle${gwShow ? '' : ' off'}" title="განმარტებული სიტყვების გალურჯების ჩართვა/გამორთვა">${gwShow ? '📘 ლექსიკონის მონიშვნის დამალვა' : '📘 ლექსიკონის მონიშვნის ჩვენება'}</button><button type="button" class="arch-toggle${archOpen ? ' on' : ''}" title="ძველი ქართული ასოების განმარტება">🔤 ძველი ასოები (ჴ, ჳ, ჲ, ჱ, ჵ)</button>${gwShow ? '<span class="gw-hint">💡 დააწკაპეთ ლურჯ სიტყვებს განმარტებისთვის</span>' : ''}</div>` : '') +
+    `<div class="arch-box${archOpen ? ' open' : ''}">
+      <div class="arch-box-h"><span>🔤 ძველი ქართული ასოების წაკითხვა</span></div>
+      <div class="arch-grid">
+        <div class="arch-item"><span class="arch-let">ჴ</span><div><b>ხარი</b> – წაიკითხეთ როგორც <b>ხ</b><small>მაგ.: ჴელი → ხელი, ფერჴი → ფეხი</small></div></div>
+        <div class="arch-item"><span class="arch-let">ჳ</span><div><b>ვიე</b> – წაიკითხეთ როგორც <b>ვ</b> ან <b>ვი</b><small>მაგ.: თჳსი → თვისი, მახჳლი → მახვილი</small></div></div>
+        <div class="arch-item"><span class="arch-let">ჲ</span><div><b>იოტი</b> – წაიკითხეთ როგორც <b>ი</b><small>მაგ.: წამებაჲ → წამებაი, ძმაჲ → ძმაი</small></div></div>
+        <div class="arch-item"><span class="arch-let">ჱ</span><div><b>ე-მერვე</b> – წაიკითხეთ როგორც <b>ე</b> ან <b>ეი</b><small>მაგ.: ძჱ → ძე, ქრისტჱსი → ქრისტესი</small></div></div>
+        <div class="arch-item"><span class="arch-let">ჵ</span><div><b>ჰოე</b> – წაიკითხეთ როგორც <b>ჰოი, ო, ოი</b><small>მაგ.: ჵ → ჰოი!</small></div></div>
+      </div>
+    </div>` +
     nums.map(n => { const k = n - off; if (!ST[k]) return `<div class="st"><div class="st-n">${pro ? 0 : n}</div><pre>– ამ გამოცემაში არ არის –</pre></div>`;
       const p = PAR[k];
       return `<div class="st${parAll ? ' par-open' : ''}"><div class="st-n">${pro ? 0 : n}${p ? '<button class="par-one" title="თანამედროვე ქართული თარგმანი">📖</button>' : ''}</div><pre>${ST[k].join('\n\n')}</pre>${p ? `<div class="par">${escH(p)}</div>` : ''}</div>`; }).join('');
@@ -410,6 +432,15 @@ document.addEventListener('click', e => {
   const s = e.target.closest('.stz');
   if (s){ e.preventDefault(); e.stopPropagation(); if (s.dataset.p) showParallel(s.dataset.p); else showStanzas(s.dataset.s); return; }
   if (e.target === dlg) dlg.close();
+  const art = e.target.closest('.arch-toggle');
+  if (art) {
+    e.stopPropagation();
+    archOpen = !archOpen;
+    art.classList.toggle('on', archOpen);
+    const box = document.querySelector('#dlg-b .arch-box');
+    if (box) box.classList.toggle('open', archOpen);
+    return;
+  }
   const gwt = e.target.closest('.gw-toggle');
   if (gwt) {
     e.stopPropagation();
@@ -425,7 +456,8 @@ document.addEventListener('click', e => {
     gwt.textContent = gwShow ? '📘 ლექსიკონის მონიშვნის დამალვა' : '📘 ლექსიკონის მონიშვნის ჩვენება';
     const hint = dlgB.querySelector('.gw-hint');
     if (gwShow && !hint) {
-      gwt.insertAdjacentHTML('afterend', '<span class="gw-hint">💡 დააწკაპეთ ლურჯ სიტყვებს განმარტებისთვის</span>');
+      const archBtn = dlgB.querySelector('.arch-toggle') || gwt;
+      archBtn.insertAdjacentHTML('afterend', '<span class="gw-hint">💡 დააწკაპეთ ლურჯ სიტყვებს განმარტებისთვის</span>');
     } else if (!gwShow && hint) {
       hint.remove();
     }
