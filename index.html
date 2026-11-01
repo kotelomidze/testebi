@@ -125,6 +125,14 @@
   .modal-box h3{font-family:var(--serif);margin:0 0 8px;font-size:1.3rem}
   .modal-box p{margin:0 0 20px;color:var(--muted)}
   .modal-actions{display:flex;gap:10px;justify-content:flex-end}
+  /* წინადადებების რედაქტირება (ვარჯიში): დავალებაში დამატება */
+  .vjbox{border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:12px 14px;margin:10px 0}
+  .vjbox h4{margin:0 0 4px;font-size:1rem}
+  .vjbox .vjrow{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
+  .vjbox .vjrow span{min-width:0;overflow-wrap:anywhere;font-size:.95rem}
+  .vjbox .vjrow button{flex:0 0 auto}
+  .vjmodal{position:fixed;inset:0;z-index:30;background:rgba(27,36,51,.55);display:flex;padding:12px}
+  .vjmodal iframe{flex:1;border:0;border-radius:12px;background:#f8fafc;width:100%}
   .modal-actions .btn{flex:1 1 0;padding:12px 10px}
   .count{color:var(--muted);font-size:.95rem;margin-top:14px;text-align:center}
 
@@ -361,6 +369,12 @@
           </div>
           <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
           <div id="vis-tree" class="vis"></div>
+          <div class="vjbox" id="vj-box">
+            <h4>წინადადებების რედაქტირება (ვარჯიში)</h4>
+            <p class="lead" style="margin:0 0 8px;font-size:.9rem">შეცდომის ტიპები, წყარო და წინადადებების რაოდენობა — ცალკე ფანჯარაში. შეგიძლია რამდენიმე სხვადასხვა ვარჯიში დაამატო.</p>
+            <div id="vj-list"></div>
+            <button type="button" class="btn ghost" id="vj-add" style="margin-top:8px">+ ვარჯიშის დამატება</button>
+          </div>
           <div class="row vis-save">
             <button class="btn" id="as-give">მიცემა</button>
             <button class="btn ghost" id="as-cancel">გაუქმება</button>
@@ -649,7 +663,7 @@ function inSet(k, set){
   const any = f => { for(const x of set) if(f(x)) return true; return false; };
   if(k.indexOf("m:") === 0){
     const c = k.slice(2);
-    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph") return any(x => x.indexOf(c + ":") === 0);
+    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph" || c === "vj") return any(x => x.indexOf(c + ":") === 0);
     if(c === "tema") return any(x => /^tema:[^:]+$/.test(x));
     if(c === "mit") return any(x => /^tema:.+:mit$/.test(x));
     if(MAT_DIR[c]) return MATERIALS.some(m => m.cat === c && set.has("mat:" + m.id));
@@ -965,6 +979,20 @@ function joinItems(set, notes){
   Object.keys(notes || {}).forEach(k => { const v = String(notes[k] || "").replace(/\s+/g, " ").trim().slice(0, 120); if(v && set.has(k)) out.push(NOTE + k + "|" + v); });
   return out;
 }
+/* წინადადებების რედაქტირება (ვარჯიში): დავალება = „vj:“ + პარამეტრები (როგორც ვარჯიშის ბმულში) */
+let VJ_META = null;
+async function vjMeta(){ if(!VJ_META){ try{ VJ_META = JSON.parse(await fetchText("varjishi/meta.json")); }catch(e){ VJ_META = { types:[], it:[], mt:{} }; } } return VJ_META; }
+function vjLabel(cfg){
+  const p = {}; String(cfg).split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); });
+  const T = (VJ_META && VJ_META.types) || [], sel = new Set();
+  if(p.a === "1") T.forEach(t => sel.add(t.i));
+  String(p.t || "").split(".").forEach(x => { if(x !== "") sel.add(+x); });
+  let cnt = 0; String(p.q || "").split(".").forEach(x => { const ab = x.split(":"); if(ab[0] !== "" && +ab[1] > 0){ sel.add(+ab[0]); cnt += +ab[1]; } });
+  const names = T.filter(t => sel.has(t.i)).map(t => t.l);
+  const n = p.q ? cnt + " წინადადება" : (+p.n > 0 ? p.n + " წინადადება" : "ყველა წინადადება");
+  return n + " · " + (p.s === "m" ? "მოდელირებული" : "გამოცდის ტექსტები") + " · " +
+    (p.a === "1" ? "ყველა ტიპი" : names.slice(0, 3).join("; ") + (names.length > 3 ? " და კიდევ " + (names.length - 3) : ""));
+}
 async function actsFor(set, mats){
   if(!STUDENT_BASE) STUDENT_BASE = (await visCatalog([])).filter(n => !/^m:(books|pres|mat)$/.test(n.key));
   const keepM = MATERIALS; if(mats) MATERIALS = mats;   // inSet-ის მასალების შემოწმებისთვის (მასწავლებლის ნახვაში)
@@ -979,6 +1007,8 @@ async function actsFor(set, mats){
       out.push(Object.assign({ key: n.key, block: n.act.t === "mit" ? "m:mit" : b }, n.act));
     if(n.kids) walk(n.kids, b);
   }); })(cat, null);
+  const vjs = Array.from(set).filter(k => k.indexOf("vj:") === 0);
+  if(vjs.length){ await vjMeta(); vjs.forEach(k => out.push({ key:k, block:"m:vj", t:"vj", cfg:k.slice(3), text: vjLabel(k.slice(3)) })); }
   return out;
   } finally { MATERIALS = keepM; }
 }
@@ -1031,6 +1061,8 @@ async function showAssign(a, isOld){
     const ns = aphs.map(x => x.n).sort((p, q) => p - q);
     sections[2].items.push(btn("aph:" + ns.join(","), "აფორიზმები", "„ვეფხისტყაოსანი“ — " + (ns.length === 1 ? "თავი " + ns[0] : "თავები: " + ns.join(", ")), () => goSection("aforizmebi/")));
   }
+  acts.filter(x => x.t === "vj").forEach(x => sections[2].items.push(btn(x.key, "წინადადებების რედაქტირება", x.text,
+    () => goSection("varjishi/#" + encodeURIComponent(x.cfg)))));
   ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
     const W = sections[2].items;
     if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;   // უკვე თავის თემასთანაა
@@ -1237,6 +1269,7 @@ async function renderAssignView(pane, a){
     const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
     const aphN = acts.filter(x => x.t === "aph").map(x => x.n).sort((p, q) => p - q);
     if(aphN.length) secs[2][1].push(["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]);
+    acts.filter(x => x.t === "vj").forEach(x => secs[2][1].push(["წინადადებების რედაქტირება", x.text]));
     ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
       secs[2][1].push([KIND[t], x.text]);
@@ -1426,8 +1459,37 @@ function refreshChecks(){
     N.cb.checked = on; N.cb.indeterminate = some; N.sp.classList.toggle("off", !on && !some);
     if(N.ni) N.ni.classList.toggle("hidden", !on);
   });
-  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => NODES[k]).length;
+  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => NODES[k] || k.indexOf("vj:") === 0).length;
+  renderVj();
 }
+async function renderVj(){
+  const host = $("vj-list"); if(!host) return;
+  const list = EDIT ? Array.from(EDIT.set).filter(k => k.indexOf("vj:") === 0) : [];
+  if(list.length) await vjMeta();
+  host.innerHTML = "";
+  list.forEach(k => {
+    const row = document.createElement("div"); row.className = "vjrow";
+    const sp = document.createElement("span"); sp.textContent = vjLabel(k.slice(3));
+    const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "მოხსნა";
+    del.onclick = () => { EDIT.set.delete(k); refreshChecks(); };
+    row.append(sp, del); host.appendChild(row);
+  });
+}
+$("vj-add").onclick = () => {   // ვარჯიშის პარამეტრები — ცალკე ფანჯარაში (იგივე საიტი)
+  try{ sessionStorage.setItem("lit-vj-key", adminKey || ""); }catch(e){}
+  const m = document.createElement("div"); m.className = "vjmodal"; m.id = "vj-modal";
+  const f = document.createElement("iframe"); f.src = "varjishi/#admin"; f.title = "ვარჯიშის პარამეტრები";
+  m.appendChild(f); document.body.appendChild(m); document.body.style.overflow = "hidden";
+};
+window.addEventListener("message", e => {
+  if(e.origin !== location.origin || !e.data) return;
+  const close = () => { const m = $("vj-modal"); if(m) m.remove(); document.body.style.overflow = ""; };
+  if(e.data.type === "vj-close") close();
+  if(e.data.type === "vj-add" && EDIT && typeof e.data.cfg === "string" && e.data.cfg.length < 290){
+    EDIT.set.add("vj:" + e.data.cfg); refreshChecks();
+    $("vis-msg").textContent = "ვარჯიში დაემატა. დახურე ფანჯარა ან დაამატე კიდევ ერთი."; $("vis-msg").className = "msg ok";
+  }
+});
 async function renderTree(){
   if(!EDIT) return;
   if(!CATALOG){ $("vis-tree").innerHTML = '<p class="lead">სია იტვირთება…</p>'; CATALOG = (await visCatalog(mergedMaterials(CFG.materials))).filter(n => n.key !== "m:mit"); }

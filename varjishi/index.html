@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>წინადადებების რედაქტირება — კოტეს დავალება</title>
+<link rel="icon" type="image/png" href="../icons/favicon-48.png">
+<script src="https://cdn.tailwindcss.com/3.4.5"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.24.7/babel.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
+<script src="../config.js"></script>
+<style>
+  body { font-family:'Noto Sans Georgian',sans-serif; background:#f8fafc; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  .animate-shake { animation:shake .3s ease-in-out; }
+  .editor { line-height:1.9; hyphens:none; -webkit-hyphens:none; }
+  .peek b { background:#fef08a; font-weight:800; padding:0 2px; border-radius:3px; }
+  @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"><p style="text-align:center;margin-top:60px;color:#64748b">იტვირთება…</p></div>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo, useRef } = React;
+const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbycuDAMQrAPEoa3rjtgf69Z-1rqwVIbyNB6fGyWSfpj6JDtny4HGZAMS6dMd93Lt8FU2w/exec";
+const SERVER_URL = ((typeof SCRIPT_URL !== "undefined" && /\/exec$/.test(String(SCRIPT_URL).trim())) ? String(SCRIPT_URL) : DEFAULT_URL).trim();
+async function api(body){
+  const r = await fetch(SERVER_URL, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+  const t = await r.text();
+  try{ return JSON.parse(t); }catch(e){ throw new Error("სკრიპტმა მოულოდნელი პასუხი დააბრუნა. Apps Script-ში ახალი Code.gs და Varjishi.gs უნდა იყოს გამოქვეყნებული (New version)."); }
+}
+const netErr = e => (e && e.message && e.message !== "Failed to fetch" && e.message !== "Load failed") ? e.message : "სკრიპტთან დაკავშირება ვერ მოხერხდა. შეამოწმე ინტერნეტი.";
+const ss = { get: k => { try{ return sessionStorage.getItem(k); }catch(e){ return null; } }, set: (k,v) => { try{ sessionStorage.setItem(k,v); }catch(e){} } };
+const ls = { get: (k,d) => { try{ const v = JSON.parse(localStorage.getItem(k)||"null"); return v==null?d:v; }catch(e){ return d; } },
+             set: (k,v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }, del: k => { try{ localStorage.removeItem(k); }catch(e){} } };
+
+/* მეტამონაცემები (სწორი პასუხების გარეშე): ტიპები, თითო წინადადების ტიპები, მოდელირებულების რაოდენობა ტიპების მიხედვით */
+let TYPES = [], ITEMS = [], MT = {}, MTYPES = [];
+const CRITS = ['მორფ./ორთოგრ./სინტ.','პუნქტუაცია','სტილი'];
+const SUBS  = ['ორთოგრაფია','მორფოლოგია','სინტაქსი'];
+const nb = (s) => String(s).replace(/([ა-ჿ])-([ა-ჿ])/g, '$1‑$2');
+const unNb = (s) => String(s).replace(/‑/g, '-');
+
+/* ხელმისაწვდომი წინადადებები (მხოლოდ რაოდენობისთვის; შერჩევას სერვერი აკეთებს იმავე წესით) */
+function pool(sel, strict, src){
+  if(!sel.size) return [];
+  if(src === 'model') return new Array([...sel].reduce((a,t)=>a+(MT[t]||0),0));
+  return ITEMS.filter(t => strict ? t.every(x => sel.has(x)) : t.some(x => sel.has(x)));
+}
+function poolOf(ti, sel, strict, src){
+  if(src === 'model') return new Array(MT[ti]||0);
+  return ITEMS.filter(t => t.includes(ti) && (!strict || t.every(x => sel.has(x))));
+}
+function encPer(per){
+  return Object.keys(per).map(Number).sort((a,b)=>a-b).filter(i => per[i] > 0).map(i => i + ':' + per[i]).join('.');
+}
+
+/* ======================= მოსწავლე ======================= */
+const Drill = ({ name, items, answers, setAnswers, idx, setIdx, onSubmit, sending, status, peek, back }) => {
+  const box = useRef(null);
+  useEffect(()=>{ if(box.current){ box.current.style.height='auto'; box.current.style.height=Math.max(110,box.current.scrollHeight)+'px'; } },[idx,answers]);
+  const total = items.length, last = idx === total-1, pct = Math.round(((idx+1)/total)*100);
+  const it = items[idx];
+  return (
+    <div className="min-h-screen p-4 sm:p-8 flex flex-col items-center">
+      <header className="max-w-3xl w-full mb-5 flex items-center justify-between gap-3 flex-wrap">
+        {back}
+        <div className="flex bg-white px-4 py-2 rounded-2xl shadow-sm border border-slate-100 items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-green-500"></div>
+          <span className="font-semibold text-slate-700 text-sm">{name || 'მასწავლებლის ნახვა'}</span>
+        </div>
+      </header>
+      <main className="max-w-3xl w-full bg-white shadow-2xl rounded-3xl border border-slate-100 p-4 sm:p-8 space-y-5">
+        <h1 className="text-lg sm:text-xl font-bold text-slate-800">წინადადებების რედაქტირება</h1>
+        <div className="space-y-2">
+          <div className="flex justify-between items-baseline gap-2">
+            <span className="text-xs sm:text-sm font-bold text-slate-600 uppercase tracking-wider">წინადადება {idx+1} / {total}</span>
+            <span className="text-xs text-slate-400 italic">იპოვე და გაასწორე შეცდომა</span>
+          </div>
+          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+            <div className="h-full bg-indigo-500 rounded-full transition-all" style={{width:pct+'%'}}></div>
+          </div>
+        </div>
+        {peek && it && it.bad && (
+          <div className="peek p-4 rounded-2xl bg-amber-50 border-2 border-amber-100 text-slate-800 text-base sm:text-lg leading-relaxed">
+            <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">მასწავლებლის ხედი — შეცდომა მონიშნულია</div>
+            {nb(it.q).split(' ').map((x,i)=> it.bad.includes(i) ? <b key={i}>{x} </b> : <span key={i}>{x} </span>)}
+          </div>
+        )}
+        <textarea ref={box} spellCheck={false} value={answers[idx]||''} aria-label="წინადადება"
+          onChange={e=>setAnswers(a=>a.map((x,i)=>i===idx?e.target.value:x))}
+          className="editor w-full p-4 sm:p-5 border-2 border-slate-100 rounded-2xl bg-slate-50 focus:bg-white text-base sm:text-lg text-slate-800 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none resize-none shadow-inner overflow-hidden"/>
+        {status && <div className="p-4 bg-red-50 text-red-800 rounded-xl border-2 border-red-100 text-center font-bold animate-shake">{status}</div>}
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={()=>setIdx(Math.max(0,idx-1))} disabled={idx===0}
+            className={`px-5 py-3 rounded-2xl font-bold transition-all active:scale-95 ${idx===0?'bg-slate-100 text-slate-300 cursor-not-allowed':'bg-white border-2 border-slate-100 text-slate-600 hover:border-indigo-200 hover:text-indigo-600'}`}>← წინა</button>
+          {last ? (
+            <button type="button" onClick={onSubmit} disabled={sending || !onSubmit}
+              className={`flex-1 px-6 py-3 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all ${sending||!onSubmit?'bg-slate-300 text-slate-500 cursor-not-allowed':'bg-indigo-600 hover:bg-indigo-700 text-white'}`}>
+              {sending?'იგზავნება...':(onSubmit?'ნამუშევრის გაგზავნა':'ნახვის რეჟიმი')}</button>
+          ) : (
+            <button type="button" onClick={()=>setIdx(Math.min(total-1,idx+1))}
+              className="flex-1 px-6 py-3 rounded-2xl font-bold text-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg active:scale-95 transition-all">შემდეგი →</button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-1.5 pt-4 border-t border-slate-100">
+          {items.map((x,i)=>{
+            const changed = answers[i] !== nb(x.q);
+            return <button key={i} type="button" onClick={()=>setIdx(i)}
+              className={`w-8 h-8 rounded-lg text-xs font-bold transition-all active:scale-95 ${i===idx?'bg-indigo-600 text-white':changed?'bg-indigo-50 text-indigo-600 border border-indigo-200':'bg-slate-50 text-slate-400 border border-slate-100 hover:border-indigo-200'}`}>{i+1}</button>;
+          })}
+        </div>
+      </main>
+    </div>
+  );
+};
+
+const BackLink = ({ label }) => (
+  <a href="../" onClick={()=>ss.set('lit-return','assign')}
+    className="inline-block px-4 py-2 rounded-xl border-2 border-slate-200 bg-white text-indigo-700 font-bold text-sm no-underline">{label || '← დავალებაზე დაბრუნება'}</a>
+);
+const Msg = ({ children }) => (
+  <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="max-w-sm w-full bg-white shadow-xl rounded-2xl p-7 border border-slate-100 text-center space-y-5">{children}</div>
+  </div>
+);
+
+const Student = () => {
+  const name = ss.get('lit-session-name') || (()=>{ try{ return localStorage.getItem('lit-user') || ''; }catch(e){ return ''; } })();
+  const cfg = decodeURIComponent((location.hash||'').replace(/^#/,''));
+  const key = 'vj:' + cfg, RUN = 'vj-run:' + name + ':' + cfg;
+  const [run,setRun] = useState(()=> ls.get(RUN, null));
+  const [err,setErr] = useState('');
+  const [sending,setSending] = useState(false);
+  const [status,setStatus] = useState('');
+  const [done,setDone] = useState(false);
+  useEffect(()=>{
+    if(!name || !cfg || run) return;
+    api({ action:'vjGet', name, cfg }).then(r => {
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : 'Apps Script ჯერ ძველი ვერსიაა.');
+      if(!r.items.length) throw new Error('ამ პარამეტრებით წინადადება ვერ მოიძებნა. მიმართე მასწავლებელს.');
+      const x = { items: r.items, answers: r.items.map(it => nb(it.q)), idx: 0 }; ls.set(RUN, x); setRun(x);
+    }).catch(e => setErr(netErr(e)));
+  },[]);
+  if(!name) return <Msg><p className="text-slate-600">ჯერ მთავარ გვერდზე შედი შენი სახელით და გვარით.</p><BackLink label="მთავარ გვერდზე"/></Msg>;
+  if(!cfg) return <Msg><p className="text-slate-600">დავალება არ არის არჩეული.</p><BackLink/></Msg>;
+  if(done) return <Msg>
+    <div className="w-14 h-14 mx-auto rounded-full bg-green-50 border-2 border-green-100 flex items-center justify-center text-green-600 text-2xl font-bold">✓</div>
+    <h2 className="text-xl font-bold text-slate-800">ნამუშევარი გაიგზავნა</h2><BackLink/></Msg>;
+  if(err) return <Msg><p className="text-red-700 font-bold">{err}</p><BackLink/></Msg>;
+  if(!run) return <Msg><p className="text-slate-500">წინადადებები იტვირთება…</p></Msg>;
+  const save = x => { ls.set(RUN, x); setRun(x); };
+  const setAnswers = f => save({ ...run, answers: typeof f === 'function' ? f(run.answers) : f });
+  const setIdx = i => save({ ...run, idx: i });
+  const submit = async () => {
+    if(!window.confirm('გავაგზავნოთ ნამუშევარი?')) return;
+    setSending(true); setStatus('');
+    try{
+      const r = await api({ action:'vjSubmit', name, cfg, time: new Date().toLocaleString('ka-GE'),
+        items: run.items.map((it,i)=> it.m ? { m: it.m, a: unNb(run.answers[i]) } : { n: it.n, i: it.i, a: unNb(run.answers[i]) }) });
+      if(!r || !r.ok) throw new Error(r && r.error);
+      ls.del(RUN);
+      const dk = 'lit-done:' + name, d = ls.get(dk, []); if(d.indexOf(key) < 0){ d.push(key); ls.set(dk, d); }
+      setDone(true);
+    }catch(e){ setStatus('გაგზავნა ვერ მოხერხდა: ' + netErr(e) + ' ნამუშევარი შენახულია — სცადე თავიდან.'); }
+    finally{ setSending(false); }
+  };
+  return <Drill name={name} items={run.items} answers={run.answers} setAnswers={setAnswers} idx={run.idx} setIdx={setIdx}
+    onSubmit={submit} sending={sending} status={status} back={<BackLink/>}/>;
+};
+
+/* ======================= მასწავლებელი (მთავარი აპის ადმინის პანელიდან) ======================= */
+const Teacher = () => {
+  const key = ss.get('lit-vj-key') || '';
+  const [prev,setPrev] = useState(null);
+  const [err,setErr] = useState('');
+  const run = async (cfgStr) => {
+    setErr('');
+    try{
+      const r = await api({ action:'vjGet', key, peek:1, cfg: cfgStr });
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : 'Apps Script ჯერ ძველი ვერსიაა.');
+      if(!r.items.length) throw new Error('ამ პარამეტრებით წინადადება ვერ მოიძებნა.');
+      setPrev({ items: r.items, answers: r.items.map(it => nb(it.q)), idx: 0 });
+    }catch(e){ setErr(netErr(e)); }
+  };
+  return <>
+    {prev && <Drill items={prev.items} answers={prev.answers} idx={prev.idx} peek={true}
+    setAnswers={f=>setPrev(p=>({ ...p, answers: typeof f==='function'?f(p.answers):f }))} setIdx={i=>setPrev(p=>({ ...p, idx:i }))}
+    back={<button onClick={()=>setPrev(null)} className="px-4 py-2 rounded-xl border-2 border-slate-200 bg-white text-indigo-700 font-bold text-sm">← პარამეტრებზე დაბრუნება</button>}/>}
+    {err && <div className="max-w-4xl mx-auto mt-4 p-3 bg-red-50 text-red-800 rounded-xl border border-red-100 text-center font-bold">{err}</div>}
+    <div style={{ display: prev ? 'none' : 'block' }}>   {/* ნახვის შემდეგ არჩეული პარამეტრები რჩება */}
+      <Admin cfg={{ sel:new Set(), n:0, per:{}, strict:false, src:'real' }} onRun={run} inFrame={window.parent !== window}/>
+    </div>
+  </>;
+};
+
+const Admin = ({ cfg, onRun, inFrame }) => {
+  const [sel,setSel]       = useState(new Set(cfg.sel));
+  const [touched,setTouched] = useState(false);
+  const [src,setSrc]       = useState('real');
+  const [strict,setStrict] = useState(cfg.strict);
+  const [n,setN]           = useState('');
+  const [copied,setCopied] = useState(false);
+  const [cmode,setCmode]   = useState(Object.keys(cfg.per||{}).length ? 'per' : 'even');
+  const [per,setPer]       = useState(()=>({...(cfg.per||{})}));
+  const setOne = (i,v) => setPer(o=>{ const x={...o}; const k=parseInt(v||'0',10)||0; if(k>0) x[i]=k; else delete x[i]; return x; });
+
+  const counts = useMemo(()=>{
+    const smart = {}, strictC = {}, model = {};
+    TYPES.forEach(t=>{ smart[t.i]=0; strictC[t.i]=0; model[t.i]=0; });
+    ITEMS.forEach(it=>{
+      const t = [...new Set(it)];
+      t.forEach(x=>{ smart[x]++; if(t.length===1) strictC[x]++; });
+    });
+    Object.keys(MT).forEach(k=>{ model[k] = MT[k]; });
+    return { smart, strictC, model };
+  },[]);
+
+  const shownTypes = src === 'model' ? TYPES.filter(x=>MTYPES.includes(x.i)) : TYPES;
+  const available = pool(sel, strict, src).length;
+  const toggle = i => { setTouched(true); setSel(s=>{ const x=new Set(s); x.has(i)?x.delete(i):x.add(i); return x; }); };
+  const setGroup = (list,on) => { setTouched(true); setSel(s=>{ const x=new Set(s); list.forEach(t=> on?x.add(t.i):x.delete(t.i)); return x; }); };
+
+  const perActive = useMemo(()=>{
+    const o = {};
+    [...sel].forEach(i=>{ if(per[i] > 0) o[i] = Math.min(per[i], counts0(i)); });
+    return o;
+  },[sel,per,strict,src]);
+  function counts0(i){ return poolOf(i, sel, strict, src).length; }
+  const perTotal = Object.keys(perActive).reduce((a,k)=>a+perActive[k],0);
+  const usePer = cmode === 'per' && perTotal > 0;
+
+  const cfgStr = useMemo(()=>{
+    if(!sel.size) return '';
+    const all = src !== 'model' && sel.size === shownTypes.length && shownTypes.every(x=>sel.has(x.i));
+    const head = all ? 'a=1' : 't=' + [...sel].sort((a,b)=>a-b).join('.');
+    const q = usePer ? '&q=' + encPer(perActive) : '';
+    return `${head}${q}${!usePer&&n?'&n='+n:''}${strict&&src!=='model'?'&m=k':''}${src==='model'?'&s=m':''}`;
+  },[sel,n,strict,src,cmode,per]);
+  const [added,setAdded] = useState(false);
+  const addToAssign = () => {
+    if(!cfgStr) return;
+    window.parent.postMessage({ type:'vj-add', cfg: cfgStr }, location.origin);
+    setAdded(true); setTimeout(()=>setAdded(false), 2500);
+  };
+
+  const families = list => {
+    const order = [], map = new Map();
+    list.forEach(t=>{ const k = t.p || ''; if(!map.has(k)){ map.set(k,[]); order.push(k); } map.get(k).push(t); });
+    return order.map(k=>({ p:k, list:map.get(k) }));
+  };
+  const box = t => {
+    const on = sel.has(t.i);
+    const avail = (cmode==='per' && on)
+      ? poolOf(t.i, sel, strict, src).length
+      : (src==='model'?counts.model[t.i]:(strict?counts.strictC[t.i]:counts.smart[t.i]));
+    return (
+    <div key={t.i} className={`flex items-start gap-2.5 px-3 py-2 rounded-xl border transition-all ${on?'border-indigo-200 bg-indigo-50/50':'border-slate-100 bg-white hover:border-slate-200'}`}>
+      <label className="flex items-start gap-2.5 flex-1 cursor-pointer">
+        <input type="checkbox" checked={on} onChange={()=>toggle(t.i)} className="mt-1 accent-indigo-600"/>
+        <span className="text-sm text-slate-700 leading-snug flex-1">{t.l}</span>
+      </label>
+      {cmode==='per' && on
+        ? <input type="number" min="0" max={avail} placeholder={String(avail)} value={per[t.i]||''}
+            onChange={e=>setOne(t.i, e.target.value.replace(/[^0-9]/g,''))}
+            title={`ხელმისაწვდომია ${avail}`}
+            className="w-16 shrink-0 px-2 py-1 text-center text-sm tabular-nums border border-indigo-200 rounded-lg bg-white focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none"/>
+        : <span className="text-xs text-slate-400 shrink-0 tabular-nums mt-1">{avail}</span>}
+    </div>
+  ); };
+
+  const groups = CRITS.map(c=>({
+    c,
+    subs: (c===CRITS[0] ? SUBS : ['']).map(s=>({ s, list: shownTypes.filter(t=>t.c===c && t.s===s) }))
+            .filter(g=>g.list.length)
+  }));
+
+  return (
+    <div className="min-h-screen p-4 sm:p-8 flex flex-col items-center">
+      <header className="max-w-4xl w-full mb-5 flex items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">წინადადებების რედაქტირება — დავალების შედგენა</h1>
+          <p className="text-sm text-slate-500">აირჩიე შეცდომის ტიპები და რაოდენობა, მერე „დავალებაში დამატება“</p>
+        </div>
+        <button onClick={()=> inFrame ? window.parent.postMessage({ type:'vj-close' }, location.origin) : location.reload()} className="bg-white px-4 py-2.5 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-600 hover:text-indigo-600 active:scale-95 transition-all">{inFrame ? 'დახურვა' : 'გასვლა'}</button>
+      </header>
+
+      <main className="max-w-4xl w-full space-y-5">
+        <section className="bg-white shadow-xl rounded-3xl border border-slate-100 p-4 sm:p-7 space-y-5">
+          <div className="space-y-2">
+            <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">წყარო</span>
+            <div className="flex gap-2 p-1 bg-slate-50 border border-slate-100 rounded-2xl">
+              <button onClick={()=>{setSrc('real'); setSel(new Set());}}
+                className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${src==='real'?'bg-white text-indigo-600 shadow-sm border border-slate-100':'text-slate-500'}`}>გამოცდის ტექსტები</button>
+              <button onClick={()=>{setSrc('model'); setSel(new Set());}}
+                className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${src==='model'?'bg-white text-indigo-600 shadow-sm border border-slate-100':'text-slate-500'}`}>მოდელირებული</button>
+            </div>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {src==='real'
+                ? 'წინადადებები 73 რედაქტირებიდან, ისე როგორც გამოცდაზეა.'
+                : 'სპეციალურად შედგენილი წინადადებები — თითოეულში ზუსტად ერთი შეცდომაა.'}
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+            <div className="flex gap-2">
+              <button onClick={()=>{setTouched(true); setSel(new Set(shownTypes.map(t=>t.i)));}} className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 border border-slate-100 text-slate-600 hover:border-indigo-200 hover:text-indigo-600 active:scale-95 transition-all">ყველას მონიშვნა</button>
+              <button onClick={()=>{setTouched(true); setSel(new Set());}} className="px-4 py-2 rounded-xl text-sm font-bold bg-slate-50 border border-slate-100 text-slate-600 hover:border-indigo-200 hover:text-indigo-600 active:scale-95 transition-all">გასუფთავება</button>
+            </div>
+            <div className="text-sm font-bold text-slate-700">
+              არჩეულია {sel.size} ტიპი · ხელმისაწვდომია <span className={available?'text-indigo-600':'text-red-600'}>{available}</span> წინადადება
+            </div>
+          </div>
+
+          {groups.map(g=>(
+            <div key={g.c} className="rounded-2xl border border-slate-100 overflow-hidden">
+              <div className="bg-slate-50 px-4 py-2.5 flex items-center justify-between">
+                <span className="font-bold text-slate-700 text-sm">{g.c}</span>
+                <div className="flex gap-2">
+                  <button onClick={()=>setGroup(g.subs.flatMap(s=>s.list),true)} className="text-xs font-bold text-indigo-600 hover:underline">ყველა</button>
+                  <button onClick={()=>setGroup(g.subs.flatMap(s=>s.list),false)} className="text-xs font-bold text-slate-400 hover:underline">არცერთი</button>
+                </div>
+              </div>
+              <div className="p-3 space-y-3">
+                {g.subs.map(sg=>(
+                  <div key={sg.s} className="space-y-1.5">
+                    {sg.s && (
+                      <div className="flex items-center gap-2 px-1">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">{sg.s}</span>
+                        <button onClick={()=>setGroup(sg.list,true)} className="text-xs text-indigo-500 hover:underline">+</button>
+                        <button onClick={()=>setGroup(sg.list,false)} className="text-xs text-slate-300 hover:underline">−</button>
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      {families(sg.list.filter(t=>src!=='model'||MTYPES.includes(t.i))).map(f=> f.p ? (
+                        <div key={f.p} className="rounded-xl border border-slate-100 bg-slate-50/60 p-2.5 space-y-1.5">
+                          <div className="flex items-center gap-2 px-1">
+                            <span className="text-sm font-bold text-slate-700">{f.p}</span>
+                            <span className="text-xs text-slate-400">({f.list.length} ქვეკატეგორია)</span>
+                            <button onClick={()=>setGroup(f.list,true)} className="text-xs text-indigo-500 hover:underline">ყველა</button>
+                            <button onClick={()=>setGroup(f.list,false)} className="text-xs text-slate-300 hover:underline">არცერთი</button>
+                          </div>
+                          <div className="grid sm:grid-cols-2 gap-1.5 pl-3 border-l-2 border-indigo-100">
+                            {f.list.map(t=>box(t))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div key="_flat" className="grid sm:grid-cols-2 gap-1.5">{f.list.map(t=>box(t))}</div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        <section className="bg-white shadow-xl rounded-3xl border border-slate-100 p-4 sm:p-7 space-y-5">
+          <div className="grid sm:grid-cols-2 gap-5">
+            <div className={`space-y-2 ${src==='model'?'opacity-40 pointer-events-none':''}`}>
+              <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">რეჟიმი</span>
+              <div className="flex gap-2 p-1 bg-slate-50 border border-slate-100 rounded-2xl">
+                <button onClick={()=>setStrict(false)} className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${!strict?'bg-white text-indigo-600 shadow-sm border border-slate-100':'text-slate-500'}`}>ჭკვიანი</button>
+                <button onClick={()=>setStrict(true)} className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${strict?'bg-white text-indigo-600 shadow-sm border border-slate-100':'text-slate-500'}`}>მკაცრი</button>
+              </div>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                {src==='model'
+                  ? 'მოდელირებულ წინადადებებში ისედაც ერთი შეცდომაა, ამიტომ რეჟიმს მნიშვნელობა არ აქვს.'
+                  : (strict
+                    ? 'მხოლოდ ის წინადადებები, რომლებშიც სხვა ტიპის შეცდომა საერთოდ არ არის. არჩევანი მცირეა.'
+                    : 'ყველა წინადადება, სადაც არჩეული ტიპია. დანარჩენი შეცდომები წინასწარ გასწორებულია, ამიტომ მოსწავლეს მხოლოდ შენი ტიპი ხვდება.')}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <span className="block text-xs font-bold text-slate-500 uppercase tracking-wider">წინადადებების რაოდენობა</span>
+              <div className="flex gap-2 p-1 bg-slate-50 border border-slate-100 rounded-2xl">
+                <button onClick={()=>setCmode('even')} className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${cmode==='even'?'bg-white text-indigo-600 shadow-sm border border-slate-100':'text-slate-500'}`}>საერთო</button>
+                <button onClick={()=>setCmode('per')} className={`flex-1 px-3 py-2.5 rounded-xl text-sm font-bold transition-all ${cmode==='per'?'bg-white text-indigo-600 shadow-sm border border-slate-100':'text-slate-500'}`}>ტიპობრივი</button>
+              </div>
+              {cmode==='even'
+                ? <>
+                    <div className="flex items-center gap-2">
+                      <input type="number" min="1" placeholder="ყველა" value={n}
+                        onChange={e=>setN(e.target.value.replace(/[^0-9]/g,''))}
+                        className="w-32 px-3.5 py-2.5 border border-slate-200 rounded-xl focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none text-base"/>
+                      <button onClick={()=>setN('')} className="px-4 py-2.5 rounded-xl text-sm font-bold bg-slate-50 border border-slate-100 text-slate-600 hover:border-indigo-200 hover:text-indigo-600 active:scale-95 transition-all">ყველა ({available})</button>
+                    </div>
+                    <p className="text-xs text-slate-400">ყველა არჩეული ტიპი ერთ გუნდში ირევა და აქედან მოდის მითითებული რაოდენობა. ცარიელი ველი ნიშნავს ყველა ხელმისაწვდომს.</p>
+                  </>
+                : <>
+                    <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                      <span className="text-sm text-slate-600">სულ გამოვა</span>
+                      <span className="text-base font-bold text-indigo-700 tabular-nums">{perTotal}</span>
+                    </div>
+                    {Object.keys(perActive).length
+                      ? <div className="space-y-1">
+                          {Object.keys(perActive).map(Number).sort((a,b)=>a-b).map(i=>{
+                            const t = TYPES.find(x=>x.i===i);
+                            return <div key={i} className="flex items-baseline gap-2 text-xs">
+                              <span className="tabular-nums font-bold text-indigo-600 w-8 shrink-0">{perActive[i]}</span>
+                              <span className="text-slate-500 leading-snug">{t?((t.p?t.p+' › ':'')+t.l):i}</span>
+                            </div>;
+                          })}
+                          <button onClick={()=>setPer({})} className="mt-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 border border-slate-100 text-slate-600 hover:border-indigo-200 hover:text-indigo-600 active:scale-95 transition-all">გასუფთავება</button>
+                        </div>
+                      : null}
+                    <p className="text-xs text-slate-400">რაოდენობა ჩაწერე თითოეული არჩეული ტიპის გვერდით, ზემოთ სიაში. ცარიელი ველი ნიშნავს, რომ ეს ტიპი არ მოვა. მითითებულზე ნაკლები მარაგის შემთხვევაში იმდენი მოვა, რამდენიც არის.</p>
+                  </>}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
+            <button onClick={()=>onRun(cfgStr)}
+              disabled={!available || (cmode==='per' && !perTotal)}
+              className={`flex-1 px-6 py-3 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all ${available&&!(cmode==='per'&&!perTotal)?'bg-white border-2 border-indigo-200 text-indigo-700 hover:bg-indigo-50':'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+              ნახე, როგორ დაინახავს მოსწავლე
+            </button>
+            {inFrame && <button onClick={addToAssign}
+              disabled={!available || (cmode==='per' && !perTotal)}
+              className={`flex-1 px-6 py-3 rounded-2xl font-bold text-lg shadow-lg active:scale-95 transition-all ${available&&!(cmode==='per'&&!perTotal)?'bg-green-600 hover:bg-green-700 text-white':'bg-slate-200 text-slate-400 cursor-not-allowed'}`}>
+              {added ? 'დაემატა ✓' : 'დავალებაში დამატება'}
+            </button>}
+          </div>
+        </section>
+      </main>
+      <footer className="mt-8 text-slate-400 text-sm">© {new Date().getFullYear()} საგანმანათლებლო პლატფორმა</footer>
+    </div>
+  );
+};
+fetch('meta.json', { cache:'no-store' }).then(r => r.json()).then(m => {
+  TYPES = m.types; ITEMS = m.it; MT = m.mt; MTYPES = Object.keys(MT).map(Number).sort((a,b)=>a-b);
+  const App = /^#admin/.test(location.hash) ? Teacher : Student;
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+}).catch(() => { document.getElementById('root').innerHTML = '<p style="text-align:center;margin-top:60px;color:#b91c1c">ფაილი meta.json ვერ ჩაიტვირთა.</p>'; });
+</script>
+</body>
+</html>
