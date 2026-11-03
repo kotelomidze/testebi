@@ -338,7 +338,7 @@ body:not(.reading) .chapter,body:not(.reading) .block-banner{display:none}
 .aph-n{font-size:13px;font-weight:800;background:var(--blue);color:#fff;border-radius:999px;padding:1px 9px}
 @media print{details.aph-box>.aph-wrap{display:block}}
 
-/* Interactive Character Maps (Responsive Zero-Overlap Network & Pantheon Grid) */
+/* Interactive Character Maps (2D Spatial Network Canvas + Numbered Quick-Steps Pill Bar) */
 .s-cmap,#general-cmap-sec{--c:var(--violet);--c50:var(--violet-50)}
 .cmap-box>summary{cursor:pointer;list-style:none;margin:0}
 .cmap-box>summary::-webkit-details-marker{display:none}
@@ -350,7 +350,8 @@ body:not(.reading) .chapter,body:not(.reading) .block-banner{display:none}
 body.reading #general-cmap-sec{display:none!important}
 .gcm-badge{display:inline-block;font-size:14px;font-weight:800;letter-spacing:.02em;color:#5b21b6;background:#ede9fe;padding:5px 14px;border-radius:999px;line-height:1.4}
 :root[data-theme="dark"] .gcm-badge{background:#2e1065;color:#ddd6fe}
-#cmap-nav-btn{font-weight:700;color:var(--violet-d)}#cmap-nav-btn.on{background:var(--violet);color:#fff}
+#cmap-nav-btn{font-weight:700;color:var(--violet-d)}
+#cmap-nav-btn.on{background:var(--violet);color:#fff}
 .cmap-route-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
 .cmap-route-tab{border:1px solid #8b5cf6;background:#f5f3ff;color:#5b21b6;font:600 13.5px 'Noto Sans Georgian',sans-serif;padding:7px 14px;border-radius:999px;cursor:pointer;transition:all .2s}
 .cmap-route-tab:hover{background:#ede9fe;transform:translateY(-1px)}
@@ -359,48 +360,48 @@ body.reading #general-cmap-sec{display:none!important}
 :root[data-theme="dark"] .cmap-route-tab.active{background:#7c3aed;color:#fff}
 .cmap-widget{background:linear-gradient(145deg,#faf5ff 0%,#f3e8ff 100%);border:1px solid #ddd6fe;border-radius:16px;padding:18px;box-shadow:var(--shadow)}
 :root[data-theme="dark"] .cmap-widget{background:linear-gradient(145deg,#1e1b4b 0%,#17153b 100%);border-color:#4c1d95}
-.cmap-canvas{position:relative;width:100%;height:auto;background:radial-gradient(circle at 50% 50%, #ffffff 0%, #f5f3ff 65%, #ede9fe 100%);border:2px solid #c4b5fd;border-radius:14px;box-shadow:inset 0 2px 12px rgba(91,33,182,.08);padding:16px 14px 12px;margin-bottom:14px;overflow:hidden}
-:root[data-theme="dark"] .cmap-canvas{background:radial-gradient(circle at 50% 50%, #1e1b4b 0%, #111827 75%, #0f172a 100%);border-color:#4c1d95}
+.cmap-canvas{position:relative;width:100%;aspect-ratio:2 / 1;min-height:290px;background:radial-gradient(circle at 50% 48%, #ffffff 0%, #f5f3ff 65%, #ede9fe 100%);border:2px solid #c4b5fd;border-radius:14px;box-shadow:inset 0 2px 12px rgba(91,33,182,.10);overflow:hidden;margin-bottom:10px}
+.cmap-canvas.dense-canvas{aspect-ratio:16 / 10;min-height:440px}
+:root[data-theme="dark"] .cmap-canvas{background:radial-gradient(circle at 50% 48%, #1e1b4b 0%, #111827 72%, #0f172a 100%);border-color:#4c1d95}
 .cmap-svg-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
-.cmap-svg-line{fill:none;stroke:#8b5cf6;stroke-width:2.2;stroke-dasharray:6 5;opacity:.6;transition:all .25s}
-.cmap-svg-line.rel-love{stroke:#ec4899;stroke-dasharray:none;stroke-width:2.8;opacity:.85}
-.cmap-svg-line.rel-bro{stroke:#10b981;stroke-dasharray:none;stroke-width:2.6;opacity:.85}
-.cmap-svg-line.rel-kin{stroke:#6366f1;stroke-dasharray:none;stroke-width:2.4;opacity:.8}
-.cmap-svg-line.rel-foe{stroke:#ef4444;stroke-dasharray:5 4;stroke-width:2.4;opacity:.85}
-.cmap-groups-wrap{position:relative;z-index:2;display:grid;gap:14px}
-.cmap-group-box{background:rgba(255,255,255,.65);border:1px solid rgba(139,92,246,.22);border-radius:12px;padding:10px 12px}
-:root[data-theme="dark"] .cmap-group-box{background:rgba(15,23,42,.55);border-color:rgba(139,92,246,.32)}
-.cmap-group-title{font-size:12.5px;font-weight:800;color:#5b21b6;margin:0 0 8px;padding-bottom:4px;border-bottom:1px dashed rgba(139,92,246,.25);display:flex;align-items:center;gap:6px}
-:root[data-theme="dark"] .cmap-group-title{color:#ddd6fe}
-.cmap-nodes-grid{position:relative;z-index:2;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;align-items:stretch}
-.cmap-node{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;background:rgba(255,255,255,.92);border:2px solid rgba(124,58,237,.25);border-radius:12px;cursor:pointer;padding:9px 7px 8px;z-index:3;transition:all .2s ease;font-family:inherit;text-align:center;box-shadow:0 2px 6px rgba(91,33,182,.08);width:100%;min-height:84px}
-:root[data-theme="dark"] .cmap-node{background:rgba(30,27,75,.88);border-color:rgba(167,139,250,.3)}
-.cmap-avatar{width:40px;height:40px;border-radius:50%;background:#f5f3ff;border:2.5px solid #7c3aed;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 3px 8px rgba(91,33,182,.18);transition:all .2s ease;flex:none}
+.cmap-svg-line{stroke:#8b5cf6;stroke-width:2.2px;stroke-dasharray:6 5;opacity:.55;transition:all .25s ease}
+.cmap-svg-line.rel-love{stroke:#ec4899;stroke-dasharray:none;stroke-width:2.5px}
+.cmap-svg-line.rel-bro{stroke:#10b981;stroke-dasharray:none;stroke-width:2.4px}
+.cmap-svg-line.rel-kin{stroke:#6366f1;stroke-dasharray:none;stroke-width:2.2px}
+.cmap-svg-line.rel-foe{stroke:#ef4444;stroke-dasharray:6 4;stroke-width:2.3px}
+.cmap-svg-line.active-edge{opacity:.95;stroke-width:3.2px;filter:drop-shadow(0 1px 3px rgba(91,33,182,.25))}
+.cmap-svg-line.dim-edge{opacity:.18;stroke-width:1.5px}
+.cmap-node{position:absolute;transform:translate(-50%, -50%);display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;cursor:pointer;padding:0;z-index:3;transition:transform .22s ease,z-index 0s;font-family:inherit}
+.cmap-avatar{position:relative;width:40px;height:40px;border-radius:50%;background:#ffffff;border:2.5px solid #7c3aed;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 3px 10px rgba(91,33,182,.22);transition:all .22s ease}
+.cmap-canvas.dense-canvas .cmap-avatar{width:34px;height:34px;font-size:16px}
 :root[data-theme="dark"] .cmap-avatar{background:#1e1b4b;border-color:#a78bfa}
-.cmap-node:hover{transform:translateY(-2px);border-color:#7c3aed;box-shadow:0 6px 14px rgba(91,33,182,.18);z-index:5}
-.cmap-node.active{background:#7c3aed;border-color:#4c1d95;color:#fff;transform:translateY(-2px);box-shadow:0 0 0 3px rgba(124,58,237,.3),0 8px 18px rgba(91,33,182,.35);z-index:6}
-:root[data-theme="dark"] .cmap-node.active{background:#6d28d9;border-color:#ddd6fe}
-.cmap-node.active .cmap-avatar{background:#fff;border-color:#fde68a;transform:scale(1.08)}
-.cmap-node.rel-peer-love{border-color:#ec4899;background:#fdf2f8}
-.cmap-node.rel-peer-bro{border-color:#10b981;background:#ecfdf5}
-.cmap-node.rel-peer-kin{border-color:#6366f1;background:#eef2ff}
-.cmap-node.rel-peer-foe{border-color:#ef4444;background:#fef2f2}
-:root[data-theme="dark"] .cmap-node.rel-peer-love{background:rgba(131,24,67,.45);border-color:#f472b6}
-:root[data-theme="dark"] .cmap-node.rel-peer-bro{background:rgba(6,78,59,.5);border-color:#34d399}
-:root[data-theme="dark"] .cmap-node.rel-peer-kin{background:rgba(49,46,129,.55);border-color:#818cf8}
-:root[data-theme="dark"] .cmap-node.rel-peer-foe{background:rgba(127,29,29,.5);border-color:#f87171}
-.cmap-node-lbl{font-size:12.5px;font-weight:800;color:#3b0764;line-height:1.25;word-break:break-word;overflow-wrap:anywhere}
-:root[data-theme="dark"] .cmap-node-lbl{color:#ede9fe}
-.cmap-node.active .cmap-node-lbl{color:#fff}
-.cmap-node-reltag{font-size:10.5px;font-weight:700;padding:1px 6px;border-radius:999px;line-height:1.25;max-width:100%;white-space:normal;display:none}
-.cmap-node.has-rel .cmap-node-reltag{display:inline-block}
-.cmap-node.rel-peer-love .cmap-node-reltag{background:#fce7f3;color:#be185d}
-.cmap-node.rel-peer-bro .cmap-node-reltag{background:#d1fae5;color:#047857}
-.cmap-node.rel-peer-kin .cmap-node-reltag{background:#e0e7ff;color:#3730a3}
-.cmap-node.rel-peer-foe .cmap-node-reltag{background:#fee2e2;color:#b91c1c}
-:root[data-theme="dark"] .cmap-node .cmap-node-reltag{background:rgba(15,23,42,.8);color:#f8fafc}
-.cmap-legend-bar{position:relative;z-index:2;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:12px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.9);border:1px solid rgba(139,92,246,.25);color:#4c1d95;font-size:11.5px;font-weight:700}
-:root[data-theme="dark"] .cmap-legend-bar{background:rgba(15,23,42,.88);color:#ddd6fe;border-color:rgba(139,92,246,.4)}
+.cmap-num{position:absolute;top:-5px;right:-6px;min-width:17px;height:17px;padding:0 4px;border-radius:999px;background:#6d28d9;color:#fff;font-size:10px;font-weight:800;line-height:17px;text-align:center;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.22)}
+:root[data-theme="dark"] .cmap-num{border-color:#1e1b4b;background:#8b5cf6}
+.cmap-node:hover,.cmap-node.active{transform:translate(-50%, -50%) scale(1.24);z-index:8}
+.cmap-node.active .cmap-avatar{background:#7c3aed;border-color:#fff;color:#fff;box-shadow:0 0 0 4px rgba(124,58,237,.32),0 6px 16px rgba(91,33,182,.45)}
+.cmap-node.active .cmap-num{background:#d97706;border-color:#fff}
+.cmap-node.has-rel{z-index:5}
+.cmap-node.rel-peer-love .cmap-avatar{border-color:#ec4899;box-shadow:0 0 0 3px rgba(236,72,153,.28)}
+.cmap-node.rel-peer-bro .cmap-avatar{border-color:#10b981;box-shadow:0 0 0 3px rgba(16,185,129,.28)}
+.cmap-node.rel-peer-kin .cmap-avatar{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.28)}
+.cmap-node.rel-peer-foe .cmap-avatar{border-color:#ef4444;box-shadow:0 0 0 3px rgba(239,68,68,.28)}
+.cmap-node-lbl{font-size:11px;font-weight:700;color:#4c1d95;background:rgba(255,255,255,.94);border:1px solid rgba(124,58,237,.32);padding:1.5px 6px;border-radius:6px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.08);transition:all .2s;max-width:155px;overflow:hidden;text-overflow:ellipsis}
+.cmap-canvas.dense-canvas .cmap-node-lbl{font-size:9.8px;padding:1px 4.5px;max-width:118px}
+.cmap-node-lbl.edge-left{transform:translateX(18%)}
+.cmap-node-lbl.edge-right{transform:translateX(-18%)}
+:root[data-theme="dark"] .cmap-node-lbl{background:rgba(15,23,42,.92);color:#ddd6fe;border-color:rgba(167,139,250,.35)}
+.cmap-node.active .cmap-node-lbl{background:#5b21b6;color:#fff;border-color:#4c1d95;font-weight:800;max-width:none}
+:root[data-theme="dark"] .cmap-node.active .cmap-node-lbl{background:#7c3aed;color:#fff}
+.cmap-legend-bar{position:absolute;left:10px;right:10px;bottom:7px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;font-size:11px;font-weight:700;color:#4c1d95;background:rgba(255,255,255,.88);padding:3px 10px;border-radius:999px;border:1px solid rgba(139,92,246,.22);z-index:4;pointer-events:none}
+:root[data-theme="dark"] .cmap-legend-bar{background:rgba(15,23,42,.86);color:#ddd6fe;border-color:rgba(139,92,246,.35)}
+.cmap-quick-steps{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px;justify-content:center}
+.cmap-qpill{border:1px solid rgba(124,58,237,.35);background:var(--card);color:#4c1d95;font:600 12.5px 'Noto Sans Georgian',sans-serif;padding:4px 10px;border-radius:999px;cursor:pointer;transition:all .15s}
+.cmap-qpill:hover{background:#ede9fe;transform:translateY(-1px)}
+.cmap-qpill.has-rel{border-color:#7c3aed;background:#f5f3ff}
+.cmap-qpill.active{background:#7c3aed;color:#fff;border-color:#5b21b6;box-shadow:0 2px 6px rgba(124,58,237,.28)}
+:root[data-theme="dark"] .cmap-qpill{background:#1e1b4b;color:#ddd6fe;border-color:#5b21b6}
+:root[data-theme="dark"] .cmap-qpill.has-rel{background:#2e1065;border-color:#a78bfa}
+:root[data-theme="dark"] .cmap-qpill.active{background:#7c3aed;color:#fff}
 .cmap-display{background:var(--card);border:1px solid var(--line);border-left:5px solid #7c3aed;border-radius:12px;padding:16px 20px;min-height:150px;box-shadow:inset 0 1px 4px rgba(0,0,0,.03)}
 .cmap-role-badge{font-size:12px;font-weight:800;background:#ede9fe;color:#5b21b6;padding:2px 10px;border-radius:999px}
 :root[data-theme="dark"] .cmap-role-badge{background:#2e1065;color:#ddd6fe}
@@ -413,17 +414,18 @@ body.reading #general-cmap-sec{display:none!important}
 .cmap-step-btn:hover:not(:disabled){background:var(--violet);color:#fff}
 .cmap-step-btn:disabled{opacity:.4;cursor:default}
 @media (max-width:640px){
-  .cmap-canvas{padding:12px 10px 10px}
-  .cmap-nodes-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .cmap-node{padding:8px 6px;min-height:76px}
-  .cmap-avatar{width:34px;height:34px;font-size:17px}
-  .cmap-node-lbl{font-size:12px}
-  .cmap-group-box{padding:8px}
+  .cmap-canvas{aspect-ratio:16 / 11;min-height:230px}
+  .cmap-canvas.dense-canvas{aspect-ratio:4 / 3;min-height:320px}
+  .cmap-canvas.dense-canvas .cmap-node:not(.active):not(.has-rel) .cmap-node-lbl{display:none}
+  .cmap-avatar{width:32px;height:32px;font-size:15px}
+  .cmap-canvas.dense-canvas .cmap-avatar{width:27px;height:27px;font-size:13px}
+  .cmap-num{min-width:15px;height:15px;font-size:9px;line-height:15px;top:-4px;right:-4px}
+  .cmap-node-lbl{font-size:10px;padding:1px 5px}
+  .cmap-legend-bar{font-size:9.5px;gap:6px;padding:2px 6px}
   .general-cmap-card{padding:16px 14px}
   .cmap-widget{padding:12px}
   .cmap-display{padding:14px}
 }
-
 </style>
 </head>
 <body>
@@ -1362,7 +1364,7 @@ body.reading #general-cmap-sec{display:none!important}
 </ul>
 <div class="aph-foot">სტროფი <button class="stz" data-s="299">299</button></div>
 </div><div class="aph">
-<p class="aph-text">ყმასა უთხრა: „ვინცა კაცმან ძმა იძმოს, თუ დაცა იდოს,<br/>ხამს, მისთვის სიკვდილსა და ჭირსა თავი არ დაჰრიდოს“.</p>
+<p class="aph-text">ყმასა უთხრა: „ვინცა კაცმან ძმა იძმოს, თუ დაცა იდოს,<br/>ხამს, თუ მისთვის სიკვდილსა და ჭირსა თავი არ დაჰრიდოს“.</p>
 <ul class="meta">
 <li><b>🗣️ ვინ ვის:</b> ტარიელი → ავთანდილს</li>
 <li><b>🧭 კონტექსტი:</b> ავთანდილისა და ასმათის თხოვნით ტარიელი თანხმდება, უამბოს თავისი მძიმე თავგადასავალი, თუმცა ამის გახსენება სულს უწვავს.</li>
@@ -4124,7 +4126,7 @@ const CH_CASTS = {
 const GENERAL_CMAPS = {
   "cgen-all": {
     t: "🌐 ყველა პერსონაჟი – „ვეფხისტყაოსნის“ სრული პანთეონი (36 პერსონაჟი)",
-    s: "პოემის ყველა მთავარი, მეორეხარისხოვანი და ეპიზოდური პერსონაჟი დაჯგუფებული სამყაროების მიხედვით – დააჭირეთ ნებისმიერ გმირს დეტალებისა და კავშირების სანახავად.",
+    s: "დააჭირეთ რუკაზე მოცემულ პერსონაჟებს (1, 2, 3...) ან ქვემოთ განთავსებულ ნომრიან ღილაკებს დეტალური დახასიათებისა და კავშირების სანახავად.",
     chars: [
       "tariel", "nestan", "avtandil", "tinatin", "pridon", "asmat",
       "rostevan", "shermadin", "sograt", "twelve_slaves", "arab_nobles",
@@ -4132,39 +4134,71 @@ const GENERAL_CMAPS = {
       "pridon_cousins", "pridon_herdsmen", "usam", "mebaghe", "fatman", "usen", "surkhav", "surkhav_son", "chashnagir", "grdzneuli_mona", "dulardukht", "rosan", "rodia", "roshaq",
       "rustaveli", "tamar_davit"
     ],
-    groups: [
-      { title: "🌟 მთავარი გმირები, მიჯნურები და მესაიდუმლე", keys: ["tariel", "nestan", "avtandil", "tinatin", "pridon", "asmat"] },
-      { title: "👑 არაბეთის სამეფო კარი", keys: ["rostevan", "shermadin", "sograt", "twelve_slaves", "arab_nobles"] },
-      { title: "🇮🇳 ინდოეთის სამეფო კარი და ხატაეთი", keys: ["parsadan", "dedofali", "saridan", "davar", "khvarazm", "two_slaves", "ramaz", "khatael_rider", "three_brothers"] },
-      { title: "🌊 მულღაზანზარი, გულანშარო და ქაჯეთის ციხე", keys: ["pridon_cousins", "pridon_herdsmen", "usam", "mebaghe", "fatman", "usen", "surkhav", "surkhav_son", "chashnagir", "grdzneuli_mona", "dulardukht", "rosan", "rodia", "roshaq"] },
-      { title: "🖋️ ავტორი და ეპოქა (პროლოგი / ეპილოგი)", keys: ["rustaveli", "tamar_davit"] }
-    ]
+    coords: {
+      rustaveli: [10, 11], tamar_davit: [26, 11], rostevan: [42, 11], shermadin: [58, 11], sograt: [74, 11], arab_nobles: [90, 11],
+      twelve_slaves: [10, 25], tinatin: [26, 25], avtandil: [42, 24], tariel: [58, 24], nestan: [74, 25], asmat: [90, 25],
+      saridan: [10, 39], parsadan: [26, 39], dedofali: [42, 39], davar: [58, 39], khvarazm: [74, 39], two_slaves: [90, 39],
+      ramaz: [10, 53], khatael_rider: [26, 53], three_brothers: [42, 53], pridon: [58, 52], pridon_cousins: [74, 53], pridon_herdsmen: [90, 53],
+      usam: [10, 67], mebaghe: [26, 67], fatman: [42, 66], usen: [58, 67], chashnagir: [74, 67], grdzneuli_mona: [90, 67],
+      surkhav: [10, 81], surkhav_son: [26, 81], dulardukht: [42, 81], rosan: [58, 81], rodia: [74, 81], roshaq: [90, 81]
+    }
   },
   "cgen-mains": {
-    t: "🌟 მთავარი გმირები და მიჯნურები",
+    t: "🌟 მთავარი გმირები და მიჯნურები (6)",
     s: "პოემის ცენტრალური ექვსეული: სამი ძმადნაფიცი გმირი, მათი სატრფოები და ერთგული მესაიდუმლე ასმათი.",
-    chars: ["tariel", "nestan", "avtandil", "tinatin", "pridon", "asmat"]
+    chars: ["tariel", "nestan", "avtandil", "tinatin", "pridon", "asmat"],
+    coords: {
+      tinatin: [20, 26], avtandil: [50, 22], pridon: [80, 26],
+      nestan: [22, 68], tariel: [50, 72], asmat: [78, 68]
+    }
   },
   "cgen-arabia": {
-    t: "👑 არაბეთის სამეფო კარი",
+    t: "👑 არაბეთის სამეფო კარი (7)",
     s: "არაბეთის სამეფოს მთავარი და მეორეხარისხოვანი პერსონაჟები და მათი ურთიერთკავშირი.",
-    chars: ["rostevan", "tinatin", "avtandil", "shermadin", "sograt", "twelve_slaves", "arab_nobles"]
+    chars: ["rostevan", "tinatin", "avtandil", "shermadin", "sograt", "twelve_slaves", "arab_nobles"],
+    coords: {
+      rostevan: [22, 24], tinatin: [50, 20], avtandil: [78, 24],
+      sograt: [15, 64], shermadin: [38, 70], twelve_slaves: [62, 70], arab_nobles: [85, 64]
+    }
   },
   "cgen-india": {
-    t: "🇮🇳 ინდოეთი და ხატაეთი",
+    t: "🇮🇳 ინდოეთი და ხატაეთი (12)",
     s: "ინდოეთის შვიდი სამეფოსა და ხატაეთის სრული პერსონაჟთა ქსელი.",
-    chars: ["tariel", "nestan", "asmat", "parsadan", "dedofali", "saridan", "davar", "khvarazm", "two_slaves", "ramaz", "khatael_rider", "three_brothers"]
+    chars: ["tariel", "nestan", "asmat", "parsadan", "dedofali", "saridan", "davar", "khvarazm", "two_slaves", "ramaz", "khatael_rider", "three_brothers"],
+    coords: {
+      saridan: [16, 20], parsadan: [39, 18], dedofali: [62, 18], davar: [85, 20],
+      asmat: [16, 48], tariel: [39, 46], nestan: [62, 46], khvarazm: [85, 48],
+      two_slaves: [16, 76], ramaz: [39, 76], khatael_rider: [62, 76], three_brothers: [85, 76]
+    }
   },
   "cgen-seas": {
-    t: "🌊 მულღაზანზარი, გულანშარო და ქაჯეთი",
+    t: "🌊 მულღაზანზარი, გულანშარო და ქაჯეთი (15)",
     s: "მულღაზანზარის, ზღვათა სამეფოსა და ქაჯეთის ციხის ყველა პერსონაჟი.",
-    chars: ["pridon", "pridon_cousins", "pridon_herdsmen", "usam", "mebaghe", "fatman", "usen", "surkhav", "surkhav_son", "chashnagir", "grdzneuli_mona", "dulardukht", "rosan", "rodia", "roshaq"]
+    chars: ["pridon", "pridon_cousins", "pridon_herdsmen", "usam", "mebaghe", "fatman", "usen", "surkhav", "surkhav_son", "chashnagir", "grdzneuli_mona", "dulardukht", "rosan", "rodia", "roshaq"],
+    coords: {
+      pridon: [12, 20], pridon_cousins: [31, 18], pridon_herdsmen: [50, 20], usam: [69, 18], mebaghe: [88, 20],
+      fatman: [12, 48], usen: [31, 46], chashnagir: [50, 48], grdzneuli_mona: [69, 46], surkhav: [88, 48],
+      surkhav_son: [12, 76], dulardukht: [31, 76], rosan: [50, 76], rodia: [69, 76], roshaq: [88, 76]
+    }
   },
   "cgen-author": {
-    t: "🖋️ ავტორი და ეპოქა",
+    t: "🖋️ ავტორი და ეპოქა (2)",
     s: "პოემის შემქმნელი და მისი ეპოქის უზენაესი მეფე-პატრონები.",
-    chars: ["rustaveli", "tamar_davit"]
+    chars: ["rustaveli", "tamar_davit"],
+    coords: {
+      rustaveli: [32, 46], tamar_davit: [68, 46]
+    }
   }
+};
+
+const CHAR_COORD_TPL = {
+  2: [[30, 46], [70, 46]],
+  3: [[50, 24], [25, 66], [75, 66]],
+  4: [[25, 26], [75, 26], [25, 68], [75, 68]],
+  5: [[50, 22], [18, 46], [82, 46], [30, 72], [70, 72]],
+  6: [[20, 26], [50, 22], [80, 26], [20, 68], [50, 72], [80, 68]],
+  7: [[20, 24], [50, 20], [80, 24], [15, 62], [38, 70], [62, 70], [85, 62]],
+  8: [[16, 24], [39, 22], [62, 22], [84, 24], [16, 66], [39, 70], [62, 70], [84, 66]]
 };
 
 const CMAP_DATA = {};
@@ -4187,10 +4221,13 @@ function buildGeneralCMaps() {
   Object.keys(GENERAL_CMAPS).forEach(gKey => {
     const g = GENERAL_CMAPS[gKey];
     const activeSet = new Set(g.chars);
-    const nodes = g.chars.map(ck => {
+    const tpl = CHAR_COORD_TPL[g.chars.length] || CHAR_COORD_TPL[8];
+    const nodes = g.chars.map((ck, i) => {
       const db = CHAR_DB[ck];
+      const xy = (g.coords && g.coords[ck]) ? g.coords[ck] : tpl[i % tpl.length];
       return {
         k: ck, n: db.n, lbl: db.lbl || db.n, ic: db.ic, r: db.r,
+        x: xy[0], y: xy[1],
         rels: getCharRelsForSet(ck, activeSet),
         stz: "",
         b: db.b
@@ -4201,7 +4238,7 @@ function buildGeneralCMaps() {
       const ia = g.chars.indexOf(a), ib = g.chars.indexOf(b);
       if (ia >= 0 && ib >= 0) edges.push([ia, ib, rtype]);
     });
-    CMAP_DATA[gKey] = { t: g.t, s: g.s, nodes, edges, groups: g.groups || null };
+    CMAP_DATA[gKey] = { t: g.t, s: g.s, nodes, edges };
   });
 }
 buildGeneralCMaps();
@@ -4220,8 +4257,8 @@ function buildChapterCMapFromDOM(chEl) {
 
   const castKeys = CH_CASTS[cid] || ["tariel", "avtandil", "nestan", "tinatin"];
   const activeSet = new Set(castKeys);
+  const tpl = CHAR_COORD_TPL[castKeys.length] || CHAR_COORD_TPL[8];
 
-  // Only select clean individual items (never .plan-group > .pi-body which concatenates multiple items!)
   const domLines = [];
   chEl.querySelectorAll('.s-plan .pg-list li, .s-plan .plan-item:not(.plan-group) .pi-body, .s-an .an-list li').forEach(el => {
     const clone = el.cloneNode(true);
@@ -4230,8 +4267,9 @@ function buildChapterCMapFromDOM(chEl) {
     if (t && t.length > 12 && !domLines.includes(t)) domLines.push(t);
   });
 
-  const nodes = castKeys.map(ck => {
+  const nodes = castKeys.map((ck, idx) => {
     const db = CHAR_DB[ck];
+    const xy = tpl[idx % tpl.length];
     const matchedKeys = chKeys.filter(k => PAR[k] && db.rx && db.rx.test(PAR[k]));
 
     let stzSpec = chSpec;
@@ -4240,7 +4278,6 @@ function buildChapterCMapFromDOM(chEl) {
       stzSpec = (pro ? 'P' : '') + firstN + (lastN !== firstN ? '–' + lastN : '');
     }
 
-    // Prefer lines where the character appears in the lead/topic part (first 55 chars) so secondary mentions don't misattribute actions
     const primaryMatches = [];
     const secondaryMatches = [];
     domLines.forEach(line => {
@@ -4264,6 +4301,7 @@ function buildChapterCMapFromDOM(chEl) {
 
     return {
       k: ck, n: db.n, lbl: db.lbl || db.n, ic: db.ic, r: db.r,
+      x: xy[0], y: xy[1],
       rels: getCharRelsForSet(ck, activeSet),
       stz: stzSpec,
       b: bullets
@@ -4278,41 +4316,37 @@ function buildChapterCMapFromDOM(chEl) {
 
   CMAP_DATA[cmapId] = {
     t: `${chLabel}: ${chTitle} – თავის პერსონაჟები`,
-    s: 'დააჭირეთ პერსონაჟს, რათა იხილოთ მისი დახასიათება, კავშირები და როლი ამ თავში.',
+    s: 'დააჭირეთ რუკაზე მოცემულ პერსონაჟს ან ქვემოთ განთავსებულ ნომრიან ღილაკს, რათა იხილოთ მისი დახასიათება, კავშირები და როლი ამ თავში.',
     nodes,
-    edges,
-    groups: null
+    edges
   };
   return CMAP_DATA[cmapId];
-}
-
-function renderCMapNodeBtn(cmapId, nd, i) {
-  return `<button type="button" class="cmap-node" data-cmap="${cmapId}" data-cidx="${i}" data-ckey="${nd.k}" title="${escH(nd.n)}">
-    <span class="cmap-avatar">${nd.ic}</span>
-    <span class="cmap-node-lbl">${escH(nd.lbl || nd.n)}</span>
-    <span class="cmap-node-reltag" id="creltag-${cmapId}-${i}"></span>
-  </button>`;
 }
 
 function renderCMapWidget(cmapId, mountEl, isChapter) {
   const cobj = CMAP_DATA[cmapId];
   if (!cobj || !mountEl) return;
   const nodes = cobj.nodes;
-  let innerGridHtml = '';
-  if (cobj.groups && cobj.groups.length) {
-    innerGridHtml = `<div class="cmap-groups-wrap">` + cobj.groups.map(grp => {
-      const grpBtns = grp.keys.map(k => {
-        const idx = nodes.findIndex(n => n.k === k);
-        return idx >= 0 ? renderCMapNodeBtn(cmapId, nodes[idx], idx) : '';
-      }).join('');
-      return `<div class="cmap-group-box">
-        <div class="cmap-group-title">${escH(grp.title)}</div>
-        <div class="cmap-nodes-grid">${grpBtns}</div>
-      </div>`;
-    }).join('') + `</div>`;
-  } else {
-    innerGridHtml = `<div class="cmap-nodes-grid">` + nodes.map((nd, i) => renderCMapNodeBtn(cmapId, nd, i)).join('') + `</div>`;
-  }
+  const isDense = nodes.length > 10;
+
+  let svgLines = '';
+  cobj.edges.forEach(([ia, ib, rtype]) => {
+    const nA = nodes[ia], nB = nodes[ib];
+    if (nA && nB) {
+      svgLines += `<line class="cmap-svg-line rel-${rtype}" data-ea="${ia}" data-eb="${ib}" x1="${nA.x}%" y1="${nA.y}%" x2="${nB.x}%" y2="${nB.y}%" />`;
+    }
+  });
+
+  let nodesHtml = '';
+  let quickStepsHtml = '';
+  nodes.forEach((nd, i) => {
+    const edgeCls = nd.x <= 15 ? ' edge-left' : (nd.x >= 85 ? ' edge-right' : '');
+    nodesHtml += `<button type="button" class="cmap-node" data-cmap="${cmapId}" data-cidx="${i}" data-ckey="${nd.k}" style="left:${nd.x}%;top:${nd.y}%" title="${escH(nd.n)}">
+      <span class="cmap-avatar"><span class="cmap-num">${i + 1}</span>${nd.ic}</span>
+      <span class="cmap-node-lbl${edgeCls}">${escH(nd.lbl || nd.n)}</span>
+    </button>`;
+    quickStepsHtml += `<button type="button" class="cmap-qpill" data-cmap="${cmapId}" data-cidx="${i}" data-ckey="${nd.k}">${i + 1}. ${escH(nd.lbl || nd.n)}</button>`;
+  });
 
   const jumpGenBtn = isChapter ? `<button type="button" class="cmap-step-btn" data-jump-gen-cmap="1">👥 პერსონაჟების საერთო რუკა</button>` : `<span></span>`;
   mountEl.innerHTML = `<div class="cmap-widget" id="cwidget-${cmapId}" data-cmap-id="${cmapId}">
@@ -4320,9 +4354,15 @@ function renderCMapWidget(cmapId, mountEl, isChapter) {
       <h4 class="vmap-heading" style="color:var(--violet-d)">${escH(cobj.t)}</h4>
       <p class="vmap-sub">${escH(cobj.s)}</p>
     </div>
-    <div class="cmap-canvas" id="ccanvas-${cmapId}">
-      <svg class="cmap-svg-lines" id="csvg-${cmapId}" aria-hidden="true"></svg>
-      ${innerGridHtml}
+    <div class="cmap-canvas${isDense ? ' dense-canvas' : ''}" id="ccanvas-${cmapId}">
+      <div class="vmap-bg-decor" aria-hidden="true">
+        <span class="vmap-watermark wm-nw">👑 არაბეთი</span>
+        <span class="vmap-watermark wm-c">🌟 მთავარი გმირები</span>
+        <span class="vmap-watermark wm-ne">🇮🇳 ინდოეთი · ხატაეთი</span>
+        <span class="vmap-watermark wm-s">🌊 გულანშარო · ქაჯეთი</span>
+      </div>
+      <svg class="cmap-svg-lines" id="csvg-${cmapId}" aria-hidden="true">${svgLines}</svg>
+      ${nodesHtml}
       <div class="cmap-legend-bar" aria-hidden="true">
         <span>❤️ მიჯნურობა</span>
         <span>🤝 ძმადნაფიცობა / თანადგომა</span>
@@ -4330,6 +4370,7 @@ function renderCMapWidget(cmapId, mountEl, isChapter) {
         <span>⚔️ დაპირისპირება</span>
       </div>
     </div>
+    <div class="vmap-quick-steps cmap-quick-steps" role="tablist" aria-label="პერსონაჟების სწრაფი სია">${quickStepsHtml}</div>
     <div class="cmap-display" id="cdisplay-${cmapId}">
       <div class="vmap-content-top">
         <span class="cmap-role-badge" id="cbadge-${cmapId}"></span>
@@ -4350,42 +4391,6 @@ function renderCMapWidget(cmapId, mountEl, isChapter) {
   selectCMapNode(cmapId, cmapState[cmapId] || 0);
 }
 
-function updateCMapLines(cmapId) {
-  const cobj = CMAP_DATA[cmapId];
-  const canvas = document.getElementById('ccanvas-' + cmapId);
-  const svg = document.getElementById('csvg-' + cmapId);
-  if (!cobj || !canvas || !svg) return;
-  const cRect = canvas.getBoundingClientRect();
-  if (!cRect.width || !cRect.height) return;
-  const activeIdx = cmapState[cmapId] ?? 0;
-  const activeNode = cobj.nodes[activeIdx];
-  if (!activeNode) return;
-
-  const nodeBtns = canvas.querySelectorAll('.cmap-node');
-  const posMap = {};
-  nodeBtns.forEach(btn => {
-    const idx = +btn.dataset.cidx;
-    const r = btn.getBoundingClientRect();
-    posMap[idx] = {
-      x: r.left - cRect.left + r.width / 2,
-      y: r.top - cRect.top + r.height / 2
-    };
-  });
-
-  const pA = posMap[activeIdx];
-  if (!pA) return;
-  let pathsHtml = '';
-  activeNode.rels.forEach(rel => {
-    const targetIdx = cobj.nodes.findIndex(n => n.k === rel.target);
-    const pB = posMap[targetIdx];
-    if (!pB) return;
-    const mx = (pA.x + pB.x) / 2;
-    const my = (pA.y + pB.y) / 2 - Math.min(28, Math.hypot(pB.x - pA.x, pB.y - pA.y) * 0.12);
-    pathsHtml += `<path class="cmap-svg-line rel-${rel.type}" d="M ${pA.x.toFixed(1)} ${pA.y.toFixed(1)} Q ${mx.toFixed(1)} ${my.toFixed(1)} ${pB.x.toFixed(1)} ${pB.y.toFixed(1)}" />`;
-  });
-  svg.innerHTML = pathsHtml;
-}
-
 function selectCMapNode(cmapId, idx) {
   const cobj = CMAP_DATA[cmapId];
   if (!cobj || idx < 0 || idx >= cobj.nodes.length) return;
@@ -4399,13 +4404,13 @@ function selectCMapNode(cmapId, idx) {
   const widget = document.getElementById('cwidget-' + cmapId);
 
   if (badge) badge.textContent = `${nd.ic} ${nd.r}`;
-  if (titleEl) titleEl.textContent = `${nd.n} (${idx + 1}/${cobj.nodes.length})`;
+  if (titleEl) titleEl.textContent = `${idx + 1}. ${nd.n}`;
   if (stzEl) stzEl.innerHTML = makeStzBtns(nd.stz);
   if (relsEl) {
     relsEl.innerHTML = nd.rels.length
       ? nd.rels.map(r => {
           const tIdx = cobj.nodes.findIndex(n => n.k === r.target);
-          return `<button type="button" class="cmap-rel-chip" data-cmap="${cmapId}" data-cidx="${tIdx}">${escH(r.label)} → <b>${escH(r.targetName)}</b></button>`;
+          return `<button type="button" class="cmap-rel-chip" data-cmap="${cmapId}" data-cidx="${tIdx}">${escH(r.label)} → <b>${tIdx + 1}. ${escH(r.targetName)}</b></button>`;
         }).join('')
       : '';
   }
@@ -4421,19 +4426,26 @@ function selectCMapNode(cmapId, idx) {
       const rel = relByTarget[ckey];
       el.classList.toggle('active', k === idx);
       el.classList.remove('has-rel', 'rel-peer-love', 'rel-peer-bro', 'rel-peer-kin', 'rel-peer-foe');
-      const tagEl = document.getElementById(`creltag-${cmapId}-${k}`);
       if (rel && k !== idx) {
         el.classList.add('has-rel', 'rel-peer-' + rel.type);
-        if (tagEl) tagEl.textContent = rel.label;
-      } else if (tagEl) {
-        tagEl.textContent = '';
       }
+    });
+    widget.querySelectorAll('.cmap-qpill').forEach((pill, k) => {
+      const ckey = pill.dataset.ckey;
+      const rel = relByTarget[ckey];
+      pill.classList.toggle('active', k === idx);
+      pill.classList.toggle('has-rel', Boolean(rel && k !== idx));
+    });
+    widget.querySelectorAll('.cmap-svg-line').forEach(line => {
+      const ea = +line.dataset.ea, eb = +line.dataset.eb;
+      const isInc = (ea === idx || eb === idx);
+      line.classList.toggle('active-edge', isInc);
+      line.classList.toggle('dim-edge', !isInc);
     });
     widget.querySelectorAll('[data-cmap-step]').forEach(btn => {
       const dir = +btn.dataset.dir;
       btn.disabled = (idx + dir < 0 || idx + dir >= cobj.nodes.length);
     });
-    requestAnimationFrame(() => updateCMapLines(cmapId));
   }
 }
 
@@ -4474,13 +4486,9 @@ function setGenCMapOpen(open) {
   if (cmapNavBtn) cmapNavBtn.classList.toggle('on', open);
   if (open) {
     if (typeof setGenMapOpen === 'function') setGenMapOpen(false);
-    if (gcmMount) {
-      if (!gcmMount.dataset.rendered) {
-        gcmMount.dataset.rendered = '1';
-        renderCMapWidget(curGenCRoute, gcmMount, false);
-      } else {
-        requestAnimationFrame(() => updateCMapLines(curGenCRoute));
-      }
+    if (gcmMount && !gcmMount.dataset.rendered) {
+      gcmMount.dataset.rendered = '1';
+      renderCMapWidget(curGenCRoute, gcmMount, false);
     }
   }
 }
@@ -4493,21 +4501,12 @@ if (toggleGenCBtn) {
 }
 
 document.addEventListener('click', e => {
-  const cnode = e.target.closest('.cmap-node, .cmap-rel-chip');
+  const cnode = e.target.closest('.cmap-node, .cmap-qpill, .cmap-rel-chip');
   if (cnode && cnode.dataset.cmap !== undefined) {
     const cmapId = cnode.dataset.cmap;
     const cidx = +cnode.dataset.cidx;
     if (cidx >= 0) {
       selectCMapNode(cmapId, cidx);
-      if (cnode.classList.contains('cmap-node')) {
-        const dispEl = document.getElementById('cdisplay-' + cmapId);
-        if (dispEl) {
-          const r = dispEl.getBoundingClientRect();
-          if (r.top > window.innerHeight - 60) {
-            dispEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        }
-      }
     }
     return;
   }
@@ -4568,7 +4567,6 @@ document.querySelectorAll('details.cmap-box').forEach(d => {
     if (d.open) {
       const chEl = d.closest('.chapter');
       ensureChapterCMapRendered(chEl);
-      if (chEl) requestAnimationFrame(() => updateCMapLines('cmap-' + chEl.id));
     }
   });
 });
@@ -4581,14 +4579,6 @@ window.addEventListener('hashchange', () => {
   if (cur >= 0 && chs[cur]) {
     ensureChapterMapRendered(chs[cur]);
     ensureChapterCMapRendered(chs[cur]);
-  }
-});
-window.addEventListener('resize', () => {
-  if (gcmBodyEl && !gcmBodyEl.classList.contains('hidden')) {
-    updateCMapLines(curGenCRoute);
-  }
-  if (cur >= 0 && chs[cur]) {
-    updateCMapLines('cmap-' + chs[cur].id);
   }
 });
 
