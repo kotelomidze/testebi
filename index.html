@@ -130,6 +130,8 @@
   .vjbox h4{margin:0 0 4px;font-size:1rem}
   .vjbox .vjrow .vjb{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
   .vjbox .vjrow .vjb .on{background:var(--lapis-soft);border-color:var(--lapis);color:var(--lapis)}
+  .hidegv{display:inline-flex;align-items:center;gap:4px;font-size:.78rem;font-weight:600;color:var(--ochre);margin-left:8px;white-space:nowrap;cursor:pointer}
+  .hidegv input{width:15px;height:15px;margin:0}
   .ordin{width:52px;flex:0 0 auto;font:inherit;font-size:.9rem;padding:3px 4px;border:1.5px solid var(--ochre);border-radius:6px;text-align:center;margin-left:6px;background:#fff}
   .vjbox .vjrow{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
   .vjbox .vjrow span{min-width:0;overflow-wrap:anywhere;font-size:.95rem}
@@ -370,7 +372,7 @@
             <label for="as-from">მონიშვნის გადმოტანა სხვა ჯგუფის ახალი დავალებიდან</label>
             <div class="row"><select id="as-from" class="gselect"></select><button type="button" class="btn ghost" id="as-copy">გადმოტანა</button></div>
           </div>
-          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="hide-given"><span>მიცემულების დამალვა</span></label><label class="showoff"><input type="checkbox" id="num-mode"><span>დანომვრა (რიგი)</span></label><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
+          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="num-mode"><span>დანომვრა (რიგი)</span></label><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
           <div id="vis-tree" class="vis"></div>
           <div class="vjbox" id="vj-box">
             <h4>წინადადებების რედაქტირება (ვარჯიში)</h4>
@@ -990,7 +992,7 @@ function joinItems(set, notes){
 }
 /* დავალებების რიგი: მასწავლებელი ნომრავს (CFG.order / ORDER), დანომრილები — ნომრის მიხედვით, დანარჩენი — ძველი რიგით */
 let ORDER = lsGet("lit-order", {});
-let HIDE_GIVEN = !!lsGet("lit-hide-given", false), NUM_MODE = false;   // მასწავლებლის სიის ჩვენების პარამეტრები
+let NUM_MODE = false;   // მასწავლებლის სიის ჩვენების პარამეტრები
 function setOrder(o){ if(o && typeof o === "object"){ ORDER = o; lsSet("lit-order", o); } }
 const ordOf = k => { const v = ORDER[String(k).split("#")[0]]; return v > 0 ? v : Infinity; };
 function sortRows(arr, keyOf){ return arr.sort((a, b) => ordOf(keyOf(a)) - ordOf(keyOf(b))); }   // stable: ნომრის გარეშე რიგი რჩება
@@ -1192,7 +1194,9 @@ let CFG = { groups: [], materials: [], disabled: new Set() };   // disabled: ს
 let DIRTY = false, CATALOG = null, NODES = {}, AS_GROUP = null, EDIT = null;   // EDIT: { aid (null = ახალი), set:Set }
 const byDate = (a, b) => String(a.date).localeCompare(String(b.date));
 function loadCfg(r){
-  CFG.groups = (r.groups || []).map(g => ({ id:g.id, name:g.name, members:new Set(g.members || []), assigns:(g.assigns || []).slice().sort(byDate) }));
+  const oldOff = Array.isArray(r.disabled) ? r.disabled : [];   // ძველი საერთო „გათიშვა“ — ყველა ჯგუფს გადაეცემა
+  CFG.groups = (r.groups || []).map(g => ({ id:g.id, name:g.name, members:new Set(g.members || []), assigns:(g.assigns || []).slice().sort(byDate),
+    off:new Set(Array.isArray(g.off) ? g.off : oldOff), hide:new Set(g.hide || []) }));
   CFG.materials = (r.materials || []).slice();
   if(Array.isArray(r.disabled)) CFG.disabled = new Set(r.disabled);
   if(typeof r.noBank === "boolean"){ CFG.noBank = r.noBank; NOBANK = r.noBank; }
@@ -1338,8 +1342,6 @@ $("as-new").onclick = () => { EDIT = { aid:null, set:new Set(), notes:{} }; open
 $("as-cancel").onclick = () => { EDIT = null; renderAssign(); };
 $("as-clear").onclick = () => { EDIT.set.clear(); refreshChecks(); };
 $("show-off").onchange = () => { SHOW_OFF = $("show-off").checked; renderTree(); };
-$("hide-given").checked = HIDE_GIVEN;
-$("hide-given").onchange = () => { HIDE_GIVEN = $("hide-given").checked; lsSet("lit-hide-given", HIDE_GIVEN); renderTree(); };
 $("num-mode").onchange = () => { NUM_MODE = $("num-mode").checked; renderTree();
   if(NUM_MODE){ $("vis-msg").textContent = "ჩაწერე ნომრები (1, 2, 3…) — ამ რიგით გამოჩნდება შენთანაც და მოსწავლესთანაც. ბოლოს დააჭირე „ცვლილებების შენახვას“."; $("vis-msg").className = "msg"; } };
 $("as-copy").onclick = () => {
@@ -1428,17 +1430,19 @@ function matNodes(mats){
 }
 // მონიშვნის ერთეული: კონკრეტული დავალება/ტექსტი/მასალა („გააზრება და თემის“ ტექსტს შიგნით მითითებაც აქვს)
 const isItem = n => n.key.indexOf("m:") !== 0 && (!n.kids || !n.kids.length || (n.act && n.act.t === "tema"));
-const isOff = n => CFG.disabled.has(n.key);
+const grpOff = () => { const g = curGroup(); return g ? (g.off || (g.off = new Set())) : new Set(); };
+const isOff = n => grpOff().has(n.key);   // „გათიშვა“ — მხოლოდ ამ ჯგუფის სიაში
 function itemKeys(n){ const out = []; (function w(x){ if(x !== n && isOff(x)) return; if(isItem(x)) out.push(x.key); (x.kids || []).forEach(w); })(n); return out; }
 let SHOW_OFF = false;
 function offBtn(n, depth){   // „გათიშვა“ / „ჩართვა“ (ზედა განყოფილებებს არა)
   if(depth === 0 || (n.act && n.act.t === "mit")) return null;
   const b = document.createElement("button"); b.type = "button"; b.className = "xoff";
   b.textContent = isOff(n) ? "ჩართვა" : "გათიშვა";
-  b.title = isOff(n) ? "სიაში დაბრუნება" : "ამ სიიდან დამალვა";
+  b.title = isOff(n) ? "ამ ჯგუფის სიაში დაბრუნება" : "ამ ჯგუფის სიიდან დამალვა (სხვა ჯგუფებთან ჩანს)";
   b.onclick = e => { e.preventDefault(); e.stopPropagation();
-    isOff(n) ? CFG.disabled.delete(n.key) : CFG.disabled.add(n.key);
-    saveAll(isOff(n) ? "„" + n.label + "“ გაითიშა — სიაში აღარ გამოჩნდება." : "„" + n.label + "“ ისევ ჩართულია.");
+    const O = grpOff(), gn = (curGroup() || {}).name || "";
+    O.has(n.key) ? O.delete(n.key) : O.add(n.key);
+    saveAll(isOff(n) ? "„" + n.label + "“ გაითიშა ჯგუფ „" + gn + "“-თან — მის სიაში აღარ გამოჩნდება." : "„" + n.label + "“ ისევ ჩართულია ჯგუფ „" + gn + "“-თან.");
     renderTree(); };
   return b;
 }
@@ -1447,8 +1451,8 @@ function givenMap(){   // ამ ჯგუფს ადრე უკვე მ�
   if(g) g.assigns.forEach(a => { if(EDIT && a.id === EDIT.aid) return; (a.items || []).forEach(k => { m[k] = a.date; }); });
   return m;
 }
-function showNode(n, given){   // „მიცემულების დამალვა“: უკვე მიცემული დავალება სიაში აღარ ჩანს
-  if(!HIDE_GIVEN) return true;
+function showNode(n, given, hide){   // „მიცემულების დამალვა“ (განყოფილებაში, ამ ჯგუფთან): უკვე მიცემული სიაში აღარ ჩანს
+  if(!hide) return true;
   if(isItem(n)) return !given[n.key];
   const k = itemKeys(n); return !k.length || k.some(x => !given[x]);
 }
@@ -1462,7 +1466,16 @@ function ordInput(n){   // ნომერი (რიგი) — ჩანს �
   return i;
 }
 const sortedKids = kids => sortRows(kids.slice(), k => k.key);
-function visNode(n, depth, given){
+function hideBox(n){   // განყოფილების სათაურთან: „მიცემულების დამალვა“ — ცალკე ყოველ განყოფილებასა და ჯგუფში
+  const g = curGroup(); if(!g) return null;
+  const l = document.createElement("label"); l.className = "hidegv"; l.title = "ამ განყოფილებაში ამ ჯგუფისთვის უკვე მიცემული დავალებების დამალვა";
+  const c = document.createElement("input"); c.type = "checkbox"; g.hide = g.hide || new Set(); c.checked = g.hide.has(n.key);
+  l.onclick = e => e.stopPropagation();
+  c.onchange = () => { c.checked ? g.hide.add(n.key) : g.hide.delete(n.key); markDirty(true); renderTree(); };
+  l.append(c, document.createTextNode("მიცემულების დამალვა")); return l;
+}
+function visNode(n, depth, given, hide){
+  if(depth === 0){ const g = curGroup(); hide = !!(g && g.hide && g.hide.has(n.key)); }
   const lab = document.createElement("label"); lab.className = "it";
   const cb = document.createElement("input"); cb.type = "checkbox";
   const sp = document.createElement("span"); sp.textContent = n.label + (n.err ? " (სია ვერ ჩაიტვირთა)" : "");
@@ -1501,9 +1514,15 @@ function visNode(n, depth, given){
   const sm = document.createElement("summary");
   const arr = document.createElement("span"); arr.className = "arr"; arr.textContent = "▸";
   lab.addEventListener("click", e => e.stopPropagation());   // მონიშვნა სიას არ ჩამოშლის
-  sm.append(arr, lab); const oi2 = ordInput(n); if(oi2) sm.appendChild(oi2); if(ob) sm.appendChild(ob); if(off) d.classList.add("dis"); d.appendChild(sm);
+  sm.append(arr, lab); const oi2 = ordInput(n); if(oi2) sm.appendChild(oi2); if(ob) sm.appendChild(ob);
+  if(depth === 0){ const hb = hideBox(n); if(hb) sm.appendChild(hb); }
+  if(off) d.classList.add("dis"); d.appendChild(sm);
   const kids = document.createElement("div"); kids.className = "kids";
-  sortedKids(n.kids).forEach(k => { if((SHOW_OFF || !isOff(k)) && showNode(k, given)) kids.appendChild(visNode(k, depth + 1, given)); });
+  // შიგთავსი იქმნება მხოლოდ ჩამოშლისას — Ctrl+F დახურულ განყოფილებებში არ ეძებს და თავისით არ ხსნის
+  d._build = () => { if(d._built) return; d._built = true;
+    sortedKids(n.kids).forEach(k => { if((SHOW_OFF || !isOff(k)) && showNode(k, given, hide)) kids.appendChild(visNode(k, depth + 1, given, hide)); });
+    refreshChecks(); };
+  d.addEventListener("toggle", () => { if(d.open) d._build(); });
   d.appendChild(kids);
   return d;
 }
@@ -1517,7 +1536,7 @@ function refreshChecks(){
     N.cb.checked = on; N.cb.indeterminate = some; N.sp.classList.toggle("off", !on && !some);
     if(N.ni) N.ni.classList.toggle("hidden", !on);
   });
-  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => NODES[k] || k.indexOf("vj:") === 0 || k.indexOf("stl:") === 0).length;
+  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => k.indexOf(NOTE) !== 0).length;
   renderVj(); renderStl();
 }
 async function renderVj(){
@@ -1584,9 +1603,11 @@ async function renderTree(){
   const open = new Set(Array.from($("vis-tree").querySelectorAll("details[open] > summary label.it span")).map(x => x.firstChild ? x.firstChild.textContent : ""));
   NODES = {}; $("vis-tree").innerHTML = "";
   const given = givenMap();
-  CATALOG.forEach(n => { if(showNode(n, given)) $("vis-tree").appendChild(visNode(n, 0, given)); });
-  $("off-count").textContent = CFG.disabled.size;
-  $("vis-tree").querySelectorAll("details > summary label.it span").forEach(x => { if(x.firstChild && open.has(x.firstChild.textContent)) x.closest("details").open = true; });
+  CATALOG.forEach(n => $("vis-tree").appendChild(visNode(n, 0, given)));
+  $("off-count").textContent = grpOff().size;
+  for(let more = true; more; ){ more = false;   // ადრე ჩამოშლილი განყოფილებები ისევ ჩამოშლილია
+    $("vis-tree").querySelectorAll("details:not([open]) > summary label.it span").forEach(x => {
+      if(x.firstChild && open.has(x.firstChild.textContent)){ const d = x.closest("details"); d._build(); d.open = true; more = true; } }); }
   refreshChecks();
 }
 function fillAdmin(r){
@@ -1599,12 +1620,12 @@ async function saveAll(okMsg){
   const btn = $("vis-save"); btn.disabled = true; $("as-give").disabled = true;
   $("vis-msg").textContent = "ინახება…"; $("vis-msg").className = "msg";
   try{
-    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials, disabled: Array.from(CFG.disabled), noBank: !!CFG.noBank, order: CFG.order || {},
-      groups: CFG.groups.map(g => ({ id:g.id, name:g.name, members:Array.from(g.members), assigns:g.assigns })) });
+    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials, disabled: [], noBank: !!CFG.noBank, order: CFG.order || {},
+      groups: CFG.groups.map(g => ({ id:g.id, name:g.name, members:Array.from(g.members), assigns:g.assigns, off:Array.from(g.off || []), hide:Array.from(g.hide || []) })) });
     if(!r.ok) throw new Error(r.error || "სკრიპტის შეცდომა");
     markDirty(false); fillAdmin(r);
     $("vis-msg").textContent = okMsg || "შენახულია."; $("vis-msg").className = "msg ok";
-    if(!Array.isArray(r.disabled) && CFG.disabled.size){ $("vis-msg").textContent = "გათიშვა არ შეინახა: Apps Script-ში ჩასვი ახალი Code.gs და გამოაქვეყნე (New version)."; $("vis-msg").className = "msg bad"; }
+    if(false){ $("vis-msg").textContent = "გათიშვა არ შეინახა: Apps Script-ში ჩასვი ახალი Code.gs და გამოაქვეყნე (New version)."; $("vis-msg").className = "msg bad"; }
   }catch(e){ $("vis-msg").textContent = netErr(e); $("vis-msg").className = "msg bad"; markDirty(true); }
   finally{ btn.disabled = false; $("as-give").disabled = false; }
 }
