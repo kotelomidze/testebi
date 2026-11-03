@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>სტილისტიკა — კოტეს დავალება</title>
+<link rel="icon" type="image/png" href="../icons/favicon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f6f9; --surface:#fff; --alt:#f8fafc; --primary:#1e40af; --primary-h:#1e3a8a; --primary-l:#eff6ff;
+    --err-bg:#fef2f2; --err-b:#f87171; --err-t:#991b1b; --acc-bg:#fffbeb; --acc-b:#fbbf24; --acc-t:#92400e;
+    --hint-bg:#f0fdf4; --hint-b:#86efac; --hint-t:#166534; --text:#0f172a; --muted:#475569; --border:#e2e8f0;
+    --green:#15803d; --radius:12px; --shadow:0 4px 20px rgba(15,23,42,.07);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Noto Sans Georgian","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:16px;line-height:1.55}
+  button{font:inherit;cursor:pointer;touch-action:manipulation}
+  .shell{max-width:860px;margin:0 auto}
+  .hidden{display:none !important}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .top h1{font-size:1.25rem;margin:0;color:var(--primary)}
+  .who{font-size:.9rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px 12px}
+  .back{display:inline-block;padding:7px 14px;border:1.5px solid var(--border);border-radius:10px;color:var(--primary);font-weight:600;font-size:.92rem;text-decoration:none;background:var(--surface)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-bottom:14px}
+  .btn{background:var(--primary);color:#fff;border:0;border-radius:10px;padding:11px 20px;font-weight:600;min-height:46px}
+  .btn:hover{background:var(--primary-h)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:var(--surface);color:var(--primary);border:1.5px solid #c7d2fe}
+  .btn.ghost:hover{background:var(--primary-l)}
+  .btn.green{background:var(--green)}
+  .btn.hintb{background:var(--hint-bg);color:var(--hint-t);border:1.5px solid var(--hint-b)}
+  .msg{padding:10px 14px;border-radius:10px;margin:10px 0;font-weight:600}
+  .msg.bad{background:var(--err-bg);color:var(--err-t)}
+  .msg.ok{background:var(--hint-bg);color:var(--hint-t)}
+  .lead{color:var(--muted);margin:0 0 14px}
+  /* სავარჯიშო */
+  .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .badge{display:inline-block;font-size:.8rem;font-weight:700;border-radius:999px;padding:3px 10px;border:1px solid}
+  .b-err{background:var(--err-bg);color:var(--err-t);border-color:var(--err-b)}
+  .b-acc{background:var(--acc-bg);color:var(--acc-t);border-color:var(--acc-b)}
+  .pill{font-size:.85rem;font-weight:700;color:var(--primary);background:var(--primary-l);border-radius:999px;padding:3px 12px}
+  .instr{font-weight:600;margin:6px 0 10px}
+  .ref{background:var(--alt);border:1px dashed var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:1.05rem}
+  textarea.ans{width:100%;font:inherit;font-size:1.05rem;padding:12px 14px;border:2px solid var(--border);border-radius:10px;resize:vertical;min-height:90px}
+  textarea.ans:focus{outline:none;border-color:var(--primary)}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:2px solid var(--border);border-radius:10px;background:var(--surface);text-align:left;width:100%}
+  .opt .r{flex:0 0 20px;height:20px;border-radius:50%;border:2px solid #94a3b8;margin-top:3px}
+  .opt.sel{border-color:var(--primary);background:var(--primary-l)}
+  .opt.sel .r{border-color:var(--primary);background:radial-gradient(var(--primary) 45%, transparent 50%)}
+  .hint{background:var(--hint-bg);border:1.5px solid var(--hint-b);color:var(--hint-t);border-radius:10px;padding:12px 14px;margin-top:12px}
+  .hint b{display:block;margin-bottom:4px}
+  .hint .sol{margin-top:8px;color:var(--text)}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:14px}
+  .nav .l{display:flex;gap:8px;flex-wrap:wrap}
+  .dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+  .dots button{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--alt);color:#94a3b8;font-size:.8rem;font-weight:700;padding:0}
+  .dots button.done{background:var(--primary-l);color:var(--primary);border-color:#c7d2fe}
+  .dots button.cur{background:var(--primary);color:#fff;border-color:var(--primary)}
+  /* მასწავლებელი */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr} }
+  .f label.t{display:block;font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+  .seg{display:flex;gap:4px;padding:4px;background:var(--alt);border:1px solid var(--border);border-radius:12px;flex-wrap:wrap}
+  .seg button{flex:1 1 auto;border:0;background:transparent;border-radius:9px;padding:8px 10px;font-weight:600;color:var(--muted);font-size:.9rem}
+  .seg button.on{background:var(--surface);color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  select.in, input.in{width:100%;font:inherit;font-size:16px;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface)}
+  .chk{display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:.95rem}
+  .chk input{margin-top:4px;width:18px;height:18px;flex:0 0 auto}
+  .topics{max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:6px;background:var(--alt);margin-top:8px}
+  .topics label{display:flex;gap:8px;align-items:flex-start;padding:5px 6px;border-radius:7px;cursor:pointer;font-size:.92rem}
+  .topics label:hover{background:#fff}
+  .topics label .c{margin-left:auto;color:#94a3b8;font-size:.8rem;flex:0 0 auto;padding-left:6px}
+  .topics label.z{opacity:.45}
+  .avail{font-weight:700;font-size:1rem}
+  .avail b{color:var(--primary)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><h1>სტილისტიკა</h1><span class="who" id="who"></span></div>
+  <div id="app"><p class="lead">იტვირთება…</p></div>
+</div>
+<script src="../config.js"></script>
+<script>
+"use strict";
+const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbycuDAMQrAPEoa3rjtgf69Z-1rqwVIbyNB6fGyWSfpj6JDtny4HGZAMS6dMd93Lt8FU2w/exec";
+const SEND_URL = ((typeof SCRIPT_URL !== "undefined" && /\/exec$/.test(String(SCRIPT_URL).trim())) ? String(SCRIPT_URL) : DEFAULT_URL).trim();
+const $ = id => document.getElementById(id);
+const APP = $("app");
+const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
+const lsGet = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; }catch(e){ return d; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
+const ssGet = k => { try{ return sessionStorage.getItem(k); }catch(e){ return null; } };
+async function api(body){
+  const r = await fetch(SEND_URL, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+  const t = await r.text();
+  try{ return JSON.parse(t); }catch(e){ throw new Error("სკრიპტმა მოულოდნელი პასუხი დააბრუნა. Apps Script-ში ახალი Code.gs უნდა იყოს გამოქვეყნებული (New version)."); }
+}
+const netErr = e => (e && e.message && e.message !== "Failed to fetch" && e.message !== "Load failed") ? e.message : "სკრიპტთან დაკავშირება ვერ მოხერხდა. შეამოწმე ინტერნეტი.";
+const parseCfg = s => { const p = {}; String(s || "").split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); }); return p; };
+
+/* ---------- სავარჯიშოს ჩვენება (მოსწავლეც და მასწავლებლის ნახვაც) ---------- */
+// run: { items, ans:{id:{a, sel, h}}, idx }, opt: { mode, hint, onChange, onSubmit, preview }
+function drill(host, run, opt){
+  const A = id => run.ans[id] || (run.ans[id] = { a:null, sel:null, h:false });
+  const filled = it => { const a = run.ans[it.id]; return !!a && (opt.mode === "s" ? a.sel != null : (a.a != null && a.a.trim() !== it.q.trim())); };
+  function render(){
+    const i = Math.max(0, Math.min(run.idx, run.items.length - 1)), it = run.items[i], a = A(it.id);
+    host.innerHTML = "";
+    const card = el("div", "card");
+    const meta = el("div", "meta");
+    meta.append(el("span", "badge " + (it.err ? "b-err" : "b-acc"), it.err ? "ცალსახად არასწორი" : "დასაშვებია, მაგრამ სხვა ფორმა უმჯობესია"),
+      el("span", "pill", (i + 1) + " / " + run.items.length));
+    card.appendChild(meta);
+    const w = opt.mode === "w";
+    card.appendChild(el("p", "instr", it.err
+      ? (w ? "მოცემული წინადადება ცალსახად მცდარია. გაასწორე შეცდომა:" : "ერთი წინადადება ცალსახად მცდარია. მონიშნე მართებული ვარიანტი:")
+      : (w ? "მოცემული ფორმა დასაშვებია, მაგრამ სტილისტურად სხვა ფორმა უკეთესია. გააუმჯობესე წინადადება:" : "ორივე ფორმა გვხვდება, მაგრამ ერთი სტილისტურად უმჯობესია. მონიშნე უკეთესი ვარიანტი:")));
+    if(w){
+      card.appendChild(el("div", "ref", it.q));
+      const ta = el("textarea", "ans"); ta.rows = 3; ta.spellcheck = false; ta.value = a.a == null ? it.q : a.a; ta.setAttribute("aria-label", "შენი პასუხი");
+      ta.oninput = () => { a.a = ta.value; opt.onChange(); };
+      card.appendChild(ta);
+    } else {
+      const box = el("div", "opts");
+      (it.o || []).forEach((t, j) => {
+        const b = el("button", "opt" + (a.sel === j ? " sel" : "")); b.type = "button";
+        b.append(el("span", "r"), el("span", "", t));
+        b.onclick = () => { a.sel = j; opt.onChange(); box.querySelectorAll(".opt").forEach((x, k) => x.classList.toggle("sel", k === j)); };
+        box.appendChild(b);
+      });
+      card.appendChild(box);
+    }
+    if(it.hint && opt.hint){
+      const hb = el("button", "btn hintb", "💡 მინიშნება"); hb.type = "button"; hb.style.marginTop = "12px";
+      const hx = el("div", "hint hidden");
+      hx.append(el("b", "", "📌 საკითხი: " + it.hint.hw), el("div", "", it.hint.comment));
+      const sol = el("div", "sol"); sol.append(el("b", "", "სწორი / უმჯობესი ვარიანტი:"));
+      it.hint.t.forEach(t => sol.append(el("div", "", "• " + t))); hx.appendChild(sol);
+      hb.onclick = () => { const show = hx.classList.toggle("hidden") === false; if(show && !a.h){ a.h = true; opt.onChange(); } };
+      card.append(hb, hx);
+    }
+    const nav = el("div", "nav"), l = el("div", "l");
+    const prev = el("button", "btn ghost", "← წინა"); prev.type = "button"; prev.disabled = i === 0; prev.onclick = () => { run.idx = i - 1; opt.onChange(); render(); scrollTo(0, 0); };
+    const next = el("button", "btn ghost", "შემდეგი →"); next.type = "button"; next.disabled = i === run.items.length - 1; next.onclick = () => { run.idx = i + 1; opt.onChange(); render(); scrollTo(0, 0); };
+    l.append(prev, next); nav.appendChild(l);
+    if(opt.onSubmit){ const s = el("button", "btn green", "დასრულება და გაგზავნა"); s.type = "button"; s.onclick = () => opt.onSubmit(filled); nav.appendChild(s); }
+    card.appendChild(nav);
+    const dots = el("div", "dots");
+    run.items.forEach((x, k) => { const b = el("button", k === i ? "cur" : filled(x) ? "done" : "", String(k + 1)); b.type = "button";
+      b.onclick = () => { run.idx = k; opt.onChange(); render(); }; dots.appendChild(b); });
+    card.appendChild(dots);
+    const m = el("div"); m.id = "send-msg"; card.appendChild(m);
+    host.appendChild(card);
+  }
+  render();
+}
+
+/* ======================= მოსწავლე ======================= */
+async function startStudent(){
+  let name = ssGet("lit-session-name") || ""; if(!name){ try{ name = localStorage.getItem("lit-user") || ""; }catch(e){} }
+  const cfg = decodeURIComponent((location.hash || "").replace(/^#/, "")), p = parseCfg(cfg);
+  APP.innerHTML = "";
+  const back = el("a", "back", "← დავალებაზე დაბრუნება"); back.href = "../";
+  back.onclick = () => { try{ sessionStorage.setItem("lit-return", "assign"); }catch(e){} };
+  const bw = el("p"); bw.style.margin = "0 0 14px"; bw.appendChild(back); APP.appendChild(bw);
+  if(!name){ APP.appendChild(el("p", "lead", "ჯერ მთავარ გვერდზე შედი შენი სახელით და გვარით.")); return; }
+  $("who").textContent = name;
+  if(!cfg){ APP.appendChild(el("p", "lead", "დავალება არ არის არჩეული.")); return; }
+  const RUN = "stl-run:" + name + ":" + cfg, key = "stl:" + cfg;
+  let run = lsGet(RUN, null);
+  const host = el("div"); APP.appendChild(host);
+  if(!run){
+    host.appendChild(el("p", "lead", "წინადადებები იტვირთება…"));
+    try{
+      const r = await api({ action:"stlGet", name, cfg });
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+      if(!r.items.length) throw new Error("ამ პარამეტრებით წინადადება ვერ მოიძებნა. მიმართე მასწავლებელს.");
+      run = { items: r.items, ans: {}, idx: 0 }; lsSet(RUN, run);
+    }catch(e){ host.innerHTML = ""; host.appendChild(el("div", "msg bad", netErr(e))); return; }
+  }
+  const save = () => lsSet(RUN, run);
+  const mode = p.m === "s" ? "s" : "w";
+  drill(host, run, { mode, hint: p.h === "1", onChange: save, onSubmit: filled => {
+    const empty = run.items.filter(it => !filled(it)).length, m = $("send-msg"); m.innerHTML = "";
+    if(empty){
+      const w = el("div", "msg bad", (mode === "s" ? "მონიშნული არ არის " : "შეუცვლელია ") + empty + " წინადადება. მაინც გავგზავნო? ");
+      const y = el("button", "btn", "კი, გაგზავნე"); y.type = "button"; y.onclick = send;
+      const n = el("button", "btn ghost", "არა"); n.type = "button"; n.style.marginLeft = "6px"; n.onclick = () => { m.innerHTML = ""; };
+      w.append(el("br"), y, n); m.appendChild(w);
+    } else send();
+  } });
+  async function send(){
+    const m = $("send-msg"); m.innerHTML = ""; const info = el("div", "msg ok", "იგზავნება…"); m.appendChild(info);
+    host.querySelectorAll("button").forEach(b => b.disabled = true);
+    const items = run.items.map(it => { const a = run.ans[it.id] || {};
+      return { id: it.id, h: !!a.h, a: mode === "s" ? (a.sel == null ? "" : it.o[a.sel]) : (a.a == null ? it.q : a.a) }; });
+    try{
+      const r = await api({ action:"stlSubmit", name, cfg, items, time: new Date().toLocaleString("ka-GE") });
+      if(!r || !r.ok) throw new Error(r && r.error);
+      lsDel(RUN);
+      const dk = "lit-done:" + name, d = lsGet(dk, []); if(d.indexOf(key) < 0){ d.push(key); lsSet(dk, d); }
+      host.innerHTML = "";
+      const c = el("div", "card"); c.append(el("h2", "", "გაიგზავნა ✔"), el("p", "lead", "პასუხები მასწავლებელს გაეგზავნა."));
+      const b = el("a", "btn", "დავალებაზე დაბრუნება"); b.href = "../"; b.style.cssText = "display:inline-block;text-decoration:none";
+      b.onclick = () => { try{ sessionStorage.setItem("lit-return", "assign"); }catch(e){} };
+      c.appendChild(b); host.appendChild(c); scrollTo(0, 0);
+    }catch(e){
+      info.className = "msg bad"; info.textContent = "ვერ გაიგზავნა: " + netErr(e) + " პასუხები შენახულია — სცადე ხელახლა.";
+      host.querySelectorAll("button").forEach(b => b.disabled = false);
+    }
+  }
+}
+
+/* ======================= მასწავლებელი: დავალების შედგენა ======================= */
+const SETS = [["", "ყველა წინადადება"], ["old", "ჩემი პროგრამა (ერრატა 2)"], ["new", "ახალი წიგნი (წიგნი VII)"], ["rep", "ახალი — განმეორებადი შეცდომებით"], ["uniq", "ახალი — ახალი ტიპის შეცდომებით"]];
+async function startTeacher(){
+  $("who").textContent = "დავალების შედგენა";
+  let M;
+  try{ M = await (await fetch("meta.json", { cache:"no-store" })).json(); }catch(e){ APP.innerHTML = ""; APP.appendChild(el("div", "msg bad", "meta.json ვერ ჩაიტვირთა.")); return; }
+  const S = { m:"w", c:"", s:"", h:false, n:"", allK:true, k:new Set(), q:"" };
+  const inFrame = window.parent !== window;
+  const passBase = (f, c, s) => { const err = f & 1, nw = f & 2, rep = f & 4;
+    if(c === "e" && !err) return false; if(c === "a" && err) return false;
+    if(s === "old" && nw) return false; if(s === "new" && !nw) return false;
+    if(s === "rep" && !(nw && rep)) return false; if(s === "uniq" && !(nw && !rep)) return false; return true; };
+  const avail = () => M.items.filter(x => passBase(x[1], S.c, S.s) && (S.allK || S.k.has(x[0]))).length;
+  const cfgStr = () => {
+    const a = [];
+    if(S.m === "s") a.push("m=s"); if(S.c) a.push("c=" + S.c); if(S.s) a.push("s=" + S.s);
+    if(!S.allK && S.k.size) a.push("k=" + Array.from(S.k).sort((x, y) => x - y).join("."));
+    if(+S.n > 0) a.push("n=" + (+S.n)); if(S.h) a.push("h=1");
+    return a.join("&") || "n=0";
+  };
+  APP.innerHTML = "";
+  const main = el("div"), prevHost = el("div", "hidden"); APP.append(main, prevHost);
+  const card = el("div", "card"); main.appendChild(card);
+  card.appendChild(el("p", "lead", "აირჩიე პარამეტრები და დააჭირე „დავალებაში დამატებას“. ყოველ მოსწავლეს ამ პარამეტრებით შემთხვევითი წინადადებები შეხვდება."));
+  const seg = (label, opts, get, set) => {
+    const f = el("div", "f"); f.appendChild(el("label", "t", label)); const s = el("div", "seg");
+    opts.forEach(([v, t]) => { const b = el("button", get() === v ? "on" : "", t); b.type = "button";
+      b.onclick = () => { set(v); s.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); drawTopics(); upd(); }; s.appendChild(b); });
+    f.appendChild(s); return f;
+  };
+  const g1 = el("div", "grid");
+  g1.append(seg("რეჟიმი", [["w", "✍️ ჩასაწერი"], ["s", "☑️ ასარჩევი"]], () => S.m, v => S.m = v),
+    seg("კატეგორია", [["", "ორივე"], ["e", "ცალსახად არასწორი"], ["a", "დასაშვები → უმჯობესი"]], () => S.c, v => S.c = v));
+  card.appendChild(g1);
+  const g2 = el("div", "grid"); g2.style.marginTop = "14px";
+  const fs = el("div", "f"); fs.appendChild(el("label", "t", "ნაკრები")); const ss = el("select", "in");
+  SETS.forEach(([v, t]) => { const o = el("option", "", t); o.value = v; ss.appendChild(o); }); ss.onchange = () => { S.s = ss.value; drawTopics(); upd(); }; fs.appendChild(ss);
+  const fn = el("div", "f"); fn.appendChild(el("label", "t", "წინადადებების რაოდენობა")); const ni = el("input", "in"); ni.type = "number"; ni.min = "1"; ni.inputMode = "numeric";
+  ni.oninput = () => { S.n = ni.value.replace(/[^0-9]/g, ""); upd(); }; fn.appendChild(ni);
+  g2.append(fs, fn); card.appendChild(g2);
+  const hl = el("label", "chk"); hl.style.marginTop = "14px"; const hc = el("input"); hc.type = "checkbox"; hc.onchange = () => { S.h = hc.checked; upd(); };
+  hl.append(hc, el("span", "", "💡 მოსწავლეს მინიშნება გამოუჩნდეს (სწორ ვარიანტს და წესს აჩვენებს; პასუხებში დაგეწერება, გამოიყენა თუ არა)")); card.appendChild(hl);
+  // საკითხები
+  const tc = el("div", "card"); main.appendChild(tc);
+  tc.appendChild(el("label", "t", "საკითხები")); tc.lastChild.style.cssText = "display:block;font-size:.8rem;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:6px";
+  const al = el("label", "chk"); const ac = el("input"); ac.type = "checkbox"; ac.checked = true;
+  al.append(ac, el("span", "", "ყველა საკითხი")); tc.appendChild(al);
+  const tw = el("div", "hidden"); tc.appendChild(tw);
+  const tq = el("input", "in"); tq.type = "search"; tq.placeholder = "საკითხის ძიება…"; tq.style.marginTop = "8px";
+  const tr = el("div", "row"); tr.style.marginTop = "8px";
+  const tAll = el("button", "btn ghost", "ხილულების მონიშვნა"); tAll.type = "button";
+  const tNone = el("button", "btn ghost", "გასუფთავება"); tNone.type = "button";
+  const tCnt = el("span", "lead"); tCnt.style.margin = "0";
+  tr.append(tAll, tNone, tCnt);
+  const tl = el("div", "topics"); tw.append(tq, tr, tl);
+  ac.onchange = () => { S.allK = ac.checked; tw.classList.toggle("hidden", S.allK); upd(); };
+  tq.oninput = () => { S.q = tq.value.trim().toLowerCase(); drawTopics(); };
+  tAll.onclick = () => { visibleTopics().forEach(i => S.k.add(i)); drawTopics(); upd(); };
+  tNone.onclick = () => { S.k.clear(); drawTopics(); upd(); };
+  const visibleTopics = () => M.topics.map((t, i) => i).filter(i => !S.q || M.topics[i].toLowerCase().includes(S.q));
+  function drawTopics(){
+    const cnt = {}; M.items.forEach(x => { if(passBase(x[1], S.c, S.s)) cnt[x[0]] = (cnt[x[0]] || 0) + 1; });
+    tl.innerHTML = "";
+    visibleTopics().forEach(i => {
+      const l = el("label", cnt[i] ? "" : "z"), c = el("input"); c.type = "checkbox"; c.checked = S.k.has(i);
+      c.onchange = () => { c.checked ? S.k.add(i) : S.k.delete(i); upd(); tCnt.textContent = "მონიშნულია: " + S.k.size; };
+      l.append(c, el("span", "", M.topics[i]), el("span", "c", String(cnt[i] || 0))); tl.appendChild(l);
+    });
+    tCnt.textContent = "მონიშნულია: " + S.k.size;
+  }
+  // ქვედა ზოლი
+  const bc = el("div", "card"); main.appendChild(bc);
+  const av = el("div", "avail"); bc.appendChild(av);
+  const br = el("div", "row"); br.style.marginTop = "12px";
+  const pv = el("button", "btn ghost", "ნახე, როგორ დაინახავს მოსწავლე"); pv.type = "button";
+  const ad = el("button", "btn green", "დავალებაში დამატება"); ad.type = "button";
+  const cl = el("button", "btn ghost", inFrame ? "დახურვა" : "უკან"); cl.type = "button";
+  br.append(pv); if(inFrame) br.append(ad); br.append(cl); bc.appendChild(br);
+  const bm = el("div"); bc.appendChild(bm);
+  cl.onclick = () => inFrame ? window.parent.postMessage({ type:"stl-close" }, location.origin) : (location.href = "../");
+  ad.onclick = () => { window.parent.postMessage({ type:"stl-add", cfg: cfgStr() }, location.origin); ad.textContent = "დაემატა ✓"; setTimeout(() => ad.textContent = "დავალებაში დამატება", 2500); };
+  pv.onclick = async () => {
+    bm.innerHTML = ""; pv.disabled = true;
+    try{
+      const r = await api({ action:"stlGet", key: ssGet("lit-stl-key") || "", cfg: cfgStr() });
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+      if(!r.items.length) throw new Error("ამ პარამეტრებით წინადადება ვერ მოიძებნა.");
+      main.classList.add("hidden"); prevHost.classList.remove("hidden"); prevHost.innerHTML = "";
+      const b = el("button", "btn ghost", "← პარამეტრებზე დაბრუნება"); b.type = "button"; b.style.marginBottom = "12px";
+      b.onclick = () => { prevHost.classList.add("hidden"); main.classList.remove("hidden"); };
+      const note = el("p", "lead", "მასწავლებლის ნახვა: მინიშნება შენ ყოველთვის გიჩანს" + (S.h ? "; მოსწავლესაც გამოუჩნდება." : "; მოსწავლეს — არა."));
+      const h = el("div"); prevHost.append(b, note, h);
+      const run = { items: r.items, ans: {}, idx: 0 };
+      drill(h, run, { mode: S.m, hint: true, onChange: () => {} });
+    }catch(e){ bm.appendChild(el("div", "msg bad", netErr(e))); }
+    finally{ pv.disabled = false; }
+  };
+  function upd(){
+    const n = avail(), want = +S.n > 0 ? Math.min(+S.n, n) : n;
+    av.innerHTML = ""; av.append("ხელმისაწვდომია ", el("b", "", String(n)), " წინადადება · მოსწავლეს შეხვდება ", el("b", "", String(want)));
+    ni.placeholder = "ყველა (" + n + ")";
+    const bad = !n || (!S.allK && !S.k.size);
+    pv.disabled = bad; ad.disabled = bad;
+  }
+  drawTopics(); upd();
+}
+
+if(/^#admin/.test(location.hash)) startTeacher(); else startStudent();
+</script>
+</body>
+</html>

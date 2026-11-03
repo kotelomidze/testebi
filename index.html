@@ -128,6 +128,9 @@
   /* წინადადებების რედაქტირება (ვარჯიში): დავალებაში დამატება */
   .vjbox{border:1.5px solid var(--line);border-radius:10px;background:var(--paper);padding:12px 14px;margin:10px 0}
   .vjbox h4{margin:0 0 4px;font-size:1rem}
+  .vjbox .vjrow .vjb{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
+  .vjbox .vjrow .vjb .on{background:var(--lapis-soft);border-color:var(--lapis);color:var(--lapis)}
+  .ordin{width:52px;flex:0 0 auto;font:inherit;font-size:.9rem;padding:3px 4px;border:1.5px solid var(--ochre);border-radius:6px;text-align:center;margin-left:6px;background:#fff}
   .vjbox .vjrow{display:flex;gap:8px;align-items:flex-start;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}
   .vjbox .vjrow span{min-width:0;overflow-wrap:anywhere;font-size:.95rem}
   .vjbox .vjrow button{flex:0 0 auto}
@@ -367,13 +370,19 @@
             <label for="as-from">მონიშვნის გადმოტანა სხვა ჯგუფის ახალი დავალებიდან</label>
             <div class="row"><select id="as-from" class="gselect"></select><button type="button" class="btn ghost" id="as-copy">გადმოტანა</button></div>
           </div>
-          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
+          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="hide-given"><span>მიცემულების დამალვა</span></label><label class="showoff"><input type="checkbox" id="num-mode"><span>დანომვრა (რიგი)</span></label><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
           <div id="vis-tree" class="vis"></div>
           <div class="vjbox" id="vj-box">
             <h4>წინადადებების რედაქტირება (ვარჯიში)</h4>
             <p class="lead" style="margin:0 0 8px;font-size:.9rem">შეცდომის ტიპები, წყარო და წინადადებების რაოდენობა — ცალკე ფანჯარაში. შეგიძლია რამდენიმე სხვადასხვა ვარჯიში დაამატო.</p>
             <div id="vj-list"></div>
             <button type="button" class="btn ghost" id="vj-add" style="margin-top:8px">+ ვარჯიშის დამატება</button>
+          </div>
+          <div class="vjbox" id="stl-box">
+            <h4>სტილისტიკა</h4>
+            <p class="lead" style="margin:0 0 8px;font-size:.9rem">რეჟიმი, კატეგორია, ნაკრები, საკითხები, რაოდენობა და მინიშნება — ცალკე ფანჯარაში.</p>
+            <div id="stl-list"></div>
+            <button type="button" class="btn ghost" id="stl-add" style="margin-top:8px">+ სტილისტიკის დამატება</button>
           </div>
           <div class="row vis-save">
             <button class="btn" id="as-give">მიცემა</button>
@@ -663,7 +672,7 @@ function inSet(k, set){
   const any = f => { for(const x of set) if(f(x)) return true; return false; };
   if(k.indexOf("m:") === 0){
     const c = k.slice(2);
-    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph" || c === "vj") return any(x => x.indexOf(c + ":") === 0);
+    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph" || c === "vj" || c === "stl") return any(x => x.indexOf(c + ":") === 0);
     if(c === "tema") return any(x => /^tema:[^:]+$/.test(x));
     if(c === "mit") return any(x => /^tema:.+:mit$/.test(x));
     if(MAT_DIR[c]) return MATERIALS.some(m => m.cat === c && set.has("mat:" + m.id));
@@ -726,7 +735,7 @@ function applyHidden(){
 }
 function refreshHidden(){   // ფონურად: უახლესი დავალებები სკრიპტიდან
   if(!state.name) return;
-  api({ action:"visibility", name: state.name }).then(r => { if(r && r.ok){ setNoBank(r.noBank); setAssigns(r.assigns, r.materials); } }).catch(() => {});
+  api({ action:"visibility", name: state.name }).then(r => { if(r && r.ok){ setNoBank(r.noBank); setOrder(r.order); setAssigns(r.assigns, r.materials); } }).catch(() => {});
 }
 /* ===== მოსწავლის „გავაკეთე“ ნიშნები (მხოლოდ მისთვის, ტელეფონში) ===== */
 let DONE = new Set();
@@ -785,7 +794,7 @@ async function chooseStudent(n, surname){
     const r = await api({ action:"login", name: n });
     if(!r.ok || !r.name){ $("name-err").textContent = "ეს მოსწავლე სიაში აღარ არის. მიმართე მასწავლებელს."; clearPick(); return; }
     signIn(r.name);
-    setNoBank(r.noBank); setAssigns(r.assigns, r.materials);
+    setNoBank(r.noBank); setOrder(r.order); setAssigns(r.assigns, r.materials);
     try{ localStorage.setItem(NAME_KEY, surname); }catch(e){}
     clearPick();
     goHome();
@@ -979,10 +988,16 @@ function joinItems(set, notes){
   Object.keys(notes || {}).forEach(k => { const v = String(notes[k] || "").replace(/\s+/g, " ").trim().slice(0, 120); if(v && set.has(k)) out.push(NOTE + k + "|" + v); });
   return out;
 }
+/* დავალებების რიგი: მასწავლებელი ნომრავს (CFG.order / ORDER), დანომრილები — ნომრის მიხედვით, დანარჩენი — ძველი რიგით */
+let ORDER = lsGet("lit-order", {});
+let HIDE_GIVEN = !!lsGet("lit-hide-given", false), NUM_MODE = false;   // მასწავლებლის სიის ჩვენების პარამეტრები
+function setOrder(o){ if(o && typeof o === "object"){ ORDER = o; lsSet("lit-order", o); } }
+const ordOf = k => { const v = ORDER[String(k).split("#")[0]]; return v > 0 ? v : Infinity; };
+function sortRows(arr, keyOf){ return arr.sort((a, b) => ordOf(keyOf(a)) - ordOf(keyOf(b))); }   // stable: ნომრის გარეშე რიგი რჩება
 /* წინადადებების რედაქტირება (ვარჯიში): დავალება = „vj:“ + პარამეტრები (როგორც ვარჯიშის ბმულში) */
 let VJ_META = null;
 async function vjMeta(){ if(!VJ_META){ try{ VJ_META = JSON.parse(await fetchText("varjishi/meta.json")); }catch(e){ VJ_META = { types:[], it:[], mt:{} }; } } return VJ_META; }
-function vjLabel(cfg){
+function vjLabel(cfg, full){   // full = მასწავლებლისთვის (ყველა ტიპი); მოსწავლეს ტიპები მხოლოდ v=1-ზე უჩანს, სრულად
   const p = {}; String(cfg).split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); });
   const T = (VJ_META && VJ_META.types) || [], sel = new Set();
   if(p.a === "1") T.forEach(t => sel.add(t.i));
@@ -990,10 +1005,26 @@ function vjLabel(cfg){
   let cnt = 0; String(p.q || "").split(".").forEach(x => { const ab = x.split(":"); if(ab[0] !== "" && +ab[1] > 0){ sel.add(+ab[0]); cnt += +ab[1]; } });
   const names = T.filter(t => sel.has(t.i)).map(t => t.l);
   const n = p.q ? cnt + " წინადადება" : (+p.n > 0 ? p.n + " წინადადება" : "ყველა წინადადება");
-  return n + " · " + (p.s === "m" ? "მოდელირებული" : "გამოცდის ტექსტები") + " · " +
-    (p.a === "1" ? "ყველა ტიპი" : names.slice(0, 3).join("; ") + (names.length > 3 ? " და კიდევ " + (names.length - 3) : ""));
+  const base = n + " · " + (p.s === "m" ? "მოდელირებული" : "გამოცდის ტექსტები");
+  if(!full && p.v !== "1") return base;
+  return base + " · " + (p.a === "1" ? "ყველა ტიპი" : names.join("; "));
 }
-async function actsFor(set, mats){
+/* სტილისტიკა: დავალება = „stl:“ + პარამეტრები (m=s ასარჩევი, c=e|a, s=ნაკრები, k=საკითხები, n=რაოდენობა, h=1 მინიშნება) */
+let STL_META = null;
+async function stlMeta(){ if(!STL_META){ try{ STL_META = JSON.parse(await fetchText("stilistika/meta.json")); }catch(e){ STL_META = { topics:[], items:[] }; } } return STL_META; }
+function stlLabel(cfg, full){
+  const p = {}; String(cfg).split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); });
+  const out = [(+p.n > 0 ? p.n + " წინადადება" : "ყველა წინადადება"), (p.m === "s" ? "ასარჩევი" : "ჩასაწერი")];
+  if(!full) return out.join(" · ");
+  const SET = { old:"ჩემი პროგრამა", "new":"ახალი წიგნი", rep:"ახალი — განმეორებადი შეცდომებით", uniq:"ახალი — ახალი ტიპის შეცდომებით" };
+  out.push(p.c === "e" ? "ცალსახად არასწორი" : p.c === "a" ? "დასაშვები → უმჯობესი" : "ორივე კატეგორია");
+  out.push(SET[p.s] || "ყველა ნაკრები");
+  const T = (STL_META && STL_META.topics) || [], k = String(p.k || "").split(".").filter(x => x !== "").map(Number);
+  out.push(k.length ? "საკითხები: " + k.map(i => T[i] || i).join(", ") : "ყველა საკითხი");
+  out.push(p.h === "1" ? "მინიშნება ჩართულია" : "მინიშნების გარეშე");
+  return out.join(" · ");
+}
+async function actsFor(set, mats, full){
   if(!STUDENT_BASE) STUDENT_BASE = (await visCatalog([])).filter(n => !/^m:(books|pres|mat)$/.test(n.key));
   const keepM = MATERIALS; if(mats) MATERIALS = mats;   // inSet-ის მასალების შემოწმებისთვის (მასწავლებლის ნახვაში)
   try{
@@ -1008,7 +1039,9 @@ async function actsFor(set, mats){
     if(n.kids) walk(n.kids, b);
   }); })(cat, null);
   const vjs = Array.from(set).filter(k => k.indexOf("vj:") === 0);
-  if(vjs.length){ await vjMeta(); vjs.forEach(k => out.push({ key:k, block:"m:vj", t:"vj", cfg:k.slice(3), text: vjLabel(k.slice(3)) })); }
+  if(vjs.length){ await vjMeta(); vjs.forEach(k => out.push({ key:k, block:"m:vj", t:"vj", cfg:k.slice(3), text: vjLabel(k.slice(3), full) })); }
+  const stls = Array.from(set).filter(k => k.indexOf("stl:") === 0);
+  if(stls.length){ await stlMeta(); stls.forEach(k => out.push({ key:k, block:"m:stl", t:"stl", cfg:k.slice(4), text: stlLabel(k.slice(4), full) })); }
   return out;
   } finally { MATERIALS = keepM; }
 }
@@ -1063,6 +1096,8 @@ async function showAssign(a, isOld){
   }
   acts.filter(x => x.t === "vj").forEach(x => sections[2].items.push(btn(x.key, "წინადადებების რედაქტირება", x.text,
     () => goSection("varjishi/#" + encodeURIComponent(x.cfg)))));
+  acts.filter(x => x.t === "stl").forEach(x => sections[2].items.push(btn(x.key, "სტილისტიკა", x.text,
+    () => goSection("stilistika/#" + encodeURIComponent(x.cfg)))));
   ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
     const W = sections[2].items;
     if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;   // უკვე თავის თემასთანაა
@@ -1076,6 +1111,7 @@ async function showAssign(a, isOld){
     else if(t === "only") W.push(btn(x.key, KIND[t], x.text, () => openFiles("only", x.id)));
     else if(t === "mit") W.push(mitRow(x));
   }));
+  sections.forEach(sec => sortRows(sec.items, it => it.mit ? it.key.replace(/:mit$/, "") : it.key));   // მასწავლებლის ნომრების მიხედვით
   box.innerHTML = "";
   let n = 0, sn = 0;
   const filled = sections.filter(sec => sec.items.length);
@@ -1160,6 +1196,7 @@ function loadCfg(r){
   CFG.materials = (r.materials || []).slice();
   if(Array.isArray(r.disabled)) CFG.disabled = new Set(r.disabled);
   if(typeof r.noBank === "boolean"){ CFG.noBank = r.noBank; NOBANK = r.noBank; }
+  if(r.order && typeof r.order === "object"){ CFG.order = Object.assign({}, r.order); setOrder(r.order); }
   if($("nobank")) $("nobank").checked = !!CFG.noBank;
   if(!CFG.groups.some(g => g.id === AS_GROUP)) AS_GROUP = CFG.groups[0] ? CFG.groups[0].id : null;
 }
@@ -1261,7 +1298,7 @@ function renderAssign(){
 async function renderAssignView(pane, a){
   pane.innerHTML = "<p class='lead'>იტვირთება…</p>";
   try{
-    const acts = await actsFor(new Set(a.items || []), mergedMaterials(CFG.materials));
+    const acts = await actsFor(new Set(a.items || []), mergedMaterials(CFG.materials), true);
     const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
     const secs = [["წასაკითხი", []], ["თხრობით სასწავლი", []], ["წერითი დავალებები", []]];
     const NOTES = splitItems(a.items).notes;
@@ -1269,7 +1306,8 @@ async function renderAssignView(pane, a){
     const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
     const aphN = acts.filter(x => x.t === "aph").map(x => x.n).sort((p, q) => p - q);
     if(aphN.length) secs[2][1].push(["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]);
-    acts.filter(x => x.t === "vj").forEach(x => secs[2][1].push(["წინადადებების რედაქტირება", x.text]));
+    acts.filter(x => x.t === "vj").forEach(x => secs[2][1].push(["წინადადებების რედაქტირება", x.text, x.key]));
+    acts.filter(x => x.t === "stl").forEach(x => secs[2][1].push(["სტილისტიკა", x.text, x.key]));
     ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
       secs[2][1].push([KIND[t], x.text]);
@@ -1300,6 +1338,10 @@ $("as-new").onclick = () => { EDIT = { aid:null, set:new Set(), notes:{} }; open
 $("as-cancel").onclick = () => { EDIT = null; renderAssign(); };
 $("as-clear").onclick = () => { EDIT.set.clear(); refreshChecks(); };
 $("show-off").onchange = () => { SHOW_OFF = $("show-off").checked; renderTree(); };
+$("hide-given").checked = HIDE_GIVEN;
+$("hide-given").onchange = () => { HIDE_GIVEN = $("hide-given").checked; lsSet("lit-hide-given", HIDE_GIVEN); renderTree(); };
+$("num-mode").onchange = () => { NUM_MODE = $("num-mode").checked; renderTree();
+  if(NUM_MODE){ $("vis-msg").textContent = "ჩაწერე ნომრები (1, 2, 3…) — ამ რიგით გამოჩნდება შენთანაც და მოსწავლესთანაც. ბოლოს დააჭირე „ცვლილებების შენახვას“."; $("vis-msg").className = "msg"; } };
 $("as-copy").onclick = () => {
   const src = CFG.groups.find(g => g.id === $("as-from").value); if(!src || !src.assigns.length) return;
   const sp = splitItems(src.assigns[src.assigns.length - 1].items); EDIT.set = sp.set; EDIT.notes = sp.notes;
@@ -1405,6 +1447,21 @@ function givenMap(){   // ამ ჯგუფს ადრე უკვე მ�
   if(g) g.assigns.forEach(a => { if(EDIT && a.id === EDIT.aid) return; (a.items || []).forEach(k => { m[k] = a.date; }); });
   return m;
 }
+function showNode(n, given){   // „მიცემულების დამალვა“: უკვე მიცემული დავალება სიაში აღარ ჩანს
+  if(!HIDE_GIVEN) return true;
+  if(isItem(n)) return !given[n.key];
+  const k = itemKeys(n); return !k.length || k.some(x => !given[x]);
+}
+function ordInput(n){   // ნომერი (რიგი) — ჩანს „დანომვრის“ ჩართვისას
+  if(!NUM_MODE || !isItem(n) || (n.act && n.act.t === "mit")) return null;
+  const i = document.createElement("input"); i.type = "number"; i.min = "1"; i.className = "ordin"; i.placeholder = "№"; i.title = "რიგითი ნომერი";
+  i.value = (CFG.order && CFG.order[n.key]) || "";
+  i.onclick = e => e.stopPropagation();
+  i.onchange = () => { CFG.order = CFG.order || {}; const v = parseInt(i.value, 10); if(v > 0) CFG.order[n.key] = v; else delete CFG.order[n.key];
+    setOrder(CFG.order); markDirty(true); renderTree(); };
+  return i;
+}
+const sortedKids = kids => sortRows(kids.slice(), k => k.key);
 function visNode(n, depth, given){
   const lab = document.createElement("label"); lab.className = "it";
   const cb = document.createElement("input"); cb.type = "checkbox";
@@ -1428,7 +1485,8 @@ function visNode(n, depth, given){
   const ob = offBtn(n, depth), off = isOff(n);
   if(!n.kids || !n.kids.length){
     let w = lab;
-    if(ob){ w = document.createElement("div"); w.className = "lf" + (off ? " dis" : ""); w.append(lab, ob); }
+    const oi = ordInput(n);
+    if(ob || oi){ w = document.createElement("div"); w.className = "lf" + (off ? " dis" : ""); w.append(lab); if(oi) w.append(oi); if(ob) w.append(ob); }
     if(n.key.indexOf("mat:") === 0){   // რომელი ნაწილი ისწავლონ / წაიკითხონ
       const box = document.createElement("div"); box.className = "mnote-w"; box.appendChild(w);
       const ni = document.createElement("input"); ni.type = "text"; ni.className = "mnote hidden"; ni.maxLength = 120;
@@ -1443,9 +1501,9 @@ function visNode(n, depth, given){
   const sm = document.createElement("summary");
   const arr = document.createElement("span"); arr.className = "arr"; arr.textContent = "▸";
   lab.addEventListener("click", e => e.stopPropagation());   // მონიშვნა სიას არ ჩამოშლის
-  sm.append(arr, lab); if(ob) sm.appendChild(ob); if(off) d.classList.add("dis"); d.appendChild(sm);
+  sm.append(arr, lab); const oi2 = ordInput(n); if(oi2) sm.appendChild(oi2); if(ob) sm.appendChild(ob); if(off) d.classList.add("dis"); d.appendChild(sm);
   const kids = document.createElement("div"); kids.className = "kids";
-  n.kids.forEach(k => { if(SHOW_OFF || !isOff(k)) kids.appendChild(visNode(k, depth + 1, given)); });
+  sortedKids(n.kids).forEach(k => { if((SHOW_OFF || !isOff(k)) && showNode(k, given)) kids.appendChild(visNode(k, depth + 1, given)); });
   d.appendChild(kids);
   return d;
 }
@@ -1459,8 +1517,8 @@ function refreshChecks(){
     N.cb.checked = on; N.cb.indeterminate = some; N.sp.classList.toggle("off", !on && !some);
     if(N.ni) N.ni.classList.toggle("hidden", !on);
   });
-  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => NODES[k] || k.indexOf("vj:") === 0).length;
-  renderVj();
+  $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => NODES[k] || k.indexOf("vj:") === 0 || k.indexOf("stl:") === 0).length;
+  renderVj(); renderStl();
 }
 async function renderVj(){
   const host = $("vj-list"); if(!host) return;
@@ -1469,12 +1527,38 @@ async function renderVj(){
   host.innerHTML = "";
   list.forEach(k => {
     const row = document.createElement("div"); row.className = "vjrow";
-    const sp = document.createElement("span"); sp.textContent = vjLabel(k.slice(3));
+    const sp = document.createElement("span"); sp.textContent = vjLabel(k.slice(3), true);
+    const bx = document.createElement("span"); bx.className = "vjb";
+    const shown = /(^|&)v=1(&|$)/.test(k);
+    const tg = document.createElement("button"); tg.type = "button"; tg.className = "del" + (shown ? " on" : "");
+    tg.textContent = shown ? "👁 ტიპებს ხედავენ" : "🙈 ტიპები დამალულია";
+    tg.title = "ჩანდეს თუ არა მოსწავლეებისთვის, რა ტიპის შეცდომებია (ჩანს სრულად)";
+    tg.onclick = () => { const nk = shown ? k.replace(/&v=1(?=&|$)/, "").replace(/^vj:v=1&?/, "vj:") : k + "&v=1";
+      EDIT.set.delete(k); EDIT.set.add(nk); refreshChecks(); };
+    const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "მოხსნა";
+    del.onclick = () => { EDIT.set.delete(k); refreshChecks(); };
+    bx.append(tg, del); row.append(sp, bx); host.appendChild(row);
+  });
+}
+async function renderStl(){
+  const host = $("stl-list"); if(!host) return;
+  const list = EDIT ? Array.from(EDIT.set).filter(k => k.indexOf("stl:") === 0) : [];
+  if(list.length) await stlMeta();
+  host.innerHTML = "";
+  list.forEach(k => {
+    const row = document.createElement("div"); row.className = "vjrow";
+    const sp = document.createElement("span"); sp.textContent = stlLabel(k.slice(4), true);
     const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "მოხსნა";
     del.onclick = () => { EDIT.set.delete(k); refreshChecks(); };
     row.append(sp, del); host.appendChild(row);
   });
 }
+$("stl-add").onclick = () => {   // სტილისტიკის პარამეტრები — ცალკე ფანჯარაში
+  try{ sessionStorage.setItem("lit-stl-key", adminKey || ""); }catch(e){}
+  const m = document.createElement("div"); m.className = "vjmodal"; m.id = "vj-modal";
+  const f = document.createElement("iframe"); f.src = "stilistika/#admin"; f.title = "სტილისტიკის პარამეტრები";
+  m.appendChild(f); document.body.appendChild(m); document.body.style.overflow = "hidden";
+};
 $("vj-add").onclick = () => {   // ვარჯიშის პარამეტრები — ცალკე ფანჯარაში (იგივე საიტი)
   try{ sessionStorage.setItem("lit-vj-key", adminKey || ""); }catch(e){}
   const m = document.createElement("div"); m.className = "vjmodal"; m.id = "vj-modal";
@@ -1484,7 +1568,11 @@ $("vj-add").onclick = () => {   // ვარჯიშის პარამე�
 window.addEventListener("message", e => {
   if(e.origin !== location.origin || !e.data) return;
   const close = () => { const m = $("vj-modal"); if(m) m.remove(); document.body.style.overflow = ""; };
-  if(e.data.type === "vj-close") close();
+  if(e.data.type === "vj-close" || e.data.type === "stl-close") close();
+  if(e.data.type === "stl-add" && EDIT && typeof e.data.cfg === "string" && e.data.cfg.length < 1400){
+    EDIT.set.add("stl:" + e.data.cfg); refreshChecks();
+    $("vis-msg").textContent = "სტილისტიკა დაემატა. დახურე ფანჯარა ან დაამატე კიდევ ერთი."; $("vis-msg").className = "msg ok";
+  }
   if(e.data.type === "vj-add" && EDIT && typeof e.data.cfg === "string" && e.data.cfg.length < 290){
     EDIT.set.add("vj:" + e.data.cfg); refreshChecks();
     $("vis-msg").textContent = "ვარჯიში დაემატა. დახურე ფანჯარა ან დაამატე კიდევ ერთი."; $("vis-msg").className = "msg ok";
@@ -1496,7 +1584,7 @@ async function renderTree(){
   const open = new Set(Array.from($("vis-tree").querySelectorAll("details[open] > summary label.it span")).map(x => x.firstChild ? x.firstChild.textContent : ""));
   NODES = {}; $("vis-tree").innerHTML = "";
   const given = givenMap();
-  CATALOG.forEach(n => $("vis-tree").appendChild(visNode(n, 0, given)));
+  CATALOG.forEach(n => { if(showNode(n, given)) $("vis-tree").appendChild(visNode(n, 0, given)); });
   $("off-count").textContent = CFG.disabled.size;
   $("vis-tree").querySelectorAll("details > summary label.it span").forEach(x => { if(x.firstChild && open.has(x.firstChild.textContent)) x.closest("details").open = true; });
   refreshChecks();
@@ -1511,7 +1599,7 @@ async function saveAll(okMsg){
   const btn = $("vis-save"); btn.disabled = true; $("as-give").disabled = true;
   $("vis-msg").textContent = "ინახება…"; $("vis-msg").className = "msg";
   try{
-    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials, disabled: Array.from(CFG.disabled), noBank: !!CFG.noBank,
+    const r = await api({ action:"saveConfig", key: adminKey, materials: CFG.materials, disabled: Array.from(CFG.disabled), noBank: !!CFG.noBank, order: CFG.order || {},
       groups: CFG.groups.map(g => ({ id:g.id, name:g.name, members:Array.from(g.members), assigns:g.assigns })) });
     if(!r.ok) throw new Error(r.error || "სკრიპტის შეცდომა");
     markDirty(false); fillAdmin(r);
