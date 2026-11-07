@@ -862,9 +862,11 @@ async function themeCandidates(dir, pre){
       const f = encodeURIComponent(j.sourceFile);
       // PDF-ები მთავარ გვერდზე, საქაღალდეში „gaazreba-tema-pdf“ / „gaazreba-pdf“ (ან ძველებურად <dir>/pdf/)
       const label = (t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile);
-      const out = [{ kind:"tema", label,
-        alts:[{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/" + dir + "-pdf/" + f },
-              { name:j.sourceFile, url: dir + "/pdf/" + f }] }];
+      const alts = [{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/" + dir + "-pdf/" + f },
+              { name:j.sourceFile, url: dir + "/pdf/" + f }];
+      const near = await nearPdf(dir, j.sourceFile);   // ზუსტად ასე თუ არ ჰქვია: იგივე ნომერი და ავტორი
+      if(near) alts.push(near);
+      const out = [{ kind:"tema", label, alts }];
       // „გააზრება და თემა“: თემის მითითებაც (საქაღალდე temis-mititebebi, იგივე სახელით), თუ მიცემულია
       if(pre === "tema" && !isHidden("tema:" + t.id + ":mit")){
         const full = (t.author ? t.author + " — " : "") + (t.work || t.title || t.id) + (t.title ? " (" + t.title + ")" : "");   // როგორც სიაში
@@ -874,6 +876,31 @@ async function themeCandidates(dir, pre){
       return out;
     }catch(e){ return null; }
   }))).flat().filter(Boolean);
+}
+// ატვირთულ PDF-ს შეიძლება ტესტში ჩაწერილისგან განსხვავებული სახელი ჰქონდეს, მაგ.
+//   ტესტში: „გააზრება, 223 (რუსთაველი, ვეფხისტყაოსანი, ხატაეთის ომში…).pdf“, ატვირთული: „გააზრება, 223 (რუსთაველი).pdf“.
+// მაშინ ვეძებთ იმავე ნომრით და ფრჩხილებში პირველი სიტყვით (ავტორი/ნაწარმოები; მცირე ბეჭდვითი შეცდომაც მიიღება).
+function pdfKey(n){
+  const m = String(n || "").replace(/_+/g, " ").match(/(\d+)\s*\(?\s*([^\s,()]+)/);
+  return m ? { n: m[1], w: m[2].toLowerCase() } : null;
+}
+function simil(a, b){
+  const g = x => { const o = {}; for(let i = 0; i < x.length - 1; i++){ const k = x.substr(i, 2); o[k] = (o[k] || 0) + 1; } return o; };
+  const A = g(a), B = g(b); let c = 0, t = 0;
+  Object.keys(A).forEach(k => { c += Math.min(A[k], B[k] || 0); t += A[k]; }); Object.keys(B).forEach(k => t += B[k]);
+  return t ? 2 * c / t : 0;
+}
+async function nearPdf(dir, src){
+  if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
+  const k = pdfKey(src); if(!k || !AUTO_FILES) return null;
+  for(const folder of [dir + "-pdf", dir + "/" + dir + "-pdf"]){
+    const list = AUTO_FILES[folder] || [];
+    if(list.indexOf(src) > -1) return null;   // ზუსტი სახელი არსებობს
+    let best = null, sc = 0;
+    list.forEach(f => { const x = pdfKey(f); if(!x || x.n !== k.n) return; const v = simil(x.w, k.w); if(v > sc){ sc = v; best = f; } });
+    if(best && sc >= 0.6) return { name: best, url: folder + "/" + encodeURIComponent(best) };
+  }
+  return null;
 }
 function openFiles(key, target){   // target: კონკრეტული დავალება („ყველა დავალებიდან“)
   FILES = Object.assign({ key, target }, FILE_SETS[key]);
