@@ -201,6 +201,9 @@
   .nobank input{width:20px;height:20px;flex:0 0 20px;margin-top:2px;accent-color:var(--lapis)}
   .nobank small{color:var(--muted)}
   .vis .meta{display:block;font-size:.8rem;color:var(--muted);font-weight:400;text-decoration:none}
+  .fbadge{font-size:.75rem;font-weight:600;margin-left:6px;white-space:nowrap;border-radius:5px;padding:0 5px}
+  .fbadge.ok{color:#1E7B34;background:#E6F4EA} .fbadge.no{color:#8A8F98;background:#F0F2F5}
+  .oldtoggle{margin-top:8px;background:transparent;border:1.5px dashed var(--line);border-radius:8px;padding:8px 12px;width:100%;text-align:left;font-weight:600;color:var(--lapis)}
   .given{color:#B06A10;font-size:.82rem;font-weight:600;margin-left:6px;white-space:nowrap}
   .asave{position:sticky;bottom:0;background:var(--bg);padding:10px 0;z-index:6}
   #as-editor .vis-save{flex-wrap:nowrap;gap:8px}
@@ -369,7 +372,7 @@
           <h3 id="as-ed-h"></h3>
           <p class="lead" style="margin-bottom:10px">მონიშნე, რაც უნდა გააკეთონ. ▸-ით ჩამოშლი. ნარინჯისფერი „უკვე მიეცა“ ნიშნავს, რომ ეს ამ ჯგუფს უკვე მიეცა ადრე — მაინც შეგიძლია ხელახლა მისცე. „გათიშვა“ დავალებას ამ სიიდან დამალავს (მოსწავლეებთან უკვე მიცემული არ იშლება); დასაბრუნებლად ჩართე „გათიშულების ჩვენება“.</p>
           <div class="copyrow">
-            <label for="as-from">მონიშვნის გადმოტანა სხვა ჯგუფის ახალი დავალებიდან</label>
+            <label for="as-from">მონიშვნის გადმოტანა სხვა დავალებიდან (ნებისმიერი ჯგუფის ახალი ან ძველი)</label>
             <div class="row"><select id="as-from" class="gselect"></select><button type="button" class="btn ghost" id="as-copy">გადმოტანა</button></div>
           </div>
           <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="num-mode"><span>დანომვრა (რიგი)</span></label><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
@@ -872,6 +875,8 @@ async function themeCandidates(dir, pre){
         const full = (t.author ? t.author + " — " : "") + (t.work || t.title || t.id) + (t.title ? " (" + t.title + ")" : "");   // როგორც სიაში
         const mu = await mitUrl(t.file, full);
         out.push({ kind:"mit", label, alts: mu ? [{ name:"თემის მითითება — " + decodeURIComponent(mu.split("/").pop()), url: mu }] : [] });
+        const pu = await parUrl(full);   // თემის პარალელები — მხოლოდ თუ ატვირთულია
+        if(pu) out.push({ kind:"par", label, alts: [{ name:"თემის პარალელები — " + decodeURIComponent(pu.split("/").pop()), url: pu }] });
       }
       return out;
     }catch(e){ return null; }
@@ -942,15 +947,16 @@ $("files-dl").onclick = async () => {
     if(!found.length){ box.innerHTML = "<p>ფაილები ჯერ არ არის. გამოიყენე „აპლიკაციიდან გაკეთება“.</p>"; return; }
     const hasMit = cands.some(c => c.kind === "mit");
     const groups = hasMit ? [["tema", "1. თემა (ტექსტი და დავალებები)"], ["mit", "2. თემის მითითება"]] : [[null, ""]];
+    if(hasMit && found.some(f => f.kind === "par")) groups.push(["par", "3. თემის პარალელები"]);
     groups.forEach(([k, h]) => {
       const fs = found.filter(f => !k || f.kind === k);
       if(h){ const hh = document.createElement("h4"); hh.textContent = h; box.appendChild(hh); }
       if(!fs.length){ const p = document.createElement("p"); p.textContent = k === "mit" ? "თემის მითითების ფაილი ჯერ არ არის ატვირთული." : "ფაილი ჯერ არ არის."; box.appendChild(p); return; }
       fs.forEach(f => {
         const a = document.createElement("a"); a.href = f.url; a.setAttribute("download", f.name); a.target = "_blank"; a.rel = "noopener";
-        if(f.kind) a.className = f.kind === "mit" ? "mitf" : "temaf";
+        if(f.kind) a.className = f.kind === "tema" ? "temaf" : "mitf";
         const sp = document.createElement("span");
-        if(f.kind){ const tg = document.createElement("span"); tg.className = "ftag"; tg.textContent = f.kind === "mit" ? "📋 თემის მითითება" : "📄 თემა"; sp.appendChild(tg); }
+        if(f.kind){ const tg = document.createElement("span"); tg.className = "ftag"; tg.textContent = f.kind === "mit" ? "📋 თემის მითითება" : f.kind === "par" ? "🔗 თემის პარალელები" : "📄 თემა"; sp.appendChild(tg); }
         sp.appendChild(document.createTextNode(f.label));
         const b = document.createElement("b"); b.textContent = "⬇ PDF" + (f.size ? " · " + (f.size / 1048576).toFixed(1) + " მბ" : "");
         a.append(sp, b); box.appendChild(a);
@@ -1002,6 +1008,15 @@ async function mitUrl(testFile, label){
     }
   }
   return null;
+}
+// თემის პარალელები: საქაღალდე temis-paralelebi, ფაილის სახელი = როგორც სიაში ჩანს,
+//   მაგ. „რუსთაველი — ვეფხისტყაოსანი (რამაზის შეწყნარება) (ტექსტი I).pdf“ (ტირეები/ბრჭყალები/სასვენები არ ითვლება)
+async function parUrl(label){
+  if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
+  const list = (AUTO_FILES && AUTO_FILES["temis-paralelebi"]) || [];
+  const want = new Set([label, String(label || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")].filter(Boolean).map(fnorm));
+  const hit = list.find(f => want.has(fnorm(f)));
+  return hit ? "temis-paralelebi/" + encodeURIComponent(hit) : null;
 }
 let STUDENT_BASE = null;   // დავალებების ჩამონათვალი (ერთხელ იტვირთება); მასალები ყოველ ჯერზე ახლიდან
 // მოცემული სიმრავლის (ერთი დავალების ან ყველა მიცემულის) შესასრულებელი ერთეულები
@@ -1099,6 +1114,7 @@ async function showAssign(a, isOld){
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
   const acts = await actsFor(new Set(a.items || []));
   const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file, x.text) })));
+  const pars = await Promise.all(acts.filter(x => x.t === "tema").map(async x => ({ x, u: await parUrl(x.text) })));   // პარალელები: თავისით, თუ ატვირთულია
   const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
   const sections = [ { h:"1. წასაკითხი", items:[] }, { h:"2. თხრობით სასწავლი", items:[] }, { h:"3. წერითი დავალებები", items:[] } ];
   const label = (el, kind, text) => { const d = el.querySelector("span") || el.appendChild(document.createElement("span"));
@@ -1136,11 +1152,12 @@ async function showAssign(a, isOld){
     else if(t === "tema"){
       W.push(btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id)));
       const mx = acts.find(z => z.t === "mit" && z.key === x.key + ":mit"); if(mx) W.push(mitRow(mx));   // მითითება — თავისი თემის ქვემოთ
+      const px = pars.find(z => z.x === x); if(px && px.u){ const r = link(x.key + ":par", "თემის პარალელები", x.text, px.u); r.mit = true; W.push(r); }
     }
     else if(t === "only") W.push(btn(x.key, KIND[t], x.text, () => openFiles("only", x.id)));
     else if(t === "mit") W.push(mitRow(x));
   }));
-  sections.forEach(sec => sortRows(sec.items, it => it.mit ? it.key.replace(/:mit$/, "") : it.key));   // მასწავლებლის ნომრების მიხედვით
+  sections.forEach(sec => sortRows(sec.items, it => it.mit ? it.key.replace(/:(mit|par)$/, "") : it.key));   // მასწავლებლის ნომრების მიხედვით
   box.innerHTML = "";
   let n = 0, sn = 0;
   const filled = sections.filter(sec => sec.items.length);
@@ -1295,7 +1312,12 @@ function renderAsGroups(){
   CFG.groups.forEach(g => { const o = document.createElement("option"); o.value = g.id; o.textContent = g.name + " (" + g.members.size + " მოსწავლე)"; sel.appendChild(o); });
   if(AS_GROUP) sel.value = AS_GROUP;
   const from = $("as-from"), prev = from.value; from.innerHTML = "";
-  CFG.groups.filter(g => g.id !== AS_GROUP && g.assigns.length).forEach(g => { const o = document.createElement("option"); o.value = g.id; o.textContent = g.name + " — " + fmtDate(g.assigns[g.assigns.length - 1].date); from.appendChild(o); });
+  CFG.groups.filter(g => g.assigns.length).forEach(g => {   // ყველა დავალება: ჯერ სხვა ჯგუფები, ბოლოს ეს ჯგუფი
+    const og = document.createElement("optgroup"); og.label = g.name + (g.id === AS_GROUP ? " (ეს ჯგუფი)" : "");
+    g.assigns.slice().reverse().forEach((a, i) => { const o = document.createElement("option"); o.value = g.id + "|" + a.id;
+      o.textContent = g.name + " — " + (i === 0 ? "ახალი" : "ძველი") + " — " + fmtDate(a.date); og.appendChild(o); });
+    g.id === AS_GROUP ? (from._own = og) : from.appendChild(og); });
+  if(from._own){ from.appendChild(from._own); from._own = null; }
   if(Array.from(from.options).some(o => o.value === prev)) from.value = prev;
   $("as-copy").disabled = !from.options.length;
   document.querySelector("#as-editor .copyrow").classList.toggle("hidden", !from.options.length);
@@ -1303,12 +1325,21 @@ function renderAsGroups(){
   $("as-body").classList.toggle("hidden", !CFG.groups.length);
 }
 $("as-group").onchange = () => { AS_GROUP = $("as-group").value; EDIT = null; renderAsGroups(); renderAssign(); };
+let OLD_OPEN = false;
 function renderAssign(){
   const g = curGroup(), host = $("as-list"); host.innerHTML = "";
   $("as-editor").classList.toggle("hidden", !EDIT); $("as-new").classList.toggle("hidden", !!EDIT);
   if(!g) return;
   if(!g.assigns.length){ const p = document.createElement("p"); p.className = "lead"; p.style.margin = "0"; p.textContent = "ამ ჯგუფს ჯერ დავალება არ მისცემია."; host.appendChild(p); }
+  let oldBox = null;
   g.assigns.slice().reverse().forEach((a, i) => {
+    if(i === 1){   // ძველები — ჩაკეცილი, ღილაკით იშლება
+      const tg = document.createElement("button"); tg.type = "button"; tg.className = "oldtoggle";
+      oldBox = document.createElement("div"); oldBox.className = OLD_OPEN ? "" : "hidden";
+      const lab = () => { tg.textContent = (OLD_OPEN ? "▾ " : "▸ ") + "ძველი დავალებები (" + (g.assigns.length - 1) + ")"; };
+      tg.onclick = () => { OLD_OPEN = !OLD_OPEN; oldBox.classList.toggle("hidden", !OLD_OPEN); lab(); }; lab();
+      host.append(tg, oldBox);
+    }
     const row = document.createElement("div"); row.className = "arow" + (i === 0 ? " cur" : "");
     const t = document.createElement("span"); t.innerHTML = "<b></b> · "; t.firstChild.textContent = (i === 0 ? "ახალი" : "ძველი") + " — " + fmtDate(a.date);
     t.appendChild(document.createTextNode(splitItems(a.items).set.size + " მონიშნული"));
@@ -1322,7 +1353,7 @@ function renderAssign(){
     del.onclick = () => openModal("წავშალო ეს დავალება?", fmtDate(a.date) + " — მოსწავლეები მას აღარ დაინახავენ (" + (i === 0 ? "ახალი გახდება წინა დავალება" : "ძველებიდან ამოიშლება") + ").", "გაუქმება", "წაშლა", () => {
       g.assigns = g.assigns.filter(x => x !== a); if(EDIT && EDIT.aid === a.id) EDIT = null; saveAll("დავალება წაიშალა.");
     });
-    acts.append(vw, ed, del); row.append(t, acts, pane); host.appendChild(row);
+    acts.append(vw, ed, del); row.append(t, acts, pane); (oldBox || host).appendChild(row);
   });
 }
 // მასწავლებლისთვის: რა მიეცა ამ დავალებით — ისე, როგორც მოსწავლე ხედავს (1. წასაკითხი, 2. თხრობით, 3. წერითი)
@@ -1343,6 +1374,8 @@ async function renderAssignView(pane, a){
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
       secs[2][1].push([KIND[t], x.text]);
       if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) secs[2][1].push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
+      if(t === "tema" && AUTO_FILES && (AUTO_FILES["temis-paralelebi"] || []).some(f => fnorm(f) === fnorm(x.text) || fnorm(f) === fnorm(x.text.replace(/\s*\(ტექსტი[^)]*\)\s*$/, ""))))
+        secs[2][1].push(["  ↳ თემის პარალელები", "იმავე ტექსტზე"]);
     }));
     pane.innerHTML = "";
     let n = 0, sn = 0;
@@ -1372,10 +1405,12 @@ $("show-off").onchange = () => { SHOW_OFF = $("show-off").checked; renderTree();
 $("num-mode").onchange = () => { NUM_MODE = $("num-mode").checked; renderTree();
   if(NUM_MODE){ $("vis-msg").textContent = "ჩაწერე ნომრები (1, 2, 3…) — ამ რიგით გამოჩნდება შენთანაც და მოსწავლესთანაც. ბოლოს დააჭირე „ცვლილებების შენახვას“."; $("vis-msg").className = "msg"; } };
 $("as-copy").onclick = () => {
-  const src = CFG.groups.find(g => g.id === $("as-from").value); if(!src || !src.assigns.length) return;
-  const sp = splitItems(src.assigns[src.assigns.length - 1].items); EDIT.set = sp.set; EDIT.notes = sp.notes;
+  const [gid, aid] = String($("as-from").value).split("|");
+  const src = CFG.groups.find(g => g.id === gid); if(!src || !src.assigns.length) return;
+  const sa = src.assigns.find(a => a.id === aid) || src.assigns[src.assigns.length - 1];
+  const sp = splitItems(sa.items); EDIT.set = sp.set; EDIT.notes = sp.notes;
   Object.keys(NODES).forEach(k => { if(NODES[k].ni) NODES[k].ni.value = EDIT.notes[k] || ""; }); refreshChecks();
-  $("vis-msg").textContent = "გადმოტანილია „" + src.name + "“-ის ახალი დავალება. შეცვალე განსხვავება და დააჭირე „მიცემას“."; $("vis-msg").className = "msg ok";
+  $("vis-msg").textContent = "გადმოტანილია „" + src.name + "“-ის დავალება (" + fmtDate(sa.date) + "). შეცვალე განსხვავება და დააჭირე „მიცემას“."; $("vis-msg").className = "msg ok";
 };
 $("as-give").onclick = () => {
   const g = curGroup(); if(!g || !EDIT) return;
@@ -1501,6 +1536,18 @@ function hideBox(n){   // განყოფილების სათაუ�
   c.onchange = () => { c.checked ? g.hide.add(n.key) : g.hide.delete(n.key); markDirty(true); renderTree(); };
   l.append(c, document.createTextNode("მიცემულების დამალვა")); return l;
 }
+// თემასთან: ატვირთულია თუ არა თემის მითითება და პარალელები (ერთხელ მოწმდება, მერე ახსოვს)
+const FILE_HAS = {};
+function fileBadges(n, sp){
+  const mk = (txt) => { const b = document.createElement("span"); b.className = "fbadge no"; b.textContent = txt + " …"; sp.appendChild(b); return b; };
+  const bm = mk("📋 მითითება"), bp = mk("🔗 პარალელები");
+  const paint = r => { [[bm, "📋 მითითება", r.mit], [bp, "🔗 პარალელები", r.par]].forEach(([b, t, ok]) => {
+    b.className = "fbadge " + (ok ? "ok" : "no"); b.textContent = t + (ok ? " ✓" : " ✗"); b.title = ok ? "ატვირთულია" : "ჯერ არ არის ატვირთული"; }); };
+  if(FILE_HAS[n.key]) return FILE_HAS[n.key].then(paint);
+  const mitN = (n.kids || []).find(k => k.act && k.act.t === "mit");
+  FILE_HAS[n.key] = Promise.all([mitN ? mitUrl(mitN.act.file, n.label) : null, parUrl(n.label)]).then(([m, p]) => ({ mit: !!m, par: !!p })).catch(() => ({ mit:false, par:false }));
+  FILE_HAS[n.key].then(paint);
+}
 function visNode(n, depth, given, hide){
   if(depth === 0){ const g = curGroup(); hide = !!(g && g.hide && g.hide.has(n.key)); }
   const lab = document.createElement("label"); lab.className = "it";
@@ -1511,6 +1558,7 @@ function visNode(n, depth, given, hide){
   const gv = isItem(n) ? given[n.key] : null;
   if(gv){ const b = document.createElement("span"); b.className = "given"; b.textContent = "უკვე მიეცა: " + fmtDate(gv); sp.appendChild(b); }
   else if(!isItem(n)){ const c = keys.filter(k => given[k]).length; if(c){ const b = document.createElement("span"); b.className = "given"; b.textContent = "უკვე მიეცა: " + c; sp.appendChild(b); } }
+  if(n.act && n.act.t === "tema") fileBadges(n, sp);
   NODES[n.key] = { n, cb, sp, keys };
   cb.onchange = () => {
     const set = EDIT.set, on = cb.checked;
