@@ -1037,7 +1037,20 @@ let ORDER = lsGet("lit-order", {});
 let NUM_MODE = false;   // მასწავლებლის სიის ჩვენების პარამეტრები
 function setOrder(o){ if(o && typeof o === "object"){ ORDER = o; lsSet("lit-order", o); } }
 const ordOf = k => { const v = ORDER[String(k).split("#")[0]]; return v > 0 ? v : Infinity; };
-function sortRows(arr, keyOf){ return arr.sort((a, b) => ordOf(keyOf(a)) - ordOf(keyOf(b))); }   // stable: ნომრის გარეშე რიგი რჩება
+// ნომერი = ადგილი სიაში: №1 — პირველი, №7 — მეშვიდე; ნომრის გარეშეები დარჩენილ ადგილებს თავისი (საპროგრამო) რიგით ავსებენ
+function placeByOrder(arr, ordFn){
+  const n = arr.length, res = new Array(n), num = [], rest = [];
+  arr.forEach((x, i) => { const o = ordFn(x); (o < Infinity ? num : rest).push({ x, o, i }); });
+  num.sort((a, b) => a.o - b.o || a.i - b.i).forEach(z => {
+    let k = Math.min(Math.max(z.o - 1, 0), n - 1);
+    while(k < n && res[k] !== undefined) k++;
+    if(k >= n){ k = n - 1; while(res[k] !== undefined) k--; }
+    res[k] = z.x;
+  });
+  let j = 0; for(let k = 0; k < n; k++) if(res[k] === undefined) res[k] = rest[j++].x;
+  arr.splice(0, n, ...res); return arr;
+}
+function sortRows(arr, keyOf){ return placeByOrder(arr, x => ordOf(keyOf(x))); }
 /* წინადადებების რედაქტირება (ვარჯიში): დავალება = „vj:“ + პარამეტრები (როგორც ვარჯიშის ბმულში) */
 let VJ_META = null;
 async function vjMeta(){ if(!VJ_META){ try{ VJ_META = JSON.parse(await fetchText("varjishi/meta.json")); }catch(e){ VJ_META = { types:[], it:[], mt:{} }; } } return VJ_META; }
@@ -1547,7 +1560,9 @@ function ordInput(n){   // ნომერი (რიგი) — ჩანს �
     setOrder(CFG.order); markDirty(true); renderTree(); };
   return i;
 }
-const sortedKids = kids => sortRows(kids.slice(), k => k.key);
+// ჯგუფს (მაგ. „შუშანიკის წამება“ ▸) მისი ტექსტების უმცირესი ნომერი აქვს — ასე შენი დანომვრა ჯგუფებზეც მოქმედებს
+const nodeOrd = n => (n.kids && !n.act) ? Math.min(Infinity, ...n.kids.map(nodeOrd)) : ordOf(n.key);
+const sortedKids = kids => placeByOrder(kids.slice(), nodeOrd);
 function hideBox(n){   // განყოფილების სათაურთან: „მიცემულების დამალვა“ — ცალკე ყოველ განყოფილებასა და ჯგუფში
   const g = curGroup(); if(!g) return null;
   const l = document.createElement("label"); l.className = "hidegv"; l.title = "ამ განყოფილებაში ამ ჯგუფისთვის უკვე მიცემული დავალებების დამალვა";
