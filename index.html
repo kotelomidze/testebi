@@ -864,7 +864,7 @@ async function themeCandidates(dir, pre){
       if(!j.sourceFile) return null;
       const f = encodeURIComponent(j.sourceFile);
       // PDF-ები მთავარ გვერდზე, საქაღალდეში „gaazreba-tema-pdf“ / „gaazreba-pdf“ (ან ძველებურად <dir>/pdf/)
-      const label = (t.author ? t.author + " — " : "") + (t.work || t.title || j.sourceFile);
+      const label = t.label || ((t.author ? t.author + " – " : "") + (t.work || t.title || j.sourceFile));
       const alts = [{ name:j.sourceFile, url: dir + "-pdf/" + f }, { name:j.sourceFile, url: dir + "/" + dir + "-pdf/" + f },
               { name:j.sourceFile, url: dir + "/pdf/" + f }];
       const near = await nearPdf(dir, j.sourceFile);   // ზუსტად ასე თუ არ ჰქვია: იგივე ნომერი და ავტორი
@@ -872,10 +872,10 @@ async function themeCandidates(dir, pre){
       const out = [{ kind:"tema", label, alts }];
       // „გააზრება და თემა“: თემის მითითებაც (საქაღალდე temis-mititebebi, იგივე სახელით), თუ მიცემულია
       if(pre === "tema" && !isHidden("tema:" + t.id + ":mit")){
-        const full = (t.author ? t.author + " — " : "") + (t.work || t.title || t.id) + (t.title ? " (" + t.title + ")" : "");   // როგორც სიაში
-        const mu = await mitUrl(t.file, full);
+        const full = testLabel(t);   // როგორც სიაში
+        const mu = await mitUrl(t.file, full, t.alias);
         out.push({ kind:"mit", label, alts: mu ? [{ name:"თემის მითითება — " + decodeURIComponent(mu.split("/").pop()), url: mu }] : [] });
-        const pu = await parUrl(full);   // თემის პარალელები — მხოლოდ თუ ატვირთულია
+        const pu = await parUrl(full, t.alias);   // თემის პარალელები — მხოლოდ თუ ატვირთულია
         if(pu) out.push({ kind:"par", label, alts: [{ name:"თემის პარალელები — " + decodeURIComponent(pu.split("/").pop()), url: pu }] });
       }
       return out;
@@ -990,13 +990,13 @@ function showMats(cat){
 const fnorm = x => String(x || "").replace(/\.pdf$/i, "").toLowerCase().replace(/[„“”"«»'`’]/g, "")
   .replace(/[\u2010-\u2015\u2212-]/g, " ").replace(/[(),.:;…]/g, " ").replace(/\s+/g, " ").trim();
 let AUTO_P = null;
-async function mitUrl(testFile, label){
+async function mitUrl(testFile, label, alias){   // alias — ძველი სათაური (ფაილი შეიძლება ძველი სახელით იყოს ატვირთული)
   let src = null;
   try{ src = (await (await fetch("gaazreba-tema/" + testFile, { cache:"no-store" })).json()).sourceFile || null; }catch(e){}
   if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
   const list = AUTO_FILES && AUTO_FILES["temis-mititebebi"];
   if(list && list.length){
-    const want = new Set([label, String(label || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, ""), src].filter(Boolean).map(fnorm));
+    const want = new Set([label, alias, String(alias || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, ""), src].filter(Boolean).map(fnorm));
     const hit = list.find(f => want.has(fnorm(f)));
     if(hit) return "temis-mititebebi/" + encodeURIComponent(hit);
   }
@@ -1011,10 +1011,10 @@ async function mitUrl(testFile, label){
 }
 // თემის პარალელები: საქაღალდე temis-paralelebi, ფაილის სახელი = როგორც სიაში ჩანს,
 //   მაგ. „რუსთაველი — ვეფხისტყაოსანი (რამაზის შეწყნარება) (ტექსტი I).pdf“ (ტირეები/ბრჭყალები/სასვენები არ ითვლება)
-async function parUrl(label){
+async function parUrl(label, alias){
   if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
   const list = (AUTO_FILES && AUTO_FILES["temis-paralelebi"]) || [];
-  const want = new Set([label, String(label || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")].filter(Boolean).map(fnorm));
+  const want = new Set([label, alias, String(alias || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")].filter(Boolean).map(fnorm));
   const hit = list.find(f => want.has(fnorm(f)));
   return hit ? "temis-paralelebi/" + encodeURIComponent(hit) : null;
 }
@@ -1076,6 +1076,7 @@ async function actsFor(set, mats, full){
   const out = [];
   (function walk(nodes, block){ nodes.forEach(n => {
     const b = block || n.key;
+    if(!n.act && n.kids && /^(m:(tema|only):|w:)/.test(n.key)){ walk(n.kids, b); return; }   // საპროგრამო/არასაპროგრამო და ნაწარმოების ჯგუფები
     if(!inSet(n.key, set)) return;
     if(n.act && n.act.t === "gaz" && allBank(CHAPTERS[n.act.idx])) return;
     if(n.act && !(n.act.t === "gram" && !(n.kids || []).some(k => inSet(k.key, set))))
@@ -1094,7 +1095,7 @@ async function loadStudentActs(){ try{ STUDENT_BASE_ACTS = await studentActs(); 
 async function showMit(){
   openList("თემის მითითებები", "დააჭირე და მითითება გადმოიწერება.");
   const acts = (await studentActs()).filter(a => a.t === "mit");
-  const found = (await Promise.all(acts.map(async a => { const u = await mitUrl(a.file, a.text); return u ? { a, u } : null; }))).filter(Boolean);
+  const found = (await Promise.all(acts.map(async a => { const u = await mitUrl(a.file, a.text, a.alias); return u ? { a, u } : null; }))).filter(Boolean);
   const box = $("list-items"); box.innerHTML = "";
   if(!found.length){ box.innerHTML = "<p>ჯერ არაფერია.</p>"; return; }
   found.forEach(f => box.appendChild(fileLink(f.u, f.a.text, "PDF")));
@@ -1113,8 +1114,8 @@ async function showAssign(a, isOld){
   useScope(a); applyHidden(); FROM_ASSIGN = { a, isOld };
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
   const acts = await actsFor(new Set(a.items || []));
-  const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file, x.text) })));
-  const pars = await Promise.all(acts.filter(x => x.t === "tema").map(async x => ({ x, u: await parUrl(x.text) })));   // პარალელები: თავისით, თუ ატვირთულია
+  const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file, x.text, x.alias) })));
+  const pars = await Promise.all(acts.filter(x => x.t === "tema").map(async x => ({ x, u: await parUrl(x.text, x.alias) })));   // პარალელები: თავისით, თუ ატვირთულია
   const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
   const sections = [ { h:"1. წასაკითხი", items:[] }, { h:"2. თხრობით სასწავლი", items:[] }, { h:"3. წერითი დავალებები", items:[] } ];
   const label = (el, kind, text) => { const d = el.querySelector("span") || el.appendChild(document.createElement("span"));
@@ -1268,7 +1269,7 @@ function renderGroups(){
   if(!CFG.groups.length){ const p = document.createElement("p"); p.className = "lead"; p.style.margin = "0"; p.textContent = "ჯგუფები ჯერ არ არის."; host.appendChild(p); }
   CFG.groups.forEach(g => {
     const d = document.createElement("details"); d.dataset.id = g.id; if(open.has(g.id)) d.open = true;
-    const sm = document.createElement("summary"); sm.textContent = g.name + " — " + g.members.size + " მოსწავლე"; d.appendChild(sm);
+    const sm = document.createElement("summary"); sm.textContent = g.name + " – " + g.members.size + " მოსწავლე"; d.appendChild(sm);
     const body = document.createElement("div"); body.className = "gbody";
     const row = document.createElement("div"); row.className = "row";
     const nm = document.createElement("input"); nm.className = "ginput"; nm.value = g.name; nm.setAttribute("aria-label","ჯგუფის სახელი");
@@ -1315,7 +1316,7 @@ function renderAsGroups(){
   CFG.groups.filter(g => g.assigns.length).forEach(g => {   // ყველა დავალება: ჯერ სხვა ჯგუფები, ბოლოს ეს ჯგუფი
     const og = document.createElement("optgroup"); og.label = g.name + (g.id === AS_GROUP ? " (ეს ჯგუფი)" : "");
     g.assigns.slice().reverse().forEach((a, i) => { const o = document.createElement("option"); o.value = g.id + "|" + a.id;
-      o.textContent = g.name + " — " + (i === 0 ? "ახალი" : "ძველი") + " — " + fmtDate(a.date); og.appendChild(o); });
+      o.textContent = g.name + " – " + (i === 0 ? "ახალი" : "ძველი") + " – " + fmtDate(a.date); og.appendChild(o); });
     g.id === AS_GROUP ? (from._own = og) : from.appendChild(og); });
   if(from._own){ from.appendChild(from._own); from._own = null; }
   if(Array.from(from.options).some(o => o.value === prev)) from.value = prev;
@@ -1341,7 +1342,7 @@ function renderAssign(){
       host.append(tg, oldBox);
     }
     const row = document.createElement("div"); row.className = "arow" + (i === 0 ? " cur" : "");
-    const t = document.createElement("span"); t.innerHTML = "<b></b> · "; t.firstChild.textContent = (i === 0 ? "ახალი" : "ძველი") + " — " + fmtDate(a.date);
+    const t = document.createElement("span"); t.innerHTML = "<b></b> · "; t.firstChild.textContent = (i === 0 ? "ახალი" : "ძველი") + " – " + fmtDate(a.date);
     t.appendChild(document.createTextNode(splitItems(a.items).set.size + " მონიშნული"));
     const acts = document.createElement("span"); acts.className = "acts";
     const vw = document.createElement("button"); vw.type = "button"; vw.textContent = "ნახვა";
@@ -1374,7 +1375,7 @@ async function renderAssignView(pane, a){
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
       secs[2][1].push([KIND[t], x.text]);
       if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) secs[2][1].push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
-      if(t === "tema" && AUTO_FILES && (AUTO_FILES["temis-paralelebi"] || []).some(f => fnorm(f) === fnorm(x.text) || fnorm(f) === fnorm(x.text.replace(/\s*\(ტექსტი[^)]*\)\s*$/, ""))))
+      if(t === "tema" && AUTO_FILES && (AUTO_FILES["temis-paralelebi"] || []).some(f => [x.text, x.alias].filter(Boolean).some(v => fnorm(f) === fnorm(v) || fnorm(f) === fnorm(v.replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")))))
         secs[2][1].push(["  ↳ თემის პარალელები", "იმავე ტექსტზე"]);
     }));
     pane.innerHTML = "";
@@ -1421,6 +1422,11 @@ $("as-give").onclick = () => {
   const msg = EDIT.aid ? "დავალება შეიცვალა." : "დავალება მიეცა ჯგუფს „" + g.name + "“." + (g.assigns.length > 1 ? " წინა დავალება გადავიდა „ძველებში“." : "");
   EDIT = null; saveAll(msg);
 };
+// ერთიანი სათაური (tests.json-ის „label“), ძველისთვის — როგორც იყო, მოკლე ტირით
+function testLabel(x){
+  if(x.label) return x.label;
+  return (x.author ? x.author + " – " : "") + (x.work || x.title || x.id) + (x.title ? " (" + x.title + ")" : "");
+}
 async function fetchText(u){ const r = await fetch(u, { cache:"no-store" }); if(!r.ok) throw new Error(u); return r.text(); }
 async function visCatalog(mats){
   const cat = [];
@@ -1431,7 +1437,7 @@ async function visCatalog(mats){
       const st = (c.text || []).filter(p => p.startsWith("§")).length;
       const nb = c.questions.filter(q => q.b).length, qn = c.questions.length - (NOBANK ? nb : 0);
       return { key:"gaz:" + c.id, label: t, meta: (st ? st + " სტროფი · " : "") + qn + " კითხვა" + (nb ? (NOBANK ? " (ბაზის " + nb + " დამალულია)" : " (აქედან " + nb + " ბაზიდან)") : ""),
-        act:{ t:"gaz", idx: CHAPTERS.indexOf(c), text: WORKS[w].title + " — " + t } }; })
+        act:{ t:"gaz", idx: CHAPTERS.indexOf(c), text: WORKS[w].title + " – " + t } }; })
   })) });
   // 1ბ. აფორიზმები („ვეფხისტყაოსანი“): თავები — მოსწავლე ყველა მონიშნულ თავს ერთ სავარჯიშოდ აკეთებს
   const aph = { key:"m:aph", label:"აფორიზმები („ვეფხისტყაოსანი“)", kids:[] };
@@ -1445,8 +1451,8 @@ async function visCatalog(mats){
   try{
     const t = await fetchText("redaqtireba.html");
     const re = /"n":\s*(\d+),\s*"id":\s*"[^"]*",\s*"wrong":\s*"([^"]{0,70})/g; let m;
-    while((m = re.exec(t))) red.kids.push({ key:"red:" + m[1], label:"დავალება " + m[1] + " — " + m[2].split(" ").slice(0,6).join(" ") + "…",
-      act:{ t:"red", n: m[1], text:"დავალება " + m[1] + " — " + m[2].split(" ").slice(0,4).join(" ") + "…" } });
+    while((m = re.exec(t))) red.kids.push({ key:"red:" + m[1], label:"დავალება " + m[1] + " – " + m[2].split(" ").slice(0,6).join(" ") + "…",
+      act:{ t:"red", n: m[1], text:"დავალება " + m[1] + " – " + m[2].split(" ").slice(0,4).join(" ") + "…" } });
   }catch(e){ red.err = true; }
   cat.push(red);
   // 3. გრამატიკა: თემები → დავალებები
@@ -1463,7 +1469,7 @@ async function visCatalog(mats){
     const reE = /\bid:"([^"]+)",\s*topic:"([a-z]\d+)"([^\n]*)\n\s*title:"([^"]*)"/g;
     while((m = reE.exec(t))){
       const no = (m[3].match(/no:"([^"]+)"/) || [,""])[1];
-      if(topics[m[2]]) topics[m[2]].kids.push({ key:"gram:" + m[2] + ":" + m[1], label: (no ? no + " — " : "") + m[4] });
+      if(topics[m[2]]) topics[m[2]].kids.push({ key:"gram:" + m[2] + ":" + m[1], label: (no ? no + " – " : "") + m[4] });
     }
   }catch(e){ gram.err = true; }
   cat.push(gram);
@@ -1472,13 +1478,22 @@ async function visCatalog(mats){
     const node = { key:"m:" + pre, label, kids:[] };
     try{
       const j = JSON.parse(await fetchText(dir + "/tests.json"));
+      const grp = { prog:{ key:"m:" + pre + ":prog", label:"საპროგრამო", kids:[] }, non:{ key:"m:" + pre + ":non", label:"არასაპროგრამო", kids:[] } };
+      const works = {};
       (j.tests || []).forEach(x => {
-        const label = (x.author ? x.author + " — " : "") + (x.work || x.title || x.id) + (x.title ? " (" + x.title + ")" : "");
-        const n = { key: pre + ":" + x.id, label, act:{ t: pre, id: x.id, text: label } };
+        const label = testLabel(x);   // მოსწავლისთვის: „ნაწარმოები“ (ეპიზოდი) – ავტორი
+        const n = { key: pre + ":" + x.id, label: label + (x.num ? " · " + x.num : ""), dup: !!x.dup,   // მასწავლებელს — ნომერიც
+          act:{ t: pre, id: x.id, text: label, alias: x.alias || "" } };
         // თემის მითითება მიბმულია ტექსტზე: ჩანს, სანამ ცალკე არ მოხსნი
-        if(pre === "tema") n.kids = [{ key: n.key + ":mit", label:"თემის მითითება", act:{ t:"mit", file: x.file, text: label } }];
-        node.kids.push(n);
+        if(pre === "tema") n.kids = [{ key: n.key + ":mit", label:"თემის მითითება", act:{ t:"mit", file: x.file, text: label, alias: x.alias || "" } }];
+        if(!x.group){ node.kids.push(n); return; }   // ძველი tests.json — როგორც იყო
+        const g = grp[x.prog ? "prog" : "non"], wk = (x.prog ? "p" : "n") + x.group;
+        if(!works[wk]){ works[wk] = { key:"w:" + pre + ":" + wk, label: x.group, kids:[] }; g.kids.push(works[wk]); }
+        works[wk].kids.push(n);
       });
+      ["prog", "non"].forEach(k => { const g = grp[k];
+        g.kids = g.kids.map(w => w.kids.filter(z => !z.dup).length === 1 && w.kids.length === 1 ? w.kids[0] : w);   // ერთი ტექსტი — პირდაპირ
+        if(g.kids.length) node.kids.push(g); });
     }catch(e){ node.err = true; }
     cat.push(node);
     if(pre === "tema") cat.push({ key:"m:mit", label:"თემის მითითებები (ბლოკი; თითოეული მიბმულია „გააზრება და თემის“ ტექსტზე)" });
@@ -1545,7 +1560,7 @@ function fileBadges(n, sp){
     b.className = "fbadge " + (ok ? "ok" : "no"); b.textContent = t + (ok ? " ✓" : " ✗"); b.title = ok ? "ატვირთულია" : "ჯერ არ არის ატვირთული"; }); };
   if(FILE_HAS[n.key]) return FILE_HAS[n.key].then(paint);
   const mitN = (n.kids || []).find(k => k.act && k.act.t === "mit");
-  FILE_HAS[n.key] = Promise.all([mitN ? mitUrl(mitN.act.file, n.label) : null, parUrl(n.label)]).then(([m, p]) => ({ mit: !!m, par: !!p })).catch(() => ({ mit:false, par:false }));
+  FILE_HAS[n.key] = Promise.all([mitN ? mitUrl(mitN.act.file, n.act.text, n.act.alias) : null, parUrl(n.act.text, n.act.alias)]).then(([m, p]) => ({ mit: !!m, par: !!p })).catch(() => ({ mit:false, par:false }));
   FILE_HAS[n.key].then(paint);
 }
 function visNode(n, depth, given, hide){
@@ -1595,7 +1610,8 @@ function visNode(n, depth, given, hide){
   const kids = document.createElement("div"); kids.className = "kids";
   // შიგთავსი იქმნება მხოლოდ ჩამოშლისას — Ctrl+F დახურულ განყოფილებებში არ ეძებს და თავისით არ ხსნის
   d._build = () => { if(d._built) return; d._built = true;
-    sortedKids(n.kids).forEach(k => { if((SHOW_OFF || !isOff(k)) && showNode(k, given, hide)) kids.appendChild(visNode(k, depth + 1, given, hide)); });
+    sortedKids(n.kids).forEach(k => { if(k.dup && !given[k.key] && !(EDIT && EDIT.set.has(k.key))) return;   // დუბლიკატი (იგივე ტესტი) — მხოლოდ თუ უკვე მიეცა
+      if((SHOW_OFF || !isOff(k)) && showNode(k, given, hide)) kids.appendChild(visNode(k, depth + 1, given, hide)); });
     refreshChecks(); };
   d.addEventListener("toggle", () => { if(d.open) d._build(); });
   d.appendChild(kids);
@@ -1760,8 +1776,9 @@ async function renderMitCheck(host){
   if(!list.length){ const p = document.createElement("p"); p.className = "lead"; p.textContent = "ფაილები ჯერ არ არის."; sec.appendChild(p); return; }
   const box = document.createElement("div"); box.className = "mbox"; sec.appendChild(box);
   let temas = [];
-  try{ temas = ((await visCatalog([])).find(n => n.key === "m:tema") || { kids:[] }).kids; }catch(e){}
-  const hits = await Promise.all(temas.map(async n => ({ n, u: await mitUrl(n.act.id ? n.kids[0].act.file : "", n.label) })));
+  try{ const flat = ns => ns.flatMap(n => n.act && n.act.t === "tema" ? [n] : flat(n.kids || []));   // ჯგუფებიდან — ყველა თემა
+    temas = flat(((await visCatalog([])).find(n => n.key === "m:tema") || { kids:[] }).kids); }catch(e){}
+  const hits = await Promise.all(temas.map(async n => ({ n, u: await mitUrl(n.kids[0].act.file, n.act.text, n.act.alias) })));
   list.forEach(f => {
     const u = "temis-mititebebi/" + encodeURIComponent(f);
     const own = hits.filter(x => x.u === u).map(x => x.n.label);
