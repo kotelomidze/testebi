@@ -375,7 +375,7 @@
             <label for="as-from">მონიშვნის გადმოტანა სხვა დავალებიდან (ნებისმიერი ჯგუფის ახალი ან ძველი)</label>
             <div class="row"><select id="as-from" class="gselect"></select><button type="button" class="btn ghost" id="as-copy">გადმოტანა</button></div>
           </div>
-          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="num-mode"><span>დანომვრა (რიგი)</span></label><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
+          <div class="vis-root"><button type="button" id="as-clear">ყველაფრის მოხსნა</button><label class="showoff"><input type="checkbox" id="num-mode"><span>დანომვრა (რიგი)</span></label><button type="button" id="num-clear" class="hidden" title="ყველა ნომრის წაშლა — დარჩება საპროგრამო/თავდაპირველი რიგი">ნომრების წაშლა</button><label class="showoff"><input type="checkbox" id="show-off"><span>გათიშულების ჩვენება (<span id="off-count">0</span>)</span></label></div>
           <div id="vis-tree" class="vis"></div>
           <div class="vjbox" id="vj-box">
             <h4>წინადადებების რედაქტირება (ვარჯიში)</h4>
@@ -1401,9 +1401,12 @@ function openEditor(){
 }
 $("as-new").onclick = () => { EDIT = { aid:null, set:new Set(), notes:{} }; openEditor(); };
 $("as-cancel").onclick = () => { EDIT = null; renderAssign(); };
+$("num-clear").onclick = () => { CFG.order = {}; setOrder({}); markDirty(true); renderTree();
+  $("vis-msg").textContent = "ნომრები წაიშალა — ჩანს საპროგრამო რიგი. ბოლოს დააჭირე „ცვლილებების შენახვას“."; $("vis-msg").className = "msg ok"; };
 $("as-clear").onclick = () => { EDIT.set.clear(); refreshChecks(); };
 $("show-off").onchange = () => { SHOW_OFF = $("show-off").checked; renderTree(); };
 $("num-mode").onchange = () => { NUM_MODE = $("num-mode").checked; renderTree();
+  $("num-clear").classList.toggle("hidden", !NUM_MODE);
   if(NUM_MODE){ $("vis-msg").textContent = "ჩაწერე ნომრები (1, 2, 3…) — ამ რიგით გამოჩნდება შენთანაც და მოსწავლესთანაც. ბოლოს დააჭირე „ცვლილებების შენახვას“."; $("vis-msg").className = "msg"; } };
 $("as-copy").onclick = () => {
   const [gid, aid] = String($("as-from").value).split("|");
@@ -1533,8 +1536,10 @@ function showNode(n, given, hide){   // „მიცემულების დ
   if(isItem(n)) return !given[n.key];
   const k = itemKeys(n); return !k.length || k.some(x => !given[x]);
 }
-function ordInput(n){   // ნომერი (რიგი) — ჩანს „დანომვრის“ ჩართვისას
-  if(!NUM_MODE || !isItem(n) || (n.act && n.act.t === "mit")) return null;
+function ordInput(n){   // ნომერი (რიგი) — ჩანს „დანომვრის“ ჩართვისას; გამორთულზე — მხოლოდ თუ ნომერი აქვს (№)
+  if(!isItem(n) || (n.act && n.act.t === "mit")) return null;
+  if(!NUM_MODE){ const v = CFG.order && CFG.order[n.key]; if(!v) return null;
+    const b = document.createElement("span"); b.className = "fbadge ok"; b.textContent = "№" + v; b.title = "შენ მიერ მინიჭებული რიგითი ნომერი (წინ გადმოაქვს)"; return b; }
   const i = document.createElement("input"); i.type = "number"; i.min = "1"; i.className = "ordin"; i.placeholder = "№"; i.title = "რიგითი ნომერი";
   i.value = (CFG.order && CFG.order[n.key]) || "";
   i.onclick = e => e.stopPropagation();
