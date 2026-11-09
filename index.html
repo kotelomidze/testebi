@@ -1148,30 +1148,36 @@ async function showAssign(a, isOld){
     const d = document.createElement("span"); d.className = "nofile"; label(d, KIND.mit, x.text + " — ფაილი ჯერ არ არის ატვირთული");
     return { key:x.key, el:d, mit:true }; };
   const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
+  // წერითი დავალებები ჯგუფებად: ჯერ გააზრება და თემა (მითითებით, პარალელებით), მერე დანარჩენი
+  const G = { tema:[], gaz:[], only:[], red:[], vj:[], stl:[], aph:[], gram:[], mit:[] };
+  const blk = (g, key, rows) => G[g].push({ key, rows });
   const aphs = acts.filter(x => x.t === "aph");
   if(aphs.length){   // ყველა მონიშნული თავი — ერთი სავარჯიშო
     const ns = aphs.map(x => x.n).sort((p, q) => p - q);
-    sections[2].items.push(btn("aph:" + ns.join(","), "აფორიზმები", "„ვეფხისტყაოსანი“ — " + (ns.length === 1 ? "თავი " + ns[0] : "თავები: " + ns.join(", ")), () => goSection("aforizmebi/")));
+    blk("aph", "aph:" + ns.join(","), [btn("aph:" + ns.join(","), "აფორიზმები", "„ვეფხისტყაოსანი“ — " + (ns.length === 1 ? "თავი " + ns[0] : "თავები: " + ns.join(", ")), () => goSection("aforizmebi/"))]);
   }
-  acts.filter(x => x.t === "vj").forEach(x => sections[2].items.push(btn(x.key, "წინადადებების რედაქტირება", x.text,
-    () => goSection("varjishi/#" + encodeURIComponent(x.cfg)))));
-  acts.filter(x => x.t === "stl").forEach(x => sections[2].items.push(btn(x.key, "სტილისტიკა", x.text,
-    () => goSection("stilistika/#" + encodeURIComponent(x.cfg)))));
+  acts.filter(x => x.t === "vj").forEach(x => blk("vj", x.key, [btn(x.key, "წინადადებების რედაქტირება", x.text,
+    () => goSection("varjishi/#" + encodeURIComponent(x.cfg)))]));
+  acts.filter(x => x.t === "stl").forEach(x => blk("stl", x.key, [btn(x.key, "სტილისტიკა", x.text,
+    () => goSection("stilistika/#" + encodeURIComponent(x.cfg)))]));
   ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
-    const W = sections[2].items;
     if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;   // უკვე თავის თემასთანაა
-    if(t === "gaz") W.push(btn(x.key, KIND[t], x.text, () => { state.work = CHAPTERS[x.idx].work; setWorkTitle(); renderChapters(); startTest(x.idx); }));
-    else if(t === "red") W.push(btn(x.key, KIND[t], x.text, () => openFiles("red", x.n)));
-    else if(t === "gram") W.push(btn(x.key, KIND[t], x.text, () => goSection("gramatika/#" + x.id)));
+    if(t === "gaz") blk("gaz", x.key, [btn(x.key, KIND[t], x.text, () => { state.work = CHAPTERS[x.idx].work; setWorkTitle(); renderChapters(); startTest(x.idx); })]);
+    else if(t === "red") blk("red", x.key, [btn(x.key, KIND[t], x.text, () => openFiles("red", x.n))]);
+    else if(t === "gram") blk("gram", x.key, [btn(x.key, KIND[t], x.text, () => goSection("gramatika/#" + x.id))]);
     else if(t === "tema"){
-      W.push(btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id)));
-      const mx = acts.find(z => z.t === "mit" && z.key === x.key + ":mit"); if(mx) W.push(mitRow(mx));   // მითითება — თავისი თემის ქვემოთ
-      const px = pars.find(z => z.x === x); if(px && px.u){ const r = link(x.key + ":par", "თემის პარალელები", x.text, px.u); r.mit = true; W.push(r); }
+      const rows = [btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id))];
+      const mx = acts.find(z => z.t === "mit" && z.key === x.key + ":mit"); if(mx) rows.push(mitRow(mx));   // მითითება — თავისი თემის ქვემოთ
+      const px = pars.find(z => z.x === x); if(px && px.u){ const r = link(x.key + ":par", "თემის პარალელები", x.text, px.u); r.mit = true; rows.push(r); }
+      blk("tema", x.key, rows);
     }
-    else if(t === "only") W.push(btn(x.key, KIND[t], x.text, () => openFiles("only", x.id)));
-    else if(t === "mit") W.push(mitRow(x));
+    else if(t === "only") blk("only", x.key, [btn(x.key, KIND[t], x.text, () => openFiles("only", x.id))]);
+    else if(t === "mit") blk("mit", x.key.replace(/:mit$/, ""), [mitRow(x)]);
   }));
-  sections.forEach(sec => sortRows(sec.items, it => it.mit ? it.key.replace(/:(mit|par)$/, "") : it.key));   // მასწავლებლის ნომრების მიხედვით
+  ["tema","mit","gaz","only","red","vj","stl","aph","gram"].forEach(g => {   // ჯგუფის შიგნით — მასწავლებლის ნომრების მიხედვით
+    sortRows(G[g], b => b.key).forEach(b => sections[2].items.push(...b.rows));
+  });
+  [0, 1].forEach(i => sortRows(sections[i].items, it => it.key));
   box.innerHTML = "";
   let n = 0, sn = 0;
   const filled = sections.filter(sec => sec.items.length);
@@ -1380,17 +1386,20 @@ async function renderAssignView(pane, a){
     const NOTES = splitItems(a.items).notes;
     acts.filter(x => x.t === "file").forEach(x => secs[x.m.cat === "mat" ? 1 : 0][1].push([MAT_CAT[x.m.cat], x.m.title + (NOTES[x.key] ? " — 📌 " + NOTES[x.key] : "")]));
     const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
+    const G = { tema:[], mit:[], gaz:[], only:[], red:[], vj:[], stl:[], aph:[], gram:[] };   // იგივე რიგი, რაც მოსწავლესთან
     const aphN = acts.filter(x => x.t === "aph").map(x => x.n).sort((p, q) => p - q);
-    if(aphN.length) secs[2][1].push(["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]);
-    acts.filter(x => x.t === "vj").forEach(x => secs[2][1].push(["წინადადებების რედაქტირება", x.text, x.key]));
-    acts.filter(x => x.t === "stl").forEach(x => secs[2][1].push(["სტილისტიკა", x.text, x.key]));
+    if(aphN.length) G.aph.push({ key:"aph", rows:[["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]] });
+    acts.filter(x => x.t === "vj").forEach(x => G.vj.push({ key:x.key, rows:[["წინადადებების რედაქტირება", x.text]] }));
+    acts.filter(x => x.t === "stl").forEach(x => G.stl.push({ key:x.key, rows:[["სტილისტიკა", x.text]] }));
     ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
-      secs[2][1].push([KIND[t], x.text]);
-      if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) secs[2][1].push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
+      const rows = [[KIND[t], x.text]];
+      if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) rows.push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
       if(t === "tema" && AUTO_FILES && (AUTO_FILES["temis-paralelebi"] || []).some(f => [x.text, x.alias].filter(Boolean).some(v => fnorm(f) === fnorm(v) || fnorm(f) === fnorm(v.replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")))))
-        secs[2][1].push(["  ↳ თემის პარალელები", "იმავე ტექსტზე"]);
+        rows.push(["  ↳ თემის პარალელები", "იმავე ტექსტზე"]);
+      G[t].push({ key: t === "mit" ? x.key.replace(/:mit$/, "") : x.key, rows });
     }));
+    ["tema","mit","gaz","only","red","vj","stl","aph","gram"].forEach(g => sortRows(G[g], z => z.key).forEach(z => secs[2][1].push(...z.rows)));
     pane.innerHTML = "";
     let n = 0, sn = 0;
     secs.filter(z => z[1].length).forEach(([h, items]) => {
