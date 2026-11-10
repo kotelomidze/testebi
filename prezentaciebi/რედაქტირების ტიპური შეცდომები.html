@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>რედაქტირების ტიპური შეცდომები</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;600;800&display=swap">
+<style>
+:root{
+  --bg:#fbfaf7; --ink:#1f2430; --soft:#5d6472; --line:#e6e2d8;
+  --k1:#1d4ed8; --k2:#047857; --k3:#9d174d;
+  --A:#1d4ed8; --Abg:#e8efff;   /* მთავარი წინადადება */
+  --B:#b45309; --Bbg:#fff1dc;   /* დამოკიდებული / ჩართული */
+  --cm:#dc2626;                 /* სასვენი ნიშანი */
+  --bad:#b42318; --good:#067647;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.7 "Noto Sans Georgian",Sylfaen,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:0 16px}
+header{padding:40px 0 18px;border-bottom:1px solid var(--line)}
+header h1{margin:0;font-size:clamp(1.7rem,5vw,2.5rem);font-weight:800;line-height:1.25}
+header p{margin:.5rem 0 0;color:var(--soft)}
+.crit{display:flex;flex-wrap:wrap;gap:8px 18px;margin:18px 0 0;padding:0;list-style:none}
+.crit a{color:inherit;text-decoration:none;font-weight:600;border-bottom:2px solid var(--c)}
+.crit li:nth-child(1){--c:var(--k1)} .crit li:nth-child(2){--c:var(--k2)} .crit li:nth-child(3){--c:var(--k3)}
+.notice{margin:22px 0 0;padding:12px 16px;border-left:4px solid #f59e0b;background:#fff8e6}
+nav{position:sticky;top:0;z-index:5;background:rgba(251,250,247,.95);backdrop-filter:blur(6px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-top:8px;padding-bottom:8px}
+nav a{flex:none;padding:4px 12px;border-radius:999px;color:var(--c);text-decoration:none;font-weight:700;font-size:.92rem;border:1.5px solid var(--c)}
+nav a:nth-child(1){--c:var(--k1)} nav a:nth-child(2){--c:var(--k2)} nav a:nth-child(3){--c:var(--k3)}
+section.k{padding:10px 0 20px}
+.k1{--c:var(--k1)} .k2{--c:var(--k2)} .k3{--c:var(--k3)}
+h2{margin:36px 0 4px;font-size:1.6rem;line-height:1.3;color:var(--c)}
+h2 small{display:block;font-size:.8rem;letter-spacing:.08em;color:var(--soft);font-weight:600}
+h3.sub{margin:28px 0 0;font-size:.95rem;color:var(--soft);text-transform:none;letter-spacing:.03em;border-bottom:1px dashed var(--line);padding-bottom:4px}
+.t{padding:18px 0;border-bottom:1px solid var(--line)}
+.t:last-child{border-bottom:0}
+.t h4{margin:0 0 6px;font-size:1.15rem;line-height:1.4}
+.t h4 .n{color:var(--c);margin-right:8px;font-weight:800}
+.t p{margin:6px 0}
+.rule{color:#333}
+.ex{margin:6px 0 6px 2px;padding-left:28px;position:relative}
+.ex::before{position:absolute;left:0;top:0;font-weight:800}
+.ex.ok::before{content:"✓";color:var(--good)}
+.ex.no::before{content:"✗";color:var(--bad)}
+.why{color:var(--soft);font-size:.95rem;margin:2px 0 10px 30px}
+.why b{color:var(--ink)}
+.A{background:var(--Abg);color:var(--A);border-radius:4px;padding:1px 3px}
+.B{background:var(--Bbg);color:var(--B);border-radius:4px;padding:1px 3px}
+.cm{color:var(--cm);font-weight:800;font-size:1.25em;line-height:0;padding:0 1px}
+.bad{color:var(--bad);text-decoration:line-through;text-decoration-thickness:1.5px}
+.good{color:var(--good);font-weight:700}
+.hl{font-weight:700;border-bottom:2px solid currentColor}
+.pairs{display:flex;flex-direction:column;gap:3px;margin:6px 0 0 2px}
+.pairs>span{display:block;padding-left:28px;position:relative}
+.pairs>span::before{content:"•";position:absolute;left:6px;color:var(--soft)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.92rem;color:var(--soft);margin:6px 0 0}
+footer{padding:28px 0 40px;color:var(--soft);font-size:.85rem;text-align:center}
+@media (max-width:520px){body{font-size:16px}}
+@media print{nav{display:none}body{background:#fff}.t{break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <h1>📝 რედაქტირება – ტიპური შეცდომები</h1>
+  <p>დავალება სწორდება სამი კრიტერიუმით:</p>
+  <ol class="crit">
+    <li><a href="#k1">1. პუნქტუაცია</a></li>
+    <li><a href="#k2">2. ორთოგრაფია, მორფოლოგია, სინტაქსი</a></li>
+    <li><a href="#k3">3. სტილი</a></li>
+  </ol>
+  <div class="notice">💡 ტექსტში <b>აუცილებლად არის ერთი სტილისტური ხარვეზი</b>, ხოლო <b>ჰ / ს</b>-სთან დაკავშირებული შეცდომა <b>ყოველთვისაა</b>.</div>
+</header>
+
+<nav><div class="wrap"><a href="#k1">1. პუნქტუაცია</a><a href="#k2">2. ორთოგრაფია, მორფოლოგია, სინტაქსი</a><a href="#k3">3. სტილი</a></div></nav>
+
+<main class="wrap">
+
+<!-- ======================= 1. პუნქტუაცია ======================= -->
+<section class="k k1" id="k1">
+<h2><small>კრიტერიუმი 1</small>პუნქტუაცია</h2>
+<p class="legend"><span><span class="A">ლურჯი</span> – მთავარი წინადადება</span><span><span class="B">ნარინჯისფერი</span> – დამოკიდებული წინადადება / განკერძოება</span><span><span class="cm">,</span> – სასვენი ნიშანი</span></p>
+
+<div class="t">
+  <h4><span class="n">1</span>მძიმე ერთგვარ წევრებს შორის</h4>
+  <p class="rule">მძიმე იწერება <b>ერთგვარ წევრებს შორის</b>. თუ მათ აერთებს <b>და</b> ან <b>თუ</b>, მძიმე <b>არ</b> იწერება.</p>
+  <p class="ex ok">კოტემ იყიდა <span class="hl">ვაშლი</span><span class="cm">,</span> <span class="hl">მსხალი</span><span class="cm">,</span> <span class="hl">ატამი</span>.</p>
+  <p class="ex no">მგზავრობა არა მხოლოდ მოუხერხებელი არამედ სახიფათოც კი იყო.</p>
+  <p class="ex ok">მგზავრობა არა მხოლოდ <span class="hl">მოუხერხებელი</span><span class="cm">,</span> არამედ <span class="hl">სახიფათოც</span> კი იყო.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">2</span>მძიმე რთულ წინადადებაში</h4>
+  <p class="rule"><b>2 ზმნა = 2 წინადადება.</b> მათ საზღვარზე იწერება მძიმე – მაშინაც, თუ კავშირი არ არის.</p>
+  <p class="ex ok"><span class="A">კოტემ <b>იყიდა</b> ვაშლი</span><span class="cm">,</span> <span class="B">რომელიც <b>იყო</b> უგემრიელესი</span>.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">3</span>გახლეჩილი წინადადება – ორი მძიმე</h4>
+  <p class="rule">დააკვირდით, რომ წინადადებების <b>ადგილის გაცვლით არაფერი იცვლება</b> – მძიმე ისევ ერთია და ისევ <b>ორი წინადადების საზღვარზე</b> დგას:</p>
+  <p class="ex ok"><span class="A">ტარიელმა ტირილი დაიწყო</span><span class="cm">,</span> <span class="B">ნესტანის ამბავი რომ ვუთხარი</span>.</p>
+  <p class="ex ok"><span class="B">ნესტანის ამბავი რომ ვუთხარი</span><span class="cm">,</span> <span class="A">ტარიელმა ტირილი დაიწყო</span>.</p>
+  <p class="rule">მაგრამ როცა დამოკიდებული წინადადება <b>მთავარის შუაში „ჩახტება“</b>, მთავარი წინადადება იხლიჩება, საზღვარი ორი ხდება და საჭიროა <b>ორი მძიმე</b>:</p>
+  <p class="ex ok"><span class="A">ტარიელმა</span><span class="cm">,</span> <span class="B">ნესტანის ამბავი რომ ვუთხარი</span><span class="cm">,</span> <span class="A">ტირილი დაიწყო</span>.</p>
+  <p class="ex no"><span class="A">ქორეოგრაფმა</span> <span class="B">რომელსაც მემკვიდრე არ ჰყავდა</span><span class="cm">,</span> <span class="A">მთელი ქონება დასის ბალერინებს უანდერძა</span>.</p>
+  <p class="ex ok"><span class="A">ქორეოგრაფმა</span><span class="cm">,</span> <span class="B">რომელსაც მემკვიდრე არ ჰყავდა</span><span class="cm">,</span> <span class="A">მთელი ქონება დასის ბალერინებს უანდერძა</span>.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">4</span>განკერძოებული სიტყვები და გამოთქმები</h4>
+  <p class="rule">მძიმით გამოიყოფა:</p>
+  <p class="rule">• <b>„გარდა“</b> და <b>„მიუხედავად“</b> თანდებულიანი გამოთქმები;<br>• აზრის წყარო: <b>ავტორის აზრით, მისი თქმით, გადმოცემის თანახმად…</b>;<br>• დაზუსტება: <b>კერძოდ, მაგალითად, სახელდობრ, ანუ…</b></p>
+  <p class="rule">წინადადების <b>თავში ან ბოლოში</b> – ერთი მძიმით, <b>შუაში</b> – ორივე მხრიდან.</p>
+  <p class="ex ok"><span class="B">გარდა ამისა</span><span class="cm">,</span> მან…</p>
+  <p class="ex ok"><span class="B">მეფის აზრით</span><span class="cm">,</span> ეს ქალაქი…</p>
+  <p class="ex ok">ფუნიკულიორი გაიხსნა 1905 წელს<span class="cm">,</span> <span class="B">კერძოდ</span><span class="cm">,</span> 27 მარტს.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">5</span>განმაზოგადებელი სიტყვა: ორწერტილი თუ ტირე</h4>
+  <p class="rule">განმაზოგადებელი სიტყვა <b>ჩამონათვლის წინაა</b> – <b>ორწერტილი</b>:</p>
+  <p class="ex ok">კოტემ იყიდა <b>ხილი</b><span class="cm">:</span> ვაშლი, მსხალი, ატამი.</p>
+  <p class="ex ok">კოტემ იყიდა <b>ყველაფერი</b><span class="cm">:</span> ვაშლი, მსხალი, ატამი.</p>
+  <p class="rule">ჩამონათვალი წინაა, განმაზოგადებელი სიტყვა <b>მოსდევს</b> – <b>ტირე</b>:</p>
+  <p class="ex ok">ვაშლი, მსხალი, ატამი <span class="cm">–</span> <b>ყველაფერი</b> იყიდა კოტემ.</p>
+  <p class="rule">ორწერტილი იწერება აგრეთვე <b>სახელდობრ, კერძოდ, შემდეგი</b>-ს შემდეგ და პირდაპირი ნათქვამის წინ.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">6</span>ტირე გამოტოვებული წევრის ნაცვლად</h4>
+  <p class="ex ok">ერთ ხელში წიგნები <b>ეჭირა</b>, მეორეში <span class="cm">–</span> რვეულები.</p>
+  <p class="why">ტირე დგას გამოტოვებული ზმნის (<b>ეჭირა</b>) ადგილას.</p>
+</div>
+</section>
+
+<!-- ======================= 2. ორთოგრაფია, მორფოლოგია, სინტაქსი ======================= -->
+<section class="k k2" id="k2">
+<h2><small>კრიტერიუმი 2</small>ორთოგრაფია, მორფოლოგია, სინტაქსი</h2>
+
+<h3 class="sub">ზმნა</h3>
+
+<div class="t">
+  <h4><span class="n">7</span>ჰ / ს – ირიბი ობიექტური პირის ნიშანი</h4>
+  <p class="rule">ასეთი შეცდომა <b>ყოველთვისაა!</b> ჰკითხე ზმნას <b>რა ქნა?</b> – თუ <b>„მას“</b> (მრავლობითში <b>„მათ“</b>) გამოჩნდა, ჰ / ს სჭირდება: <i>სჭირდება ის მას → დასჭირდა ის <b>მას</b></i> – ამიტომ <b>ს</b>.</p>
+  <p class="rule"><b>ს</b> – დ, თ, ტ, ძ, ც, წ-ს წინ; <b>ჰ</b> – ბ, ფ, პ, გ, ქ, კ, ყ-ს წინ. ერთპირიან ზმნას ჰ / ს <b>არ</b> სჭირდება.</p>
+  <div class="pairs">
+    <span><span class="bad">სჩანს</span> → <span class="good">ჩანს</span></span>
+    <span><span class="bad">შესდგებოდა</span> → <span class="good">შედგებოდა</span></span>
+    <span>მას <span class="bad">წამდა</span> → <span class="good">სწამდა</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">8</span>ზმნისწინი</h4>
+  <p class="rule"><b>აღ-</b> ზმნისწინთან პირის ნიშანი <b>ზმნისწინის შემდეგ</b> იწერება. ძველი ზმნისწინი (<b>გან-</b>) ან <b>მთლიანად</b> რჩება, ან მთლიანად მოდის – ხმოვანს ნუ შეცვლით.</p>
+  <div class="pairs">
+    <span><span class="bad">ავღზარდე</span> → <span class="good">აღვზარდე</span></span>
+    <span><span class="bad">ავღნიშნოთ</span> → <span class="good">აღვნიშნოთ</span></span>
+    <span><span class="bad">გაანთავისუფლა</span> → <span class="good">გაათავისუფლა</span></span>
+    <span><span class="bad">გაანვითარა</span> → <span class="good">განავითარა</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">9</span>თემის ნიშანი -ავ / -ამ</h4>
+  <p class="rule">საწყისი <b>-ვა</b> → <b>-ავ</b> (ბარ<b>ვა</b> – ვბარ<b>ავ</b>); საწყისი <b>-მა</b> → <b>-ამ</b> (დადგ<b>მა</b> – ვდგ<b>ამ</b>).</p>
+  <div class="pairs">
+    <span><span class="bad">გამოუთქვავს</span> → <span class="good">გამოუთქვამს</span> (გამოთქ<b>მა</b>)</span>
+    <span>ხაზს <span class="bad">უსვავდა</span> → <span class="good">უსვამდა</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">10</span>ხმოვანმონაცვლე (ფუძედრეკადი) ზმნები</h4>
+  <p class="rule">ზმნებს, რომლებსაც წარსულში <b>ფუძის შიგნით ხმოვანი ეცვლებათ</b>, თემის ნიშანი <b>არ აქვთ</b>:</p>
+  <p class="ex ok">კრ<b>ე</b>ფს – მოკრ<b>ი</b>ფა · კბ<b>ე</b>ჩს – ჩაკბ<b>ი</b>ჩა</p>
+  <p class="ex ok">წმ<b>ე</b>ნდს – გაწმ<b>ი</b>ნდა · ხლ<b>ე</b>ჩს – გახლ<b>ი</b>ჩა</p>
+  <div class="pairs">
+    <span><span class="bad">კრეფავს</span> → <span class="good">კრეფს</span></span>
+    <span><span class="bad">წმინდავდნენ</span> → <span class="good">წმენდდნენ</span></span>
+    <span><span class="bad">გადაუწყვიტავთ</span> → <span class="good">გადაუწყვეტიათ</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">11</span>კონტაქტის ნიშანი -ინ / -ევინ</h4>
+  <div class="pairs">
+    <span><span class="bad">გააკეთებია</span> → <span class="good">გააკეთებ<u>ინ</u>ა</span></span>
+    <span><span class="bad">აეშენებიათ</span> → <span class="good">აეშენებ<u>ინ</u>ათ</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">12</span>-დენ → -დნენ</h4>
+  <p class="rule">მრავლობითში <b>დ</b>-ს და <b>ოდ</b>-ის შემდეგ იწერება <b>-ნენ</b>.</p>
+  <div class="pairs">
+    <span><span class="bad">მოვიდენ</span> → <span class="good">მოვიდნენ</span></span>
+    <span><span class="bad">სწავლობდენ</span> → <span class="good">სწავლობდნენ</span></span>
+  </div>
+</div>
+
+<h3 class="sub">სახელი</h3>
+
+<div class="t">
+  <h4><span class="n">13</span>კუმშვა და კვეცა</h4>
+  <p class="rule">კუმშვადი ფუძე (<b>ალ, ამ, ან, არ; ელ, ემ, ენ, ერ; ოლ, ომ, ონ, ორ</b>) ხმოვანს კარგავს <b>ნათესაობითში, მოქმედებითში, ვითარებითში</b> და მრავლობითში. <b>ა-</b> და <b>ე-</b>ფუძიანი იკვეცება ნათესაობითსა და მოქმედებითში.</p>
+  <div class="pairs">
+    <span>მტკვარი – <span class="good">მტკვრის</span></span>
+    <span><span class="bad">წერეთელის</span> → <span class="good">წერეთლის</span></span>
+    <span><span class="bad">წელიდან</span> → <span class="good">წლიდან</span></span>
+    <span><span class="bad">ხანით</span> → <span class="good">ხნით</span></span>
+    <span><span class="bad">მეპატრონეს</span> → <span class="good">მეპატრონის</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">14</span>-ად თუ -ათ</h4>
+  <p class="rule">ვითარებითიდან ნაწარმოებ ზმნიზედაში – <b>-დ</b> (კარგა<b>დ</b>, ჩუმა<b>დ</b>, ამჟამა<b>დ</b>); მოქმედებითიდან – <b>-თ</b> (ზემო<b>თ</b>, გარე<b>თ</b>, უკე<b>თ</b>).</p>
+  <div class="pairs">
+    <span><span class="bad">კარგათ</span> → <span class="good">კარგად</span></span>
+    <span><span class="bad">ხშირათ</span> → <span class="good">ხშირად</span></span>
+    <span><span class="bad">მიუხედავათ</span> → <span class="good">მიუხედავად</span></span>
+    <span><span class="bad">თანახმათ</span> → <span class="good">თანახმად</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">15</span>-თანავე</h4>
+  <p class="rule">ნათესაობითი + <b>თანავე</b> ერთად იწერება.</p>
+  <div class="pairs">
+    <span><span class="bad">დაარსების თანავე</span> → <span class="good">დაარსებისთანავე</span></span>
+    <span><span class="bad">ჩასვლის თანავე</span> → <span class="good">ჩასვლისთანავე</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">16</span>-იდან თუ -ისგან</h4>
+  <p class="rule"><b>საიდან?</b> – <b>-იდან</b>; მასალა ან მიზეზი (<b>რისგან?</b>) – <b>-ისგან</b>.</p>
+  <p class="ex ok">ხ<b>იდან</b> ჩამოვარდა ვაშლი – ხ<b>ისგან</b> მზადდება მაგიდა.</p>
+  <div class="pairs">
+    <span><span class="bad">თიხიდან</span> გამოიძერწა → <span class="good">თიხისაგან</span></span>
+    <span><span class="bad">სამშობლოსაგან</span> იღებდნენ → <span class="good">სამშობლოდან</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">17</span>ნაცვალსახელები</h4>
+  <p class="rule"><b>ჩვენს ქალაქში</b> – კუთვნილება (მიცემითში <b>-ს</b> აუცილებელია), <b>ჩვენ ირგვლივ</b> – თანდებული (I და II პირის ნაცვალსახელს თანდებულის წინ <b>-ს</b> არ დაერთვის: ჩემკენ, ჩემგან).</p>
+  <div class="pairs">
+    <span><span class="bad">ჩვენ ქალაქში</span> → <span class="good">ჩვენს ქალაქში</span></span>
+    <span><span class="bad">მათთაგანი</span> → <span class="good">მათგანი</span></span>
+    <span><span class="bad">ჩვენთაგანი</span> → <span class="good">ჩვენგანი</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">18</span>კომპოზიტები</h4>
+  <p class="rule"><b>დეფისით</b> – ორცნებიანი (შუაში „და“ ჩაჯდება), გაორმაგებული ფუძე, სინონიმები, ანტონიმები. <b>ერთად</b> – ერთცნებიანი, „და“-თი შეერთებული, <b>მაწარმოებლიანი</b>.</p>
+  <p class="ex ok">დედა<b>-</b>შვილი – დედაშვილ<b>ობა</b></p>
+  <div class="pairs">
+    <span><span class="bad">ახალახალი</span> → <span class="good">ახალ-ახალი</span></span>
+    <span><span class="bad">არა-ერთი</span> → <span class="good">არაერთი</span></span>
+    <span><span class="bad">სამ სართულიანი</span> → <span class="good">სამსართულიანი</span></span>
+    <span><span class="bad">დრო და დრო</span> → <span class="good">დროდადრო</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">19</span>რიცხვითი სახელები</h4>
+  <p class="rule">არაბული ციფრით: <b>მე-5</b>, მაგრამ <b>21-ე</b>. რომაულ ციფრთან <b>არაფერი</b> ერთვის. ბრუნვის ნიშანი – დეფისით: <b>გიორგი I-მა</b>.</p>
+  <div class="pairs">
+    <span><span class="bad">18-ე</span> → <span class="good">მე-18</span></span>
+    <span><span class="bad">მე-21</span> → <span class="good">21-ე</span></span>
+    <span><span class="bad">XXI-ე</span> → <span class="good">XXI</span></span>
+    <span><span class="bad">მე-XV</span> → <span class="good">XV</span></span>
+    <span><span class="bad">50-ან</span> → <span class="good">50-იან</span></span>
+  </div>
+</div>
+
+<h3 class="sub">შეთანხმება და წინადადება</h3>
+
+<div class="t">
+  <h4><span class="n">20</span>რიცხვში შეთანხმება</h4>
+  <p class="rule">რიცხვით სახელთან და სიტყვებთან <b>ყველა, რამდენიმე, არაერთი</b> სახელი <b>მხოლობითშია</b>. <b>კრებით სახელთან</b> და <b>კომპოზიტთან</b> ზმნა მხოლობითშია; სულიერი მრავლობითი ქვემდებარე – ზმნაც მრავლობითში.</p>
+  <div class="pairs">
+    <span><b>ორი</b> <span class="bad">ბიჭები</span> → <span class="good">ბიჭი</span></span>
+    <span><b>არაერთი</b> <span class="bad">ქალაქები</span> → <span class="good">ქალაქი</span></span>
+    <span><b>ხალხი</b> <span class="bad">მოვიდნენ</span> → <span class="good">მოვიდა</span></span>
+    <span><b>დედა-შვილი</b> <span class="bad">მოვიდნენ</span> → <span class="good">მოვიდა</span></span>
+    <span><b>ლეკებიც</b> <span class="bad">ესხმოდა</span> → <span class="good">ესხმოდნენ</span></span>
+  </div>
+  <p class="rule"><b>რიცხვში მონაცვლე ზმნები:</b></p>
+  <p class="ex ok">ბიჭი <b>დაჯდა</b> – ბიჭები <b>დასხდნენ</b></p>
+  <p class="ex ok">ვაშლი <b>აბია</b> – ვაშლები <b>ასხია</b></p>
+  <p class="ex ok">ფოთოლი <b>ჩამოვარდა</b> – ფოთლები <b>ჩამოცვივდა</b></p>
+</div>
+
+<div class="t">
+  <h4><span class="n">21</span>მისი / მისთვის – მათი / მათთვის</h4>
+  <p class="rule"><b>მისი, მისთვის</b> – მხოლობითში მდგარ სახელს მიემართება, <b>მათი, მათთვის</b> – მრავლობითში მდგარს.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">22</span>მსაზღვრელ-საზღვრული</h4>
+  <p class="rule">ზედსართავი არსებითთან ერთად ბრუნვაში ეთანხმება: <b>მაღალი</b> კაცის, <b>მაღალ</b> კაცს. საკუთარ სახელთან პროფესიის, წოდების სიტყვა <b>ფუძის სახითაა</b>.</p>
+  <div class="pairs">
+    <span><span class="bad">სპარსულ</span> კერამიკის → <span class="good">სპარსული</span></span>
+    <span><span class="bad">აკადემიკოსი</span> შანიძის → <span class="good">აკადემიკოს</span></span>
+    <span><span class="bad">კუნძული</span> როდოსის → <span class="good">კუნძულ</span></span>
+    <span><span class="bad">ჟურნალი</span> „ნიანგის“ → <span class="good">ჟურნალ</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">23</span>რომელიც / რომლებიც</h4>
+  <p class="rule">კრებით სახელთან – <b>რომელიც</b>; რიცხვით სახელთან, ორ სახელთან და კომპოზიტთან – <b>რომლებიც</b>.</p>
+  <p class="ex ok">კაცი, <b>რომელიც</b>… · ხალხი, <b>რომელიც</b>…</p>
+  <p class="ex ok">კაცები, <b>რომლებიც</b>… · ორი კაცი, <b>რომლებიც</b>… · დედა-შვილი, <b>რომლებიც</b>…</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">24</span>ვინც / რაც – რომელიც</h4>
+  <p class="rule">ნაცვალსახელთან – <b>ვინც, რაც</b>; არსებით სახელთან – <b>რომელიც</b>.</p>
+  <p class="ex ok"><b>ის</b>, ვინც… · <b>ის</b>, რაც… · ის <b>კაცი</b>, რომელიც…</p>
+  <p class="ex no">ეს იყო ფუნდამენტური <b>ნაშრომი</b>, <span class="bad">რაც</span> საზოგადოებას…</p>
+  <p class="ex ok">ეს იყო ფუნდამენტური <b>ნაშრომი</b>, <span class="good">რომელიც</span> საზოგადოებას…</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">25</span>„ისეთი…, როგორიცაა“</h4>
+  <p class="rule">წყვილები: <b>ისე… როგორც</b>; <b>ისეთი… როგორიც</b>. როგორიც რიცხვში ეთანხმება სახელს: <b>ისეთ შემოქმედებს, როგორებიც</b>.</p>
+  <p class="ex no">ისეთ მნიშვნელოვან საქმეში, <span class="bad">როგორც</span> ქალთა უფლებების <span class="bad">დაცვაა</span>.</p>
+  <p class="ex ok">ისეთ მნიშვნელოვან საქმეში, <span class="good">როგორიცაა</span> ქალთა უფლებების <span class="good">დაცვა</span>.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">26</span>მიზეზი თუ მიზანი</h4>
+  <p class="rule"><b>მიზეზი</b> – რატომ? რის გამო? ამიტომ, <b>რადგან</b>, რის გამოც. <b>მიზანი</b> – რისთვის? ამისთვის, <b>რათა</b>.</p>
+  <p class="ex no">…ჩაეწერა, <span class="bad">რათა</span> ფიქრობდა, რომ გერმანია საქართველოს გაათავისუფლებდა.</p>
+  <p class="ex ok">…ჩაეწერა, <span class="good">რადგან</span> ფიქრობდა, რომ გერმანია საქართველოს გაათავისუფლებდა.</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">27</span>გახლეჩილი მთავარი წინადადება</h4>
+  <p class="rule">მთავარი წინადადების ქვემდებარე <b>მთავარი წინადადების ზმნას</b> შეეწყობა და არა დამოკიდებულისას.</p>
+  <p class="ex no"><span class="A"><span class="bad">პროექტმა</span></span>, <span class="B">რომელსაც ქმნიდნენ სტუდენტები</span>, <span class="A"><b>ითვალისწინებდა</b> ტორტის გამოცხობას</span>.</p>
+  <p class="ex ok"><span class="A"><span class="good">პროექტი</span></span>, <span class="B">რომელსაც ქმნიდნენ სტუდენტები</span>, <span class="A"><b>ითვალისწინებდა</b> ტორტის გამოცხობას</span>.</p>
+  <p class="why">ვინ ითვალისწინებდა? – <b>პროექტი</b> (და არა „პროექტმა“).</p>
+</div>
+
+<div class="t">
+  <h4><span class="n">28</span>სიტყვათა წყობა</h4>
+  <p class="rule"><b>„რომელიც“</b> იმ სიტყვასთან ახლოს უნდა იდგეს, რომელსაც მიემართება.</p>
+  <p class="ex no">წაიღო <span class="hl">ხიდი</span> ადიდებულმა მდინარემ, <span class="hl">რომელიც</span> ახლახან შევაკეთეთ.</p>
+  <p class="why">გამოდის, თითქოს მდინარე შევაკეთეთ.</p>
+  <p class="ex ok">ადიდებულმა მდინარემ წაიღო <span class="hl">ხიდი</span>, <span class="hl">რომელიც</span> ახლახან შევაკეთეთ.</p>
+</div>
+</section>
+
+<!-- ======================= 3. სტილი ======================= -->
+<section class="k k3" id="k3">
+<h2><small>კრიტერიუმი 3</small>სტილი</h2>
+<p class="rule">ტექსტში <b>აუცილებლად არის ერთი</b> სტილისტური ხარვეზი.</p>
+
+<div class="t">
+  <h4><span class="n">29</span>კალკები</h4>
+  <p class="rule">საწყისი + <b>მოახდენს / მოხდება / განახორციელებს</b> ხშირად კალკია – აზრი <b>მარტივი პირიანი ზმნით</b> გადმოეცით. „მოახდენს“ მართებულია უცხოურ საწყისებთან (რეალიზაცია, მობილიზება).</p>
+  <div class="pairs">
+    <span><span class="bad">მისი დაკრძალვა მოხდა</span> → <span class="good">იგი დაკრძალეს</span></span>
+    <span><span class="bad">შემოწმების მოხდენა</span> → <span class="good">შემოწმება</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">30</span>პლეონაზმი (ზედმეტი სიტყვა)</h4>
+  <p class="rule">ნუ დააწყვილებთ სიტყვებს, რომელთაგან ერთი მეორის მნიშვნელობაში <b>უკვე იგულისხმება</b>. ხარისხის ფორმას (<b>უ</b>დიდ<b>ესი</b>) „ყველაზე“, „ძალიან“ არ სჭირდება.</p>
+  <div class="pairs">
+    <span><span class="bad">ყველაზე</span> <span class="good">უმნიშვნელოვანესი</span></span>
+    <span>ძალიან <span class="bad">უნიჭიერესი</span> → <span class="good">ნიჭიერი</span></span>
+  </div>
+</div>
+
+<div class="t">
+  <h4><span class="n">31</span>ლექსიკური შეუთავსებლობა</h4>
+  <p class="rule">სიტყვა <b>არ ეგუება</b> კონტექსტს ან მეზობელ სიტყვას.</p>
+  <div class="pairs">
+    <span>საფუძველი <span class="bad">დაუდო</span> → <span class="good">ჩაუყარა</span></span>
+    <span><span class="bad">სრულყოფილად</span> გაძარცვეს → <span class="good">მთლიანად</span></span>
+  </div>
+</div>
+</section>
+
+</main>
+</body>
+</html>
