@@ -142,8 +142,10 @@ function drill(host, run, opt){
       const hb = el("button", "btn hintb", "💡 მინიშნება"); hb.type = "button"; hb.style.marginTop = "12px";
       const hx = el("div", "hint hidden");
       hx.append(el("b", "", "📌 საკითხი: " + it.hint.hw), el("div", "", it.hint.comment));
-      const sol = el("div", "sol"); sol.append(el("b", "", "სწორი / უმჯობესი ვარიანტი:"));
-      it.hint.t.forEach(t => sol.append(el("div", "", "• " + t))); hx.appendChild(sol);
+      if(it.hint.t && it.hint.t.length){   // სწორი ვარიანტი მხოლოდ მასწავლებლის ნახვაში მოდის
+        const sol = el("div", "sol"); sol.append(el("b", "", "სწორი / უმჯობესი ვარიანტი (მხოლოდ შენ გიჩანს):"));
+        it.hint.t.forEach(t => sol.append(el("div", "", "• " + t))); hx.appendChild(sol);
+      }
       hb.onclick = () => { const show = hx.classList.toggle("hidden") === false; if(show && !a.h){ a.h = true; opt.onChange(); } };
       card.append(hb, hx);
     }
@@ -260,7 +262,7 @@ async function startTeacher(){
   ni.oninput = () => { S.n = ni.value.replace(/[^0-9]/g, ""); upd(); }; fn.appendChild(ni);
   g2.append(fs, fn); card.appendChild(g2);
   const hl = el("label", "chk"); hl.style.marginTop = "14px"; const hc = el("input"); hc.type = "checkbox"; hc.onchange = () => { S.h = hc.checked; upd(); };
-  hl.append(hc, el("span", "", "💡 მოსწავლეს მინიშნება გამოუჩნდეს (სწორ ვარიანტს და წესს აჩვენებს; პასუხებში დაგეწერება, გამოიყენა თუ არა)")); card.appendChild(hl);
+  hl.append(hc, el("span", "", "💡 მოსწავლეს მინიშნება გამოუჩნდეს (საკითხს და წესს აჩვენებს, სწორ ვარიანტს – არა; პასუხებში დაგეწერება, გამოიყენა თუ არა)")); card.appendChild(hl);
   // საკითხები
   const tc = el("div", "card"); main.appendChild(tc);
   tc.appendChild(el("label", "t", "საკითხები")); tc.lastChild.style.cssText = "display:block;font-size:.8rem;font-weight:700;color:#475569;text-transform:uppercase;margin-bottom:6px";

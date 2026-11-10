@@ -101,8 +101,12 @@ const Drill = ({ name, items, answers, setAnswers, idx, setIdx, onSubmit, sendin
               className="px-4 py-2 rounded-xl font-bold text-sm bg-green-50 text-green-800 border-2 border-green-200 active:scale-95 transition-all">💡 მინიშნება</button>
             {showHint && (
               <div className="mt-3 p-4 rounded-2xl bg-green-50 border-2 border-green-200 text-green-900 space-y-2">
-                <div><b>📌 შეცდომის ტიპი:</b> {it.hint.t.join('; ')}</div>
-                <div className="text-slate-800"><b>სწორი წინადადება:</b><br/>{nb(it.hint.c)}</div>
+                {it.hint.t.map((t,k)=>(
+                  <div key={k} className={k?'pt-2 border-t border-green-200':''}>
+                    <div><b>📌 შეცდომის ტიპი:</b> {t}</div>
+                    {(it.hint.r && it.hint.r[k] || []).map((x,j)=><div key={j} className="text-slate-800 mt-1">{x}</div>)}
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -430,7 +434,7 @@ const Admin = ({ cfg, onRun, inFrame }) => {
 
           <label className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl border border-green-200 bg-green-50 cursor-pointer">
             <input type="checkbox" checked={hint} onChange={e=>setHint(e.target.checked)} className="mt-1 accent-green-600"/>
-            <span className="text-sm text-green-900 leading-snug">💡 მოსწავლეს მინიშნება გამოუჩნდეს (შეცდომის ტიპს და სწორ წინადადებას აჩვენებს; პასუხებში დაგეწერება, გამოიყენა თუ არა)</span>
+            <span className="text-sm text-green-900 leading-snug">💡 მოსწავლეს მინიშნება გამოუჩნდეს (შეცდომის ტიპს და წესს აჩვენებს, სწორ პასუხს – არა; პასუხებში დაგეწერება, გამოიყენა თუ არა)</span>
           </label>
           <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
             <button onClick={()=>onRun(cfgStr)}
