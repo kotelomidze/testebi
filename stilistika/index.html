@@ -249,9 +249,11 @@ function drill(host, run, opt){
     }
     const nav = el("div", "nav"), l = el("div", "l");
     const prev = el("button", "btn ghost", "← წინა"); prev.type = "button"; prev.disabled = i === 0; prev.onclick = () => { run.idx = i - 1; opt.onChange(); render(); scrollTo(0, 0); };
-    const next = el("button", "btn ghost", "შემდეგი →"); next.type = "button"; next.disabled = i === run.items.length - 1; next.onclick = () => { run.idx = i + 1; opt.onChange(); render(); scrollTo(0, 0); };
-    l.append(prev, next); nav.appendChild(l);
-    if(opt.onSubmit){ const s = el("button", "btn green", "დასრულება და გაგზავნა"); s.type = "button"; s.onclick = () => opt.onSubmit(filled); nav.appendChild(s); }
+    l.appendChild(prev); nav.appendChild(l);
+    // „შემდეგი“ – მთავარი ღილაკი; გაგზავნა მხოლოდ ბოლო წინადადებაზე ჩანს (მის ადგილას), რომ შემთხვევით არ დააჭირონ
+    if(i < run.items.length - 1){
+      const next = el("button", "btn", "შემდეგი →"); next.type = "button"; next.onclick = () => { run.idx = i + 1; opt.onChange(); render(); scrollTo(0, 0); }; nav.appendChild(next);
+    } else if(opt.onSubmit){ const s = el("button", "btn green", "დასრულება და გაგზავნა"); s.type = "button"; s.onclick = () => opt.onSubmit(filled); nav.appendChild(s); }
     card.appendChild(nav);
     const dots = el("div", "dots");
     run.items.forEach((x, k) => { const b = el("button", k === i ? "cur" : filled(x) ? "done" : "", String(k + 1)); b.type = "button";
