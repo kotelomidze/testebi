@@ -1494,6 +1494,7 @@ async function visCatalog(mats){
     }
     const reE = /\bid:"([^"]+)",\s*topic:"([a-z]\d+)"([^\n]*)\n\s*title:"([^"]*)"/g;
     while((m = reE.exec(t))){
+      if(/\boff:1\b/.test(m[3])) continue;   // გათიშული დავალება
       const no = (m[3].match(/no:"([^"]+)"/) || [,""])[1];
       if(topics[m[2]]) topics[m[2]].kids.push({ key:"gram:" + m[2] + ":" + m[1], label: (no ? no + " – " : "") + m[4] });
     }
