@@ -1063,8 +1063,9 @@ function vjLabel(cfg, full){   // full = მასწავლებლისთ
   const names = T.filter(t => sel.has(t.i)).map(t => t.l);
   const n = p.q ? cnt + " წინადადება" : (+p.n > 0 ? p.n + " წინადადება" : "ყველა წინადადება");
   const base = n + " · " + (p.s === "m" ? "მოდელირებული" : "გამოცდის ტექსტები");
+  const hn = full ? " · " + (p.h === "1" ? "მინიშნება ჩართულია" : "მინიშნების გარეშე") : "";
   if(!full && p.v !== "1") return base;
-  return base + " · " + (p.a === "1" ? "ყველა ტიპი" : names.join("; "));
+  return base + " · " + (p.a === "1" ? "ყველა ტიპი" : names.join("; ")) + hn;
 }
 /* სტილისტიკა: დავალება = „stl:“ + პარამეტრები (m=s ასარჩევი, c=e|a, s=ნაკრები, k=საკითხები, n=რაოდენობა, h=1 მინიშნება) */
 let STL_META = null;

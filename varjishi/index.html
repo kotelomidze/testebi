@@ -59,8 +59,10 @@ function encPer(per){
 }
 
 /* ======================= მოსწავლე ======================= */
-const Drill = ({ name, items, answers, setAnswers, idx, setIdx, onSubmit, sending, status, peek, back }) => {
+const Drill = ({ name, items, answers, setAnswers, idx, setIdx, onSubmit, sending, status, peek, back, onHint }) => {
   const box = useRef(null);
+  const [showHint,setShowHint] = useState(false);
+  useEffect(()=>{ setShowHint(false); },[idx]);
   useEffect(()=>{ if(box.current){ box.current.style.height='auto'; box.current.style.height=Math.max(110,box.current.scrollHeight)+'px'; } },[idx,answers]);
   const total = items.length, last = idx === total-1, pct = Math.round(((idx+1)/total)*100);
   const it = items[idx];
@@ -93,6 +95,18 @@ const Drill = ({ name, items, answers, setAnswers, idx, setIdx, onSubmit, sendin
         <textarea ref={box} spellCheck={false} value={answers[idx]||''} aria-label="წინადადება"
           onChange={e=>setAnswers(a=>a.map((x,i)=>i===idx?e.target.value:x))}
           className="editor w-full p-4 sm:p-5 border-2 border-slate-100 rounded-2xl bg-slate-50 focus:bg-white text-base sm:text-lg text-slate-800 focus:ring-4 focus:ring-indigo-50 focus:border-indigo-500 outline-none resize-none shadow-inner overflow-hidden"/>
+        {it && it.hint && (
+          <div>
+            <button type="button" onClick={()=>{ const v=!showHint; setShowHint(v); if(v && onHint) onHint(idx); }}
+              className="px-4 py-2 rounded-xl font-bold text-sm bg-green-50 text-green-800 border-2 border-green-200 active:scale-95 transition-all">💡 მინიშნება</button>
+            {showHint && (
+              <div className="mt-3 p-4 rounded-2xl bg-green-50 border-2 border-green-200 text-green-900 space-y-2">
+                <div><b>📌 შეცდომის ტიპი:</b> {it.hint.t.join('; ')}</div>
+                <div className="text-slate-800"><b>სწორი წინადადება:</b><br/>{nb(it.hint.c)}</div>
+              </div>
+            )}
+          </div>
+        )}
         {status && <div className="p-4 bg-red-50 text-red-800 rounded-xl border-2 border-red-100 text-center font-bold animate-shake">{status}</div>}
         <div className="flex items-center gap-3">
           <button type="button" onClick={()=>setIdx(Math.max(0,idx-1))} disabled={idx===0}
@@ -155,12 +169,13 @@ const Student = () => {
   const save = x => { ls.set(RUN, x); setRun(x); };
   const setAnswers = f => save({ ...run, answers: typeof f === 'function' ? f(run.answers) : f });
   const setIdx = i => save({ ...run, idx: i });
+  const onHint = i => { const h = (run.hints || []).slice(); if(!h[i]){ h[i] = 1; save({ ...run, hints: h }); } };
   const submit = async () => {
     if(!window.confirm('გავაგზავნოთ ნამუშევარი?')) return;
     setSending(true); setStatus('');
     try{
       const r = await api({ action:'vjSubmit', name, cfg, time: new Date().toLocaleString('ka-GE'),
-        items: run.items.map((it,i)=> it.m ? { m: it.m, a: unNb(run.answers[i]) } : { n: it.n, i: it.i, a: unNb(run.answers[i]) }) });
+        items: run.items.map((it,i)=> Object.assign(it.m ? { m: it.m, a: unNb(run.answers[i]) } : { n: it.n, i: it.i, a: unNb(run.answers[i]) }, (run.hints||[])[i] ? { h: 1 } : {})) });
       if(!r || !r.ok) throw new Error(r && r.error);
       ls.del(RUN);
       const dk = 'lit-done:' + name, d = ls.get(dk, []); if(d.indexOf(key) < 0){ d.push(key); ls.set(dk, d); }
@@ -169,7 +184,7 @@ const Student = () => {
     finally{ setSending(false); }
   };
   return <Drill name={name} items={run.items} answers={run.answers} setAnswers={setAnswers} idx={run.idx} setIdx={setIdx}
-    onSubmit={submit} sending={sending} status={status} back={<BackLink/>}/>;
+    onSubmit={submit} sending={sending} status={status} back={<BackLink/>} onHint={onHint}/>;
 };
 
 /* ======================= მასწავლებელი (მთავარი აპის ადმინის პანელიდან) ======================= */
@@ -204,6 +219,7 @@ const Admin = ({ cfg, onRun, inFrame }) => {
   const [strict,setStrict] = useState(cfg.strict);
   const [n,setN]           = useState('');
   const [copied,setCopied] = useState(false);
+  const [hint,setHint]     = useState(false);
   const [cmode,setCmode]   = useState(Object.keys(cfg.per||{}).length ? 'per' : 'even');
   const [per,setPer]       = useState(()=>({...(cfg.per||{})}));
   const setOne = (i,v) => setPer(o=>{ const x={...o}; const k=parseInt(v||'0',10)||0; if(k>0) x[i]=k; else delete x[i]; return x; });
@@ -238,8 +254,8 @@ const Admin = ({ cfg, onRun, inFrame }) => {
     const all = src !== 'model' && sel.size === shownTypes.length && shownTypes.every(x=>sel.has(x.i));
     const head = all ? 'a=1' : 't=' + [...sel].sort((a,b)=>a-b).join('.');
     const q = usePer ? '&q=' + encPer(perActive) : '';
-    return `${head}${q}${!usePer&&n?'&n='+n:''}${strict&&src!=='model'?'&m=k':''}${src==='model'?'&s=m':''}`;
-  },[sel,n,strict,src,cmode,per]);
+    return `${head}${q}${!usePer&&n?'&n='+n:''}${strict&&src!=='model'?'&m=k':''}${src==='model'?'&s=m':''}${hint?'&h=1':''}`;
+  },[sel,n,strict,src,cmode,per,hint]);
   const [added,setAdded] = useState(false);
   const addToAssign = () => {
     if(!cfgStr) return;
@@ -412,6 +428,10 @@ const Admin = ({ cfg, onRun, inFrame }) => {
             </div>
           </div>
 
+          <label className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl border border-green-200 bg-green-50 cursor-pointer">
+            <input type="checkbox" checked={hint} onChange={e=>setHint(e.target.checked)} className="mt-1 accent-green-600"/>
+            <span className="text-sm text-green-900 leading-snug">💡 მოსწავლეს მინიშნება გამოუჩნდეს (შეცდომის ტიპს და სწორ წინადადებას აჩვენებს; პასუხებში დაგეწერება, გამოიყენა თუ არა)</span>
+          </label>
           <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row gap-3">
             <button onClick={()=>onRun(cfgStr)}
               disabled={!available || (cmode==='per' && !perTotal)}
