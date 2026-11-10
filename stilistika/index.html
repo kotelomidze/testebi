@@ -32,7 +32,7 @@
   .btn.ghost{background:var(--surface);color:var(--primary);border:1.5px solid #c7d2fe}
   .btn.ghost:hover{background:var(--primary-l)}
   .btn.green{background:var(--green)}
-  .btn.hintb{background:var(--hint-bg);color:var(--hint-t);border:1.5px solid var(--hint-b)}
+  .btn.hintb{background:#eef2ff;color:#3730a3;border:1.5px solid #e0e7ff}
   .msg{padding:10px 14px;border-radius:10px;margin:10px 0;font-weight:600}
   .msg.bad{background:var(--err-bg);color:var(--err-t)}
   .msg.ok{background:var(--hint-bg);color:var(--hint-t)}
@@ -52,9 +52,16 @@
   .opt .r{flex:0 0 20px;height:20px;border-radius:50%;border:2px solid #94a3b8;margin-top:3px}
   .opt.sel{border-color:var(--primary);background:var(--primary-l)}
   .opt.sel .r{border-color:var(--primary);background:radial-gradient(var(--primary) 45%, transparent 50%)}
-  .hint{background:var(--hint-bg);border:1.5px solid var(--hint-b);color:var(--hint-t);border-radius:10px;padding:12px 14px;margin-top:12px}
-  .hint b{display:block;margin-bottom:4px}
-  .hint .sol{margin-top:8px;color:var(--text)}
+  .hint{background:#fff;border:2px solid #e0e7ff;color:var(--text);border-radius:12px;padding:12px 16px;margin-top:12px;line-height:1.7}
+  .hint h4{margin:0 0 4px;font-size:1.05rem;color:#3730a3}
+  .hint .rule{margin:5px 0}
+  .hint .g{color:#067647} .hint .r{color:#b42318} .hint s.r{text-decoration-thickness:1.5px}
+  .hint .pairs{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+  .hint .pairs>span{display:block;padding-left:22px;position:relative}
+  .hint .pairs>span::before{content:"•";position:absolute;left:6px;color:var(--muted)}
+  .hint .ex{color:var(--muted);margin:5px 0}
+  .hint .sol{margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)}
+  .hint .sol b{display:block;margin-bottom:4px}
   .nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:14px}
   .nav .l{display:flex;gap:8px;flex-wrap:wrap}
   .dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
@@ -106,6 +113,69 @@ async function api(body){
 const netErr = e => (e && e.message && e.message !== "Failed to fetch" && e.message !== "Load failed") ? e.message : "სკრიპტთან დაკავშირება ვერ მოხერხდა. შეამოწმე ინტერნეტი.";
 const parseCfg = s => { const p = {}; String(s || "").split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); }); return p; };
 
+/* ---------- მინიშნების ორგანიზება: წესი + მაგალითები (✗ → ✓) ---------- */
+// hw – საკითხი, comment – წესის ტექსტი, q – მიმდინარე წინადადება (მისი პასუხის შემცველი მაგალითი იმალება)
+function stlHintHtml(hw, comment, q){
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const words = s => String(s).toLowerCase().replace(/[„“"'.,:;!?()«»\[\]–—\/]/g," ").split(/\s+/).filter(Boolean);
+  const qw = words(q || "");
+  // ფუძის მიხედვით დამთხვევა (ბრუნვა-უღვლილება რომ არ შეუშალოს ხელი)
+  const hasStem = w => { const n = Math.min(w.length, Math.max(4, w.length - 2)); return qw.some(x => x.slice(0, n) === w.slice(0, n)); };
+  const inSentence = s => { const w = words(s).filter(x => x.length >= 3); return w.length > 0 && w.every(hasStem); };
+  // სამი სიტყვა ზედიზედ ემთხვევა წინადადებას → მაგალითი პასუხს გასცემს
+  const stemEq = (a, b) => { const n = Math.min(a.length, b.length, Math.max(4, Math.min(a.length, b.length) - 2)); return a.slice(0, n) === b.slice(0, n); };
+  const overlap = s => { const w = words(s); if(w.length < 3) return false;
+    for(let i = 0; i + 3 <= w.length; i++) for(let j = 0; j + 3 <= qw.length; j++) if(stemEq(w[i], qw[j]) && stemEq(w[i+1], qw[j+1]) && stemEq(w[i+2], qw[j+2])) return true;
+    return false; };
+  const Q = "„([^“”]+)[“”]";
+  const style = s => esc(s)
+    .replace(/(^|[\s(])(მართებულია|სწორია|უმჯობესია|ბუნებრივია)/g, '$1<b class="g">$2</b>')
+    .replace(/(^|[\s(])(მცდარია|უმართებულოა|არასწორია|ზედმეტია|კალკია)/g, '$1<b class="r">$2</b>')
+    .replace(/(\(?და არა\s+)(„[^“”]+[“”](?:\s*\/\s*„[^“”]+[“”])*|[^,.;:()]+)/g, (m, a, b) => a + '<s class="r">' + b + '</s>')
+    .replace(/„([^“”]+)[“”]/g, (m, x) => m.indexOf("<") >= 0 ? m : '<b>„' + (overlap(x) ? "…" : x) + '“</b>')
+    .replace(/\s*\(<b>„…“<\/b>\)/g, "");
+
+  // 1. მაგალითები ფრჩხილებში: (მაგ.: …)
+  const exs = [], pairs = [];
+  let text = String(comment || "").replace(/"([^"]+)"/g, "„$1“").replace(/\s*\((?:მაგ\.?:?|მაგალითად:?)\s*([^()]*(?:\([^()]*\)[^()]*)*)\)/g, (m, x) => { exs.push(x.trim()); return ""; });
+  // 2. „A“ → „B“ (ან „B1 / B2“) წყვილები
+  const reP = new RegExp(Q + "\\s*→\\s*((?:„[^“”]+[“”])(?:\\s*(?:\\/|ან)\\s*„[^“”]+[“”])*|[^,.;()]+)", "g");
+  // 3. წინადადებებად დაყოფა (შემოკლებებზე – მაგ., შდრ., ე. ი. – არ ვყოფთ)
+  const sents = [];
+  let buf = "";
+  text.split(/(?<=[.!?])\s+/).forEach(part => {
+    buf = buf ? buf + " " + part : part;
+    if(!/(?:მაგ|შდრ|იხ|ე\. ი|ე|ი|ა|შ|წ|\d)\.$/.test(buf.trim())) { sents.push(buf.trim()); buf = ""; }
+  });
+  if(buf.trim()) sents.push(buf.trim());
+
+  const rules = sents.map(s => {
+    const found = [];
+    const rest = s.replace(reP, (m, a, b) => { found.push([a, b.replace(/[„“”]/g, "").trim()]); return "\u0001"; });
+    if(!found.length) return style(s);
+    // თუ ორწერტილის შემდეგ მხოლოდ წყვილებია – წესში ვტოვებთ მხოლოდ ორწერტილამდე ნაწილს
+    const ci = rest.indexOf(":");
+    const tail = ci >= 0 ? rest.slice(ci + 1) : rest;
+    if(!tail.replace(/[\u0001\s,;.()\/–—]|და|ან/g, "")) { found.forEach(p => pairs.push(p)); return style((ci >= 0 ? rest.slice(0, ci) : "").trim().replace(/[,;(]+$/, "")) + (ci >= 0 ? ":" : ""); }
+    let k = 0;
+    return style(rest).replace(/\u0001/g, () => { const p = found[k++]; return '<span class="pr"><s class="r">' + esc(p[0]) + '</s> → <b class="g">' + (inSentence(p[0]) ? "…" : esc(p[1])) + '</b></span>'; });
+  }).filter(x => x && x !== ":");
+
+  let h = "";
+  if(hw && !/^ერრატა/.test(hw)) h += '<h4>' + esc(hw) + '</h4>';
+  h += rules.map(r => '<p class="rule">' + r + '</p>').join("");
+  // მაგალითები, რომლებიც მხოლოდ „A“ → „B“ წყვილებია, წყვილების სიაში გადადის
+  for(let i = exs.length - 1; i >= 0; i--){
+    const f = []; const rest = exs[i].replace(reP, (m, a, b) => { f.push([a, b.replace(/[„“”]/g, "").trim()]); return ""; });
+    if(f.length && !rest.replace(/[\s,;.()\/–—]|და|ან/g, "")){ pairs.unshift(...f); exs.splice(i, 1); }
+  }
+  const vis = pairs.filter(p => !inSentence(p[0]) && !overlap(p[0]) && !overlap(p[1]));
+  if(vis.length) h += '<div class="pairs">' + vis.map(p => '<span><s class="r">' + esc(p[0]) + '</s> → <b class="g">' + esc(p[1]) + '</b></span>').join("") + '</div>';
+  const vex = exs.filter(x => !overlap(x));
+  if(vex.length) h += vex.map(x => '<p class="ex">მაგ.: ' + style(x) + '</p>').join("");
+  return h;
+}
+
 /* ---------- სავარჯიშოს ჩვენება (მოსწავლეც და მასწავლებლის ნახვაც) ---------- */
 // run: { items, ans:{id:{a, sel, h}}, idx }, opt: { mode, hint, onChange, onSubmit, preview }
 function drill(host, run, opt){
@@ -141,7 +211,7 @@ function drill(host, run, opt){
     if(it.hint && opt.hint){
       const hb = el("button", "btn hintb", "💡 მინიშნება"); hb.type = "button"; hb.style.marginTop = "12px";
       const hx = el("div", "hint hidden");
-      hx.append(el("b", "", "📌 საკითხი: " + it.hint.hw), el("div", "", it.hint.comment));
+      const hc = el("div", ""); hc.innerHTML = stlHintHtml(it.hint.hw, it.hint.comment, it.q); hx.appendChild(hc);
       if(it.hint.t && it.hint.t.length){   // სწორი ვარიანტი მხოლოდ მასწავლებლის ნახვაში მოდის
         const sol = el("div", "sol"); sol.append(el("b", "", "სწორი / უმჯობესი ვარიანტი (მხოლოდ შენ გიჩანს):"));
         it.hint.t.forEach(t => sol.append(el("div", "", "• " + t))); hx.appendChild(sol);
