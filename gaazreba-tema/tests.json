@@ -2,7 +2,7 @@
   "tests": [
     {
       "id": "shushanikis-tsamebaa",
-      "file": "test-shushanikis-tsamebaa.json",
+      "file": "tema-264-II-shushanikis-tsameba.json",
       "title": "ტექსტი II",
       "author": "იაკობ ხუცესი",
       "work": "შუშანიკის წამება (გარდაუვალი განსაცდელი...)",
@@ -20,7 +20,7 @@
     },
     {
       "id": "shushanikis-tsameba",
-      "file": "test-shushanikis-tsameba.json",
+      "file": "tema-232-II-shushanikis-tsameba.json",
       "title": "ტექსტი II",
       "author": "იაკობ ხუცესი",
       "work": "შუშანიკის წამება (დაყოლიება, დაბრუნდეს სასახლეში)",
@@ -38,7 +38,7 @@
     },
     {
       "id": "abo-tbilelis-tsameba",
-      "file": "test-abo-tbilelis-tsameba.json",
+      "file": "tema-224-II-abo-tbilelis-tsameba.json",
       "title": "ტექსტი II",
       "author": "იოვანე საბანისძე",
       "work": "აბო თბილელის წამება",
@@ -56,7 +56,7 @@
     },
     {
       "id": "grigol-khandztelis-tskhovrebaa",
-      "file": "test-grigol-khandztelis-tskhovrebaa.json",
+      "file": "tema-255-II-grigol-khandztelis-tskhovreba.json",
       "title": "ტექსტი II",
       "author": "გიორგი მერჩულე",
       "work": "გრიგოლ ხანძთელის ცხოვრება",
@@ -74,7 +74,7 @@
     },
     {
       "id": "grigol-khandztelis-tskhovreba",
-      "file": "test-grigol-khandztelis-tskhovreba.json",
+      "file": "tema-244-II-grigol-khandztelis-tskhovreba.json",
       "title": "ტექსტი II",
       "author": "გრიგოლ",
       "work": "გრიგოლ ხანძთელის ცხოვრება",
@@ -92,7 +92,7 @@
     },
     {
       "id": "vepkhistqaosaniiii",
-      "file": "test-vepkhistqaosaniiii.json",
+      "file": "tema-243-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
       "author": "რუსთაველი",
       "work": "ვეფხისტყაოსანი (მეფე საწოლს შემოვიდა...)",
@@ -110,7 +110,7 @@
     },
     {
       "id": "vepkhistqaosanii",
-      "file": "test-vepkhistqaosanii.json",
+      "file": "tema-223-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
       "author": "რუსთაველი",
       "work": "ვეფხისტყაოსანი (რამაზის შეწყნარება)",
@@ -128,7 +128,7 @@
     },
     {
       "id": "vepkhistqaosniiiiii",
-      "file": "test-vepkhistqaosniiiiii.json",
+      "file": "tema-253-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
       "author": "რუსთაველი",
       "work": "ვეფხისტყაოსნი (მოედანს დავდგი...)",
@@ -146,7 +146,7 @@
     },
     {
       "id": "vepkhistqaosaniii",
-      "file": "test-vepkhistqaosaniii.json",
+      "file": "tema-231-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
       "author": "რუსთაველი",
       "work": "ვეფხისტყაოსანი (ტარიელი გამოქვაბულში არ დახვდა)",
@@ -164,7 +164,7 @@
     },
     {
       "id": "vepkhistqaosniiiiiii",
-      "file": "test-vepkhistqaosnidaniiiiiii.json",
+      "file": "tema-261-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
       "author": "რუსთაველი",
       "work": "ვეფხისტყაოსანი (ამოა რომე...)",
@@ -182,7 +182,7 @@
     },
     {
       "id": "davitiani",
-      "file": "test-davitiani.json",
+      "file": "tema-221-I-davitiani.json",
       "title": "ტექსტი I",
       "author": "დავით გურამიშვილი",
       "work": "დავითიანი",
@@ -200,7 +200,7 @@
     },
     {
       "id": "merani",
-      "file": "test-merani.json",
+      "file": "tema-265-I-merani.json",
       "title": "ტექსტი I",
       "author": "ნიკოლოზ ბარათაშვილი",
       "work": "მერანი",
@@ -218,7 +218,7 @@
     },
     {
       "id": "pikrni-mtkvris-piras",
-      "file": "test-pikrni-mtkvris-piras.json",
+      "file": "tema-226-I-pikrni-mtkvris-piras.json",
       "title": "ტექსტი I",
       "author": "ნიკოლოზ ბარათაშვილი",
       "work": "ფიქრნი მტკვრის პირას",
@@ -236,7 +236,7 @@
     },
     {
       "id": "katsia-adamiani",
-      "file": "test-katsia-adamiani.json",
+      "file": "tema-252-II-katsia-adamiani.json",
       "title": "ტექსტი II",
       "author": "ილია ჭავჭავაძე",
       "work": "კაცია-ადამიანი?!",
@@ -254,7 +254,7 @@
     },
     {
       "id": "mgzavris-tserilebi",
-      "file": "test-mgzavris-tserilebi.json",
+      "file": "tema-246-II-mgzavris-tserilebi.json",
       "title": "ტექსტი II",
       "author": "ილია ჭავჭავაძე",
       "work": "მგზავრის წერილები",
@@ -272,7 +272,7 @@
     },
     {
       "id": "otaraant-kvrivi",
-      "file": "test-otaraant-kvrivi.json",
+      "file": "tema-235-II-otaraant-kvrivi.json",
       "title": "ტექსტი II",
       "author": "ილია ჭავჭავაძე",
       "work": "ოთარაანთ ქვრივი",
@@ -290,7 +290,7 @@
     },
     {
       "id": "gamzrdeli",
-      "file": "test-gamzrdeli.json",
+      "file": "tema-245-I-gamzrdeli.json",
       "title": "ტექსტი I",
       "author": "აკაკი წერეთლი",
       "work": "გამზრდელი",
@@ -308,7 +308,7 @@
     },
     {
       "id": "khevisberi-gocha",
-      "file": "test-khevisberi-gocha.json",
+      "file": "tema-222-II-khevisberi-gocha.json",
       "title": "ტექსტი II",
       "author": "ალექსანდრე ყაზბეგი",
       "work": "ხევისბერი გოჩა",
@@ -326,7 +326,7 @@
     },
     {
       "id": "chemi-vedreba",
-      "file": "test-chemi-vedreba.json",
+      "file": "tema-251-I-chemi-vedreba.json",
       "title": "ტექსტი I",
       "author": "ვაჟა-ფშაველა",
       "work": "ჩემი ვედრება",
@@ -344,7 +344,7 @@
     },
     {
       "id": "bakhtrioni",
-      "file": "test-bakhtrioni.json",
+      "file": "tema-233-I-bakhtrioni.json",
       "title": "ტექსტი I",
       "author": "ვაჟა-ფშაველა",
       "work": "ბახტრიონი",
@@ -362,7 +362,7 @@
     },
     {
       "id": "stumar-maspindzelii",
-      "file": "test-stumar-maspindzelii.json",
+      "file": "tema-241-I-stumar-maspindzeli.json",
       "title": "ტექსტი I",
       "author": "ვაჟა-ფშაველა",
       "work": "სტუმარ-მასპინძელი (აღაზას ეპიზოდი)",
@@ -380,7 +380,7 @@
     },
     {
       "id": "stumar-maspindzeli",
-      "file": "test-stumar-maspindzeli.json",
+      "file": "tema-263-I-stumar-maspindzeli.json",
       "title": "ტექსტი I",
       "author": "ვაჟა-ფშაველა",
       "work": "სტუმარ-მასპინძელი (საფლავზე დაკვლა)",
@@ -398,7 +398,7 @@
     },
     {
       "id": "didostatis-marjvena",
-      "file": "test-didostatis-marjvena.json",
+      "file": "tema-242-II-didostatis-marjvena.json",
       "title": "ტექსტი II",
       "author": "კონსტანტინე გამსახურდია",
       "work": "დიდოსტატის მარჯვენა",
@@ -416,7 +416,7 @@
     },
     {
       "id": "jaqos-khiznebi",
-      "file": "test-jaqos-khiznebi.json",
+      "file": "tema-225-II-jaqos-khiznebi.json",
       "title": "ტექსტი II",
       "author": "მიხეილ ჯავახიშვილი",
       "work": "ჯაყოს ხიზნები (აქვს თუ არა ფასი ცოდნას...)",
@@ -434,7 +434,7 @@
     },
     {
       "id": "jaqos-khiznebii",
-      "file": "test-jaqos-khiznebii.json",
+      "file": "tema-262-II-jaqos-khiznebi.json",
       "title": "ტექსტი II",
       "author": "მიხეილ ჯავახიშვილი",
       "work": "ჯაყოს ხიზნები (ჯაყოსა და მარგოს ქორწილი)",
@@ -452,7 +452,7 @@
     },
     {
       "id": "mtatsmindis-mtvare",
-      "file": "test-mtatsmindis-mtvare.json",
+      "file": "tema-254-I-mtatsmindis-mtvare.json",
       "title": "ტექსტი I",
       "author": "გალაკტიონ ტაბიძე",
       "work": "მთაწმინდის მთვარე",
@@ -470,7 +470,7 @@
     },
     {
       "id": "qivchaghis-paemani",
-      "file": "test-qivchaghis-paemani.json",
+      "file": "tema-236-I-qivchaghis-paemani.json",
       "title": "ტექსტი I",
       "author": "გიორგი ლეონიძე",
       "work": "ყივჩაღის პაემანი",
@@ -488,7 +488,7 @@
     },
     {
       "id": "igi",
-      "file": "test-igi.json",
+      "file": "tema-234-II-igi.json",
       "title": "ტექსტი II",
       "author": "ჯემალ ქარჩხაძე",
       "work": "იგი",
@@ -506,7 +506,7 @@
     },
     {
       "id": "amaqi",
-      "file": "test-amaqi.json",
+      "file": "tema-221-II-amaqi.json",
       "title": "ტექსტი II",
       "author": "ნიკო ლორთქიფანიძე",
       "work": "ამაყი",
@@ -524,7 +524,7 @@
     },
     {
       "id": "tikhis-sami-pirpita",
-      "file": "test-tikhis-sami-pirpita.json",
+      "file": "tema-222-I-tikhis-sami-pirpita.json",
       "title": "ტექსტი I",
       "author": "ოთარ ჭილაძე",
       "work": "თიხის სამი ფირფიტა",
@@ -542,7 +542,7 @@
     },
     {
       "id": "samoseli-pirveli",
-      "file": "test-samoseli-pirveli.json",
+      "file": "tema-223-II-samoseli-pirveli.json",
       "title": "ტექსტი II",
       "author": "გურამ დოჩანაშვილი",
       "work": "სამოსელი პირველი",
@@ -560,7 +560,7 @@
     },
     {
       "id": "peodali",
-      "file": "test-peodali.json",
+      "file": "tema-224-I-peodali.json",
       "title": "ტექსტი I",
       "author": "გივი გეგეჭკორი",
       "work": "ფეოდალი",
@@ -578,7 +578,7 @@
     },
     {
       "id": "tserili-dedas",
-      "file": "test-tserili-dedas.json",
+      "file": "tema-225-I-tserili-dedas.json",
       "title": "ტექსტი I",
       "author": "პაოლო იაშვილი",
       "work": "წერილი დედას",
@@ -596,7 +596,7 @@
     },
     {
       "id": "data-tutashkhia",
-      "file": "test-data-tutashkhia.json",
+      "file": "tema-226-II-data-tutashkhia.json",
       "title": "ტექსტი II",
       "author": "ჭაბუა ამირეჯიბი",
       "work": "დათა თუთაშხია",
@@ -614,7 +614,7 @@
     },
     {
       "id": "rachis-eristavi-rostom",
-      "file": "test-rachis-eristavi-rostom.json",
+      "file": "tema-231-II-rachis-eristavi-rostom.json",
       "title": "ტექსტი II",
       "author": "აკაკი წერეთლი",
       "work": "რაჭის ერისთავი როსტომ",
@@ -632,7 +632,7 @@
     },
     {
       "id": "kartopilis-amogheba",
-      "file": "test-kartopilis-amogheba.json",
+      "file": "tema-232-I-kartopilis-amogheba.json",
       "title": "ტექსტი I",
       "author": "ბესიკ ხარანაული",
       "work": "კარტოფილის ამოღება",
@@ -650,7 +650,7 @@
     },
     {
       "id": "chadrakis-mskhverpli",
-      "file": "test-chadrakis-mskhverpli.json",
+      "file": "tema-233-II-chadrakis-mskhverpli.json",
       "title": "ტექსტი II",
       "author": "შოთა ჩანტლაძე",
       "work": "ჭადრაკის მსხვერპლი",
@@ -668,7 +668,7 @@
     },
     {
       "id": "qvarlis-mtebs",
-      "file": "test-qvarlis-mtebs.json",
+      "file": "tema-234-I-qvarlis-mtebs.json",
       "title": "ტექსტი I",
       "author": "ილია ჭავჭავაძე",
       "work": "ყვარლის მთებს",
@@ -686,7 +686,7 @@
     },
     {
       "id": "gamigonia-mtiel-khvaramzes",
-      "file": "test-gamigonia-mtiel-khvaramzes.json",
+      "file": "tema-235-I-gamigonia-mtiel-khvaramzes.json",
       "title": "ტექსტი I",
       "author": "ლია სტურუა",
       "work": "გამიგონია, მთიელ ხვარამზეს...",
@@ -704,7 +704,7 @@
     },
     {
       "id": "ade-chamovida-psikologiuri-etiudi",
-      "file": "test-ade-chamovida-psikologiuri-etiudi.json",
+      "file": "tema-236-II-ade-chamovida.json",
       "title": "ტექსტი II",
       "author": "შიო არაგვისპირელი",
       "work": "ადე, ჩამოვიდა  (ფსიქოლოგიური ეტიუდი)",
@@ -722,7 +722,7 @@
     },
     {
       "id": "pirosmani",
-      "file": "test-pirosmani.json",
+      "file": "tema-241-II-pirosmani.json",
       "title": "ტექსტი II",
       "author": "რევაზ ინანიშვილი",
       "work": "ფიროსმანი",
@@ -740,7 +740,7 @@
     },
     {
       "id": "leksi-vepkhvisa-da-moqmisa",
-      "file": "test-leksi-vepkhvisa-da-moqmisa.json",
+      "file": "tema-242-I-leksi-vepkhvisa-da-moqmisa.json",
       "title": "ტექსტი I",
       "author": "ხალხური",
       "work": "ლექსი ვეფხვისა და მოყმისა",
@@ -758,7 +758,7 @@
     },
     {
       "id": "va-sopelo",
-      "file": "test-va-sopelo.json",
+      "file": "tema-243-II-va-sopelo.json",
       "title": "ტექსტი II",
       "author": "ზაირა არსენიშვილი",
       "work": "ვა, სოფელო...",
@@ -776,7 +776,7 @@
     },
     {
       "id": "simghera-davit-guramishvilze",
-      "file": "test-simghera-davit-guramishvilze.json",
+      "file": "tema-244-I-simghera-davit-guramishvilze.json",
       "title": "ტექსტი I",
       "author": "სიმონ ჩიქოვანი",
       "work": "სიმღერა დავით გურამიშვილზე",
@@ -794,7 +794,7 @@
     },
     {
       "id": "shuadghe",
-      "file": "test-shuadghe.json",
+      "file": "tema-245-II-shuadghe.json",
       "title": "ტექსტი II",
       "author": "თამაზ ჭილაძე",
       "work": "შუადღე",
@@ -812,7 +812,7 @@
     },
     {
       "id": "sakhli",
-      "file": "test-sakhli.json",
+      "file": "tema-246-I-sakhli.json",
       "title": "ტექსტი I",
       "author": "ოთარ ჭილაძე",
       "work": "სახლი",
@@ -830,7 +830,7 @@
     },
     {
       "id": "asvla",
-      "file": "test-asvla.json",
+      "file": "tema-251-II-asvla.json",
       "title": "ტექსტი II",
       "author": "გურამ რჩეულიშვილი",
       "work": "ასვლა",
@@ -848,7 +848,7 @@
     },
     {
       "id": "nu-tsakhval-ise-rom-aravis-ar-stse-nugeshi",
-      "file": "test-nu-tsakhval-ise-rom-aravis-ar-stse-nugeshi.json",
+      "file": "tema-252-I-nu-tsakhval-ise.json",
       "title": "ტექსტი I",
       "author": "გივი გეგეჭკორი",
       "work": "ნუ წახვალ ისე, რომ არავის არ სცე ნუგეში",
@@ -866,7 +866,7 @@
     },
     {
       "id": "barklai-de-tolis-sizmrebi",
-      "file": "test-barklai-de-tolis-sizmrebi.json",
+      "file": "tema-253-II-barklai-de-tolis-sizmrebi.json",
       "title": "ტექსტი II",
       "author": "ნოდარ წულეისკირი",
       "work": "ბარკლაი დე ტოლის სიზმრები",
@@ -884,7 +884,7 @@
     },
     {
       "id": "aivniani-kalaki",
-      "file": "test-aivniani-kalaki.json",
+      "file": "tema-254-II-aivniani-kalaki.json",
       "title": "ტექსტი II",
       "author": "ნიკოლოზ გაბაონი",
       "work": "აივნიანი ქალაქი",
@@ -902,7 +902,7 @@
     },
     {
       "id": "ana-kalandadzes",
-      "file": "test-ana-kalandadzes.json",
+      "file": "tema-255-I-ana-kalandadzes.json",
       "title": "ტექსტი I",
       "author": "მურმან ლებანიძე",
       "work": "ანა კალანდაძეს",
@@ -920,7 +920,7 @@
     },
     {
       "id": "gmirta-varami",
-      "file": "test-gmirta-varami.json",
+      "file": "tema-261-II-gmirta-varami.json",
       "title": "ტექსტი II",
       "author": "ლევან გოთუა",
       "work": "გმირთა ვარამი",
@@ -938,7 +938,7 @@
     },
     {
       "id": "voi",
-      "file": "test-voi.json",
+      "file": "tema-262-I-voi.json",
       "title": "ტექსტი I",
       "author": "მურმან ლებანიძე",
       "work": "ვოი!",
@@ -956,7 +956,7 @@
     },
     {
       "id": "obole",
-      "file": "test-obole.json",
+      "file": "tema-263-II-obole.json",
       "title": "ტექსტი II",
       "author": "აკა მორჩილაძე",
       "work": "ობოლე",
@@ -974,7 +974,7 @@
     },
     {
       "id": "dzveli-simghera",
-      "file": "test-dzveli-simghera.json",
+      "file": "tema-264-I-dzveli-simghera.json",
       "title": "ტექსტი I",
       "author": "დავით წერედიანი",
       "work": "ძველი სიმღერა",
@@ -992,7 +992,7 @@
     },
     {
       "id": "devnili",
-      "file": "test-devnili.json",
+      "file": "tema-265-II-devnili.json",
       "title": "ტექსტი II",
       "author": "გურამ გეგეშიძე",
       "work": "დევნილი",
