@@ -120,24 +120,6 @@
       "rank": 7
     },
     {
-      "id": "vepkhistqaosani-6",
-      "file": "gaazreba-143-I-vepkhistqaosani-2.json",
-      "title": "ტექსტი I",
-      "author": "რუსთაველი",
-      "work": "ვეფხისტყაოსანი (დაგიღრეჯია მეფეო)",
-      "order": 999,
-      "source": "„ვეფხისტყაოსანში“ აღწერილია თინათინის გამეფების შემდეგ გამართული ნადიმი",
-      "questionCount": 15,
-      "keyComplete": true,
-      "label": "„ვეფხისტყაოსანი“ (1. „დაგიღრეჯია, მეფეო…“; სტრ. 57–66) – შოთა რუსთაველი",
-      "num": "143",
-      "prog": true,
-      "group": "„ვეფხისტყაოსანი“ – შოთა რუსთაველი",
-      "alias": "რუსთაველი — ვეფხისტყაოსანი (დაგიღრეჯია მეფეო) (ტექსტი I)",
-      "rank": 8,
-      "dup": "vepkhistqaosani-4"
-    },
-    {
       "id": "vepkhistqaosani-3",
       "file": "gaazreba-141-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
@@ -155,24 +137,6 @@
       "rank": 9
     },
     {
-      "id": "vepkhistqaosani-5",
-      "file": "gaazreba-141-I-vepkhistqaosani-2.json",
-      "title": "ტექსტი I",
-      "author": "რუსთაველი",
-      "work": "ვეფხისტყაოსანი (თინათინ-ავთანდილის შეხვედრა)",
-      "order": 999,
-      "source": "„ვეფხისტყაოსნის“ ავტორი მოგვითხრობს თინათინისა და ავთანდილის შეხვედრის შესახებ",
-      "questionCount": 15,
-      "keyComplete": true,
-      "label": "„ვეფხისტყაოსანი“ (4. თინათინისა და ავთანდილის შეხვედრა; სტრ. 124–132) – შოთა რუსთაველი",
-      "num": "141",
-      "prog": true,
-      "group": "„ვეფხისტყაოსანი“ – შოთა რუსთაველი",
-      "alias": "რუსთაველი — ვეფხისტყაოსანი (თინათინ-ავთანდილის შეხვედრა) (ტექსტი I)",
-      "rank": 10,
-      "dup": "vepkhistqaosani-3"
-    },
-    {
       "id": "vepkhistqaosani-7",
       "file": "gaazreba-161-I-vepkhistqaosani.json",
       "title": "ტექსტი I",
@@ -188,24 +152,6 @@
       "group": "„ვეფხისტყაოსანი“ – შოთა რუსთაველი",
       "alias": "რუსთაველი — ვეფხისტყაოსანი (ხატაელებთან ომი) (ტექსტი I)",
       "rank": 11
-    },
-    {
-      "id": "vepkhistqaosani-khataelebtan-omi",
-      "file": "gaazreba-161-I-vepkhistqaosani-2.json",
-      "title": "ტექსტი I",
-      "author": "რუსთაველი",
-      "work": "ვეფხისტყაოსანი (ხატაელებთან ომი)",
-      "order": 1611,
-      "source": "„ვეფხისტყაოსანში“ ტარიელი ავთანდილს ხატაელებთან ბრძოლის ამბავს უამბობს",
-      "questionCount": 15,
-      "keyComplete": true,
-      "label": "„ვეფხისტყაოსანი“ (17. ხატაელებთან ომი; სტრ. 448–460) – შოთა რუსთაველი",
-      "num": "161",
-      "prog": true,
-      "group": "„ვეფხისტყაოსანი“ – შოთა რუსთაველი",
-      "alias": "რუსთაველი — ვეფხისტყაოსანი (ხატაელებთან ომი) (ტექსტი I)",
-      "rank": 12,
-      "dup": "vepkhistqaosani-7"
     },
     {
       "id": "gaazreba-174-rustaveli-vepkhistqaosani",
@@ -633,24 +579,6 @@
       "rank": 35
     },
     {
-      "id": "samoseli-pirveli",
-      "file": "gaazreba-123-II-samoseli-pirveli-2.json",
-      "title": "ტექსტი II",
-      "author": "გურამ დოჩანაშვილი",
-      "work": "სამოსელი პირველი (ზე მორეირას ეპიზოდი)",
-      "order": 999,
-      "source": "რომანში „სამოსელი პირველი“ გურამ დოჩანაშვილი მოგვითხრობს, რომ იარაღის საყიდ-",
-      "questionCount": 15,
-      "keyComplete": true,
-      "label": "„სამოსელი პირველი“ (ზე მორეირას ეპიზოდი) – გურამ დოჩანაშვილი",
-      "num": "123",
-      "prog": false,
-      "group": "„სამოსელი პირველი“ – გურამ დოჩანაშვილი",
-      "alias": "გურამ დოჩანაშვილი — სამოსელი პირველი (ზე მორეირას ეპიზოდი) (ტექსტი II)",
-      "rank": 36,
-      "dup": "gaazreba-123-guram-dochanashvili-samoseli"
-    },
-    {
       "id": "gaazreba-133-guram-dochanashvili-samoseli",
       "file": "gaazreba-133-II-samoseli-pirveli.json",
       "title": "ტექსტი II",
@@ -666,24 +594,6 @@
       "group": "„სამოსელი პირველი“ – გურამ დოჩანაშვილი",
       "alias": "გურამ დოჩანაშვილი — სამოსელი პირველი (ტერეზას ეპიზოდი) (ტექსტი II)",
       "rank": 37
-    },
-    {
-      "id": "samoseli-pirveli-2",
-      "file": "gaazreba-133-II-samoseli-pirveli-2.json",
-      "title": "ტექსტი II",
-      "author": "გურამ დოჩანაშვილი",
-      "work": "სამოსელი პირველი (ტერეზას ეპიზოდი)",
-      "order": 999,
-      "source": "რომანში „სამოსელი პირველი“ გურამ დოჩანაშვილი მოგვითხრობს",
-      "questionCount": 15,
-      "keyComplete": true,
-      "label": "„სამოსელი პირველი“ (ტერეზას ეპიზოდი) – გურამ დოჩანაშვილი",
-      "num": "133",
-      "prog": false,
-      "group": "„სამოსელი პირველი“ – გურამ დოჩანაშვილი",
-      "alias": "გურამ დოჩანაშვილი — სამოსელი პირველი (ტერეზას ეპიზოდი) (ტექსტი II)",
-      "rank": 38,
-      "dup": "gaazreba-133-guram-dochanashvili-samoseli"
     },
     {
       "id": "gora-mborgali",
