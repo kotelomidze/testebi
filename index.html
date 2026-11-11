@@ -877,6 +877,8 @@ async function themeCandidates(dir, pre){
         out.push({ kind:"mit", label, alts: mu ? [{ name:"თემის მითითება — " + decodeURIComponent(mu.split("/").pop()), url: mu }] : [] });
         const pu = await parUrl(full, t.alias);   // თემის პარალელები — მხოლოდ თუ ატვირთულია
         if(pu) out.push({ kind:"par", label, alts: [{ name:"თემის პარალელები — " + decodeURIComponent(pu.split("/").pop()), url: pu }] });
+        const pu2 = await parUrl(full, t.alias, PAR2);
+        if(pu2) out.push({ kind:"par2", label, alts: [{ name:"ისტორიული პარალელები — " + decodeURIComponent(pu2.split("/").pop()), url: pu2 }] });
       }
       return out;
     }catch(e){ return null; }
@@ -947,7 +949,8 @@ $("files-dl").onclick = async () => {
     if(!found.length){ box.innerHTML = "<p>ფაილები ჯერ არ არის. გამოიყენე „აპლიკაციიდან გაკეთება“.</p>"; return; }
     const hasMit = cands.some(c => c.kind === "mit");
     const groups = hasMit ? [["tema", "1. თემა (ტექსტი და დავალებები)"], ["mit", "2. თემის მითითება"]] : [[null, ""]];
-    if(hasMit && found.some(f => f.kind === "par")) groups.push(["par", "3. თემის პარალელები"]);
+    if(hasMit && found.some(f => f.kind === "par")) groups.push(["par", groups.length + 1 + ". თემის პარალელები"]);
+    if(hasMit && found.some(f => f.kind === "par2")) groups.push(["par2", groups.length + 1 + ". ისტორიული პარალელები"]);
     groups.forEach(([k, h]) => {
       const fs = found.filter(f => !k || f.kind === k);
       if(h){ const hh = document.createElement("h4"); hh.textContent = h; box.appendChild(hh); }
@@ -956,7 +959,7 @@ $("files-dl").onclick = async () => {
         const a = document.createElement("a"); a.href = f.url; a.setAttribute("download", f.name); a.target = "_blank"; a.rel = "noopener";
         if(f.kind) a.className = f.kind === "tema" ? "temaf" : "mitf";
         const sp = document.createElement("span");
-        if(f.kind){ const tg = document.createElement("span"); tg.className = "ftag"; tg.textContent = f.kind === "mit" ? "📋 თემის მითითება" : f.kind === "par" ? "🔗 თემის პარალელები" : "📄 თემა"; sp.appendChild(tg); }
+        if(f.kind){ const tg = document.createElement("span"); tg.className = "ftag"; tg.textContent = f.kind === "mit" ? "📋 თემის მითითება" : f.kind === "par" ? "🔗 თემის პარალელები" : f.kind === "par2" ? "📜 ისტორიული პარალელები" : "📄 თემა"; sp.appendChild(tg); }
         sp.appendChild(document.createTextNode(f.label));
         const b = document.createElement("b"); b.textContent = "⬇ PDF" + (f.size ? " · " + (f.size / 1048576).toFixed(1) + " მბ" : "");
         a.append(sp, b); box.appendChild(a);
@@ -1011,12 +1014,15 @@ async function mitUrl(testFile, label, alias){   // alias — ძველი �
 }
 // თემის პარალელები: საქაღალდე temis-paralelebi, ფაილის სახელი = როგორც სიაში ჩანს,
 //   მაგ. „რუსთაველი — ვეფხისტყაოსანი (რამაზის შეწყნარება) (ტექსტი I).pdf“ (ტირეები/ბრჭყალები/სასვენები არ ითვლება)
-async function parUrl(label, alias){
+// ისტორიული პარალელები (არამხატვრული წყაროებიდან): იგივე წესით, საქაღალდე istoriuli-paralelebi
+const PAR2 = "istoriuli-paralelebi";
+async function parUrl(label, alias, dir){
+  dir = dir || "temis-paralelebi";
   if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
-  const list = (AUTO_FILES && AUTO_FILES["temis-paralelebi"]) || [];
+  const list = (AUTO_FILES && AUTO_FILES[dir]) || [];
   const want = new Set([label, alias, String(alias || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")].filter(Boolean).map(fnorm));
   const hit = list.find(f => want.has(fnorm(f)));
-  return hit ? "temis-paralelebi/" + encodeURIComponent(hit) : null;
+  return hit ? dir + "/" + encodeURIComponent(hit) : null;
 }
 let STUDENT_BASE = null;   // დავალებების ჩამონათვალი (ერთხელ იტვირთება); მასალები ყოველ ჯერზე ახლიდან
 // მოცემული სიმრავლის (ერთი დავალების ან ყველა მიცემულის) შესასრულებელი ერთეულები
@@ -1129,7 +1135,7 @@ async function showAssign(a, isOld){
   const box = $("all-box"); box.innerHTML = "<p class='lead'>იტვირთება…</p>"; show("s-all");
   const acts = await actsFor(new Set(a.items || []));
   const mits = await Promise.all(acts.filter(x => x.t === "mit").map(async x => ({ x, u: await mitUrl(x.file, x.text, x.alias) })));
-  const pars = await Promise.all(acts.filter(x => x.t === "tema").map(async x => ({ x, u: await parUrl(x.text, x.alias) })));   // პარალელები: თავისით, თუ ატვირთულია
+  const pars = await Promise.all(acts.filter(x => x.t === "tema").map(async x => ({ x, u: await parUrl(x.text, x.alias), u2: await parUrl(x.text, x.alias, PAR2) })));   // პარალელები: თავისით, თუ ატვირთულია
   const KIND = { gaz:"გააზრება", red:"რედაქტირება", gram:"გრამატიკა", tema:"გააზრება და თემა", mit:"თემის მითითება", only:"გააზრება თემის გარეშე" };
   const sections = [ { h:"1. წასაკითხი", items:[] }, { h:"2. თხრობით სასწავლი", items:[] }, { h:"3. წერითი დავალებები", items:[] } ];
   const label = (el, kind, text) => { const d = el.querySelector("span") || el.appendChild(document.createElement("span"));
@@ -1170,6 +1176,7 @@ async function showAssign(a, isOld){
       const rows = [btn(x.key, KIND[t], x.text, () => openFiles("tema", x.id))];
       const mx = acts.find(z => z.t === "mit" && z.key === x.key + ":mit"); if(mx) rows.push(mitRow(mx));   // მითითება — თავისი თემის ქვემოთ
       const px = pars.find(z => z.x === x); if(px && px.u){ const r = link(x.key + ":par", "თემის პარალელები", x.text, px.u); r.mit = true; rows.push(r); }
+      if(px && px.u2){ const r = link(x.key + ":par2", "ისტორიული პარალელები", x.text, px.u2); r.mit = true; rows.push(r); }
       blk("tema", x.key, rows);
     }
     else if(t === "only") blk("only", x.key, [btn(x.key, KIND[t], x.text, () => openFiles("only", x.id))]);
@@ -1398,6 +1405,8 @@ async function renderAssignView(pane, a){
       if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) rows.push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
       if(t === "tema" && AUTO_FILES && (AUTO_FILES["temis-paralelebi"] || []).some(f => [x.text, x.alias].filter(Boolean).some(v => fnorm(f) === fnorm(v) || fnorm(f) === fnorm(v.replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")))))
         rows.push(["  ↳ თემის პარალელები", "იმავე ტექსტზე"]);
+      if(t === "tema" && AUTO_FILES && (AUTO_FILES[PAR2] || []).some(f => [x.text, x.alias].filter(Boolean).some(v => fnorm(f) === fnorm(v) || fnorm(f) === fnorm(v.replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")))))
+        rows.push(["  ↳ ისტორიული პარალელები", "იმავე ტექსტზე"]);
       G[t].push({ key: t === "mit" ? x.key.replace(/:mit$/, "") : x.key, rows });
     }));
     ["tema","mit","gaz","only","red","vj","stl","aph","gram"].forEach(g => sortRows(G[g], z => z.key).forEach(z => secs[2][1].push(...z.rows)));
@@ -1586,12 +1595,12 @@ function hideBox(n){   // განყოფილების სათაუ�
 const FILE_HAS = {};
 function fileBadges(n, sp){
   const mk = (txt) => { const b = document.createElement("span"); b.className = "fbadge no"; b.textContent = txt + " …"; sp.appendChild(b); return b; };
-  const bm = mk("📋 მითითება"), bp = mk("🔗 პარალელები");
-  const paint = r => { [[bm, "📋 მითითება", r.mit], [bp, "🔗 პარალელები", r.par]].forEach(([b, t, ok]) => {
+  const bm = mk("📋 მითითება"), bp = mk("🔗 პარალელები"), bh = mk("📜 ისტ. პარალელები");
+  const paint = r => { [[bm, "📋 მითითება", r.mit], [bp, "🔗 პარალელები", r.par], [bh, "📜 ისტ. პარალელები", r.par2]].forEach(([b, t, ok]) => {
     b.className = "fbadge " + (ok ? "ok" : "no"); b.textContent = t + (ok ? " ✓" : " ✗"); b.title = ok ? "ატვირთულია" : "ჯერ არ არის ატვირთული"; }); };
   if(FILE_HAS[n.key]) return FILE_HAS[n.key].then(paint);
   const mitN = (n.kids || []).find(k => k.act && k.act.t === "mit");
-  FILE_HAS[n.key] = Promise.all([mitN ? mitUrl(mitN.act.file, n.act.text, n.act.alias) : null, parUrl(n.act.text, n.act.alias)]).then(([m, p]) => ({ mit: !!m, par: !!p })).catch(() => ({ mit:false, par:false }));
+  FILE_HAS[n.key] = Promise.all([mitN ? mitUrl(mitN.act.file, n.act.text, n.act.alias) : null, parUrl(n.act.text, n.act.alias), parUrl(n.act.text, n.act.alias, PAR2)]).then(([m, p, p2]) => ({ mit: !!m, par: !!p, par2: !!p2 })).catch(() => ({ mit:false, par:false, par2:false }));
   FILE_HAS[n.key].then(paint);
 }
 function visNode(n, depth, given, hide){
