@@ -389,6 +389,12 @@
             <div id="stl-list"></div>
             <button type="button" class="btn ghost" id="stl-add" style="margin-top:8px">+ სტილისტიკის დამატება</button>
           </div>
+          <div class="vjbox" id="idi-box">
+            <h4>იდიომები</h4>
+            <p class="lead" style="margin:0 0 8px;font-size:.9rem">კითხვების რაოდენობა — ცალკე ფანჯარაში. იდიომები თითოეულ მოსწავლეს შემთხვევით შეხვდება.</p>
+            <div id="idi-list"></div>
+            <button type="button" class="btn ghost" id="idi-add" style="margin-top:8px">+ იდიომების დამატება</button>
+          </div>
           <div class="row vis-save">
             <button class="btn" id="as-give">მიცემა</button>
             <button class="btn ghost" id="as-cancel">გაუქმება</button>
@@ -677,7 +683,7 @@ function inSet(k, set){
   const any = f => { for(const x of set) if(f(x)) return true; return false; };
   if(k.indexOf("m:") === 0){
     const c = k.slice(2);
-    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph" || c === "vj" || c === "stl") return any(x => x.indexOf(c + ":") === 0);
+    if(c === "gaz" || c === "red" || c === "gram" || c === "only" || c === "aph" || c === "vj" || c === "stl" || c === "idi") return any(x => x.indexOf(c + ":") === 0);
     if(c === "tema") return any(x => /^tema:[^:]+$/.test(x));
     if(c === "mit") return any(x => /^tema:.+:mit$/.test(x));
     if(MAT_DIR[c]) return MATERIALS.some(m => m.cat === c && set.has("mat:" + m.id));
@@ -1087,6 +1093,8 @@ function vjLabel(cfg, full){   // full = მასწავლებლისთ
 /* სტილისტიკა: დავალება = „stl:“ + პარამეტრები (m=s ასარჩევი, c=e|a, s=ნაკრები, k=საკითხები, n=რაოდენობა, h=1 მინიშნება) */
 let STL_META = null;
 async function stlMeta(){ if(!STL_META){ try{ STL_META = JSON.parse(await fetchText("stilistika/meta.json")); }catch(e){ STL_META = { topics:[], items:[] }; } } return STL_META; }
+/* იდიომები: დავალება = „idi:n=10&r=…“ (n — კითხვების რაოდენობა, r — ერთმანეთისგან გასარჩევად) */
+function idiLabel(cfg){ const m = /(?:^|&)n=(\d+)/.exec(String(cfg)); return (m ? m[1] : "10") + " კითხვა"; }
 function stlLabel(cfg, full){
   const p = {}; String(cfg).split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); });
   const out = [(+p.n > 0 ? p.n + " წინადადება" : "ყველა წინადადება"), (p.m === "s" ? "ასარჩევი" : "ჩასაწერი")];
@@ -1118,6 +1126,7 @@ async function actsFor(set, mats, full){
   if(vjs.length){ await vjMeta(); vjs.forEach(k => out.push({ key:k, block:"m:vj", t:"vj", cfg:k.slice(3), text: vjLabel(k.slice(3), full) })); }
   const stls = Array.from(set).filter(k => k.indexOf("stl:") === 0);
   if(stls.length){ await stlMeta(); stls.forEach(k => out.push({ key:k, block:"m:stl", t:"stl", cfg:k.slice(4), text: stlLabel(k.slice(4), full) })); }
+  Array.from(set).filter(k => k.indexOf("idi:") === 0).forEach(k => out.push({ key:k, block:"m:idi", t:"idi", cfg:k.slice(4), text: idiLabel(k.slice(4)) }));
   return out;
   } finally { MATERIALS = keepM; }
 }
@@ -1167,7 +1176,7 @@ async function showAssign(a, isOld){
     return { key:x.key, el:d, mit:true }; };
   const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
   // წერითი დავალებები ჯგუფებად: ჯერ გააზრება და თემა (მითითებით, პარალელებით), მერე დანარჩენი
-  const G = { tema:[], gaz:[], only:[], red:[], vj:[], stl:[], aph:[], gram:[], mit:[] };
+  const G = { tema:[], gaz:[], only:[], red:[], vj:[], stl:[], idi:[], aph:[], gram:[], mit:[] };
   const blk = (g, key, rows) => G[g].push({ key, rows });
   const aphs = acts.filter(x => x.t === "aph");
   if(aphs.length){   // ყველა მონიშნული თავი — ერთი სავარჯიშო
@@ -1178,6 +1187,8 @@ async function showAssign(a, isOld){
     () => goSection("varjishi/#" + encodeURIComponent(x.cfg)))]));
   acts.filter(x => x.t === "stl").forEach(x => blk("stl", x.key, [btn(x.key, "სტილისტიკა", x.text,
     () => goSection("stilistika/#" + encodeURIComponent(x.cfg)))]));
+  acts.filter(x => x.t === "idi").forEach(x => blk("idi", x.key, [btn(x.key, "იდიომები", x.text,
+    () => goSection("idiomebi/#" + encodeURIComponent(x.cfg)))]));
   ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
     if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;   // უკვე თავის თემასთანაა
     if(t === "gaz") blk("gaz", x.key, [btn(x.key, KIND[t], x.text, () => { state.work = CHAPTERS[x.idx].work; setWorkTitle(); renderChapters(); startTest(x.idx); })]);
@@ -1193,7 +1204,7 @@ async function showAssign(a, isOld){
     else if(t === "only") blk("only", x.key, [btn(x.key, KIND[t], x.text, () => openFiles("only", x.id))]);
     else if(t === "mit") blk("mit", x.key.replace(/:mit$/, ""), [mitRow(x)]);
   }));
-  ["tema","mit","gaz","only","red","vj","stl","aph","gram"].forEach(g => {   // ჯგუფის შიგნით — მასწავლებლის ნომრების მიხედვით
+  ["tema","mit","gaz","only","red","vj","stl","idi","aph","gram"].forEach(g => {   // ჯგუფის შიგნით — მასწავლებლის ნომრების მიხედვით
     sortRows(G[g], b => b.key).forEach(b => sections[2].items.push(...b.rows));
   });
   [0, 1].forEach(i => sortRows(sections[i].items, it => it.key));
@@ -1405,11 +1416,12 @@ async function renderAssignView(pane, a){
     const NOTES = splitItems(a.items).notes;
     acts.filter(x => x.t === "file").forEach(x => secs[x.m.cat === "mat" ? 1 : 0][1].push([MAT_CAT[x.m.cat], x.m.title + (NOTES[x.key] ? " — 📌 " + NOTES[x.key] : "")]));
     const temaKeys = new Set(acts.filter(x => x.t === "tema").map(x => x.key));
-    const G = { tema:[], mit:[], gaz:[], only:[], red:[], vj:[], stl:[], aph:[], gram:[] };   // იგივე რიგი, რაც მოსწავლესთან
+    const G = { tema:[], mit:[], gaz:[], only:[], red:[], vj:[], stl:[], idi:[], aph:[], gram:[] };   // იგივე რიგი, რაც მოსწავლესთან
     const aphN = acts.filter(x => x.t === "aph").map(x => x.n).sort((p, q) => p - q);
     if(aphN.length) G.aph.push({ key:"aph", rows:[["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]] });
     acts.filter(x => x.t === "vj").forEach(x => G.vj.push({ key:x.key, rows:[["წინადადებების რედაქტირება", x.text]] }));
     acts.filter(x => x.t === "stl").forEach(x => G.stl.push({ key:x.key, rows:[["სტილისტიკა", x.text]] }));
+    acts.filter(x => x.t === "idi").forEach(x => G.idi.push({ key:x.key, rows:[["იდიომები", x.text]] }));
     const parHas = new Map(await Promise.all(acts.filter(x => x.t === "tema").map(async x => [x.key, [!!(await parUrl(x.text, x.alias)), !!(await parUrl(x.text, x.alias, PAR2))]])));
     ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
@@ -1421,7 +1433,7 @@ async function renderAssignView(pane, a){
         rows.push(["  ↳ ისტორიული პარალელები", "იმავე ტექსტზე"]);
       G[t].push({ key: t === "mit" ? x.key.replace(/:mit$/, "") : x.key, rows });
     }));
-    ["tema","mit","gaz","only","red","vj","stl","aph","gram"].forEach(g => sortRows(G[g], z => z.key).forEach(z => secs[2][1].push(...z.rows)));
+    ["tema","mit","gaz","only","red","vj","stl","idi","aph","gram"].forEach(g => sortRows(G[g], z => z.key).forEach(z => secs[2][1].push(...z.rows)));
     pane.innerHTML = "";
     let n = 0, sn = 0;
     secs.filter(z => z[1].length).forEach(([h, items]) => {
@@ -1680,7 +1692,7 @@ function refreshChecks(){
     if(N.ni) N.ni.classList.toggle("hidden", !on);
   });
   $("vis-count").textContent = "მონიშნულია: " + Array.from(set).filter(k => k.indexOf(NOTE) !== 0).length;
-  renderVj(); renderStl();
+  renderVj(); renderStl(); renderIdi();
 }
 async function renderVj(){
   const host = $("vj-list"); if(!host) return;
@@ -1715,6 +1727,24 @@ async function renderStl(){
     row.append(sp, del); host.appendChild(row);
   });
 }
+function renderIdi(){
+  const host = $("idi-list"); if(!host) return;
+  const list = EDIT ? Array.from(EDIT.set).filter(k => k.indexOf("idi:") === 0) : [];
+  host.innerHTML = "";
+  list.forEach(k => {
+    const row = document.createElement("div"); row.className = "vjrow";
+    const sp = document.createElement("span"); sp.textContent = "იდიომები · " + idiLabel(k.slice(4));
+    const del = document.createElement("button"); del.type = "button"; del.className = "del"; del.textContent = "მოხსნა";
+    del.onclick = () => { EDIT.set.delete(k); refreshChecks(); };
+    row.append(sp, del); host.appendChild(row);
+  });
+}
+$("idi-add").onclick = () => {   // იდიომების რაოდენობა — ცალკე ფანჯარაში
+  try{ sessionStorage.setItem("lit-stl-key", adminKey || ""); }catch(e){}
+  const m = document.createElement("div"); m.className = "vjmodal"; m.id = "vj-modal";
+  const f = document.createElement("iframe"); f.src = "idiomebi/#admin"; f.title = "იდიომების პარამეტრები";
+  m.appendChild(f); document.body.appendChild(m); document.body.style.overflow = "hidden";
+};
 $("stl-add").onclick = () => {   // სტილისტიკის პარამეტრები — ცალკე ფანჯარაში
   try{ sessionStorage.setItem("lit-stl-key", adminKey || ""); }catch(e){}
   const m = document.createElement("div"); m.className = "vjmodal"; m.id = "vj-modal";
@@ -1730,7 +1760,11 @@ $("vj-add").onclick = () => {   // ვარჯიშის პარამე�
 window.addEventListener("message", e => {
   if(e.origin !== location.origin || !e.data) return;
   const close = () => { const m = $("vj-modal"); if(m) m.remove(); document.body.style.overflow = ""; };
-  if(e.data.type === "vj-close" || e.data.type === "stl-close") close();
+  if(e.data.type === "vj-close" || e.data.type === "stl-close" || e.data.type === "idi-close") close();
+  if(e.data.type === "idi-add" && EDIT && typeof e.data.cfg === "string" && e.data.cfg.length < 100){
+    EDIT.set.add("idi:" + e.data.cfg); refreshChecks();
+    $("vis-msg").textContent = "იდიომები დაემატა. დახურე ფანჯარა ან დაამატე კიდევ ერთი."; $("vis-msg").className = "msg ok";
+  }
   if(e.data.type === "stl-add" && EDIT && typeof e.data.cfg === "string" && e.data.cfg.length < 1400){
     EDIT.set.add("stl:" + e.data.cfg); refreshChecks();
     $("vis-msg").textContent = "სტილისტიკა დაემატა. დახურე ფანჯარა ან დაამატე კიდევ ერთი."; $("vis-msg").className = "msg ok";

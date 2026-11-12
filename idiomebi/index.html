@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>იდიომები — კოტეს დავალება</title>
+<link rel="icon" type="image/png" href="../icons/favicon-48.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f6f9; --surface:#fff; --alt:#f8fafc; --primary:#1e40af; --primary-h:#1e3a8a; --primary-l:#eff6ff;
+    --err-bg:#fef2f2; --err-b:#f87171; --err-t:#991b1b; --acc-bg:#fffbeb; --acc-b:#fbbf24; --acc-t:#92400e;
+    --hint-bg:#f0fdf4; --hint-b:#86efac; --hint-t:#166534; --text:#0f172a; --muted:#475569; --border:#e2e8f0;
+    --green:#15803d; --radius:12px; --shadow:0 4px 20px rgba(15,23,42,.07);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Noto Sans Georgian","Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:16px;line-height:1.55}
+  button{font:inherit;cursor:pointer;touch-action:manipulation}
+  .shell{max-width:860px;margin:0 auto}
+  .hidden{display:none !important}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+  .top h1{font-size:1.25rem;margin:0;color:var(--primary)}
+  .who{font-size:.9rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:4px 12px}
+  .back{display:inline-block;padding:7px 14px;border:1.5px solid var(--border);border-radius:10px;color:var(--primary);font-weight:600;font-size:.92rem;text-decoration:none;background:var(--surface)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px 18px;margin-bottom:14px}
+  .btn{background:var(--primary);color:#fff;border:0;border-radius:10px;padding:11px 20px;font-weight:600;min-height:46px}
+  .btn:hover{background:var(--primary-h)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn.ghost{background:var(--surface);color:var(--primary);border:1.5px solid #c7d2fe}
+  .btn.ghost:hover{background:var(--primary-l)}
+  .btn.green{background:var(--green)}
+  .btn.hintb{background:#eef2ff;color:#3730a3;border:1.5px solid #e0e7ff}
+  .msg{padding:10px 14px;border-radius:10px;margin:10px 0;font-weight:600}
+  .msg.bad{background:var(--err-bg);color:var(--err-t)}
+  .msg.ok{background:var(--hint-bg);color:var(--hint-t)}
+  .lead{color:var(--muted);margin:0 0 14px}
+  /* სავარჯიშო */
+  .meta{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .badge{display:inline-block;font-size:.8rem;font-weight:700;border-radius:999px;padding:3px 10px;border:1px solid}
+  .b-err{background:var(--err-bg);color:var(--err-t);border-color:var(--err-b)}
+  .b-acc{background:var(--acc-bg);color:var(--acc-t);border-color:var(--acc-b)}
+  .pill{font-size:.85rem;font-weight:700;color:var(--primary);background:var(--primary-l);border-radius:999px;padding:3px 12px}
+  .instr{font-weight:600;margin:6px 0 10px}
+  .ref{background:var(--alt);border:1px dashed var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;font-size:1.05rem}
+  textarea.ans{width:100%;font:inherit;font-size:1.05rem;padding:12px 14px;border:2px solid var(--border);border-radius:10px;resize:vertical;min-height:90px}
+  textarea.ans:focus{outline:none;border-color:var(--primary)}
+  .opts{display:flex;flex-direction:column;gap:10px}
+  .opt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:2px solid var(--border);border-radius:10px;background:var(--surface);text-align:left;width:100%}
+  .opt .r{flex:0 0 20px;height:20px;border-radius:50%;border:2px solid #94a3b8;margin-top:3px}
+  .opt.sel{border-color:var(--primary);background:var(--primary-l)}
+  .opt.sel .r{border-color:var(--primary);background:radial-gradient(var(--primary) 45%, transparent 50%)}
+  .hint{background:#fff;border:2px solid #e0e7ff;color:var(--text);border-radius:12px;padding:12px 16px;margin-top:12px;line-height:1.7}
+  .hint h4{margin:0 0 4px;font-size:1.05rem;color:#3730a3}
+  .hint .rule{margin:5px 0}
+  .hint .g{color:#067647} .hint .r{color:#b42318} .hint s.r{text-decoration-thickness:1.5px}
+  .hint .pairs{display:flex;flex-direction:column;gap:3px;margin-top:6px}
+  .hint .pairs>span{display:block;padding-left:22px;position:relative}
+  .hint .pairs>span::before{content:"•";position:absolute;left:6px;color:var(--muted)}
+  .hint .ex{color:var(--muted);margin:5px 0}
+  .hint .sol{margin-top:10px;padding-top:8px;border-top:1px dashed var(--border)}
+  .hint .sol b{display:block;margin-bottom:4px}
+  .hint .sh-t{font-weight:800;color:#3730a3;font-size:1.05rem;margin-bottom:6px}
+  .hint .sh-p{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+  .hint .sh-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 6px;background:#f8fafc;border-radius:10px;padding:6px 10px}
+  .hint .sh-row s{color:#b42318;text-decoration-thickness:1.5px} .hint .sh-row b{color:#067647}
+  .hint .sh-row .x{color:#b42318;font-weight:800} .hint .sh-row .v{color:#067647;font-weight:800} .hint .sh-row .ar{color:#94a3b8}
+  .hint .sh-n{margin-top:10px;font-size:.93rem;color:#475569;border-left:3px solid #c7d2fe;padding-left:10px}
+  .nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;margin-top:14px}
+  .nav .l{display:flex;gap:8px;flex-wrap:wrap}
+  .dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+  .dots button{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--alt);color:#94a3b8;font-size:.8rem;font-weight:700;padding:0}
+  .dots button.done{background:var(--primary-l);color:var(--primary);border-color:#c7d2fe}
+  .dots button.cur{background:var(--primary);color:#fff;border-color:var(--primary)}
+  /* მასწავლებელი */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media (max-width:640px){ .grid{grid-template-columns:1fr} }
+  .f label.t{display:block;font-size:.8rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
+  .seg{display:flex;gap:4px;padding:4px;background:var(--alt);border:1px solid var(--border);border-radius:12px;flex-wrap:wrap}
+  .seg button{flex:1 1 auto;border:0;background:transparent;border-radius:9px;padding:8px 10px;font-weight:600;color:var(--muted);font-size:.9rem}
+  .seg button.on{background:var(--surface);color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.08)}
+  select.in, input.in{width:100%;font:inherit;font-size:16px;padding:9px 11px;border:1.5px solid var(--border);border-radius:10px;background:var(--surface)}
+  .chk{display:flex;gap:8px;align-items:flex-start;cursor:pointer;font-size:.95rem}
+  .chk input{margin-top:4px;width:18px;height:18px;flex:0 0 auto}
+  .topics{max-height:340px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:6px;background:var(--alt);margin-top:8px}
+  .topics label{display:flex;gap:8px;align-items:flex-start;padding:5px 6px;border-radius:7px;cursor:pointer;font-size:.92rem}
+  .topics label:hover{background:#fff}
+  .topics label .c{margin-left:auto;color:#94a3b8;font-size:.8rem;flex:0 0 auto;padding-left:6px}
+  .topics label.z{opacity:.45}
+  .avail{font-weight:700;font-size:1rem}
+  .avail b{color:var(--primary)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .sent{font-size:1.12rem;line-height:1.75;background:var(--alt);border:1px dashed var(--border);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+  .sent mark{background:#dbeafe;color:#1d4ed8;font-weight:700;border-radius:3px;padding:0 1px}
+  .sent .src{color:var(--muted);font-size:.95rem}
+  .q{font-weight:700;margin:4px 0 12px;font-size:1.05rem}
+  .q b{color:#1d4ed8}
+  .sol{margin-top:10px;font-size:.93rem;color:var(--hint-t);background:var(--hint-bg);border-radius:10px;padding:8px 12px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="top"><h1>იდიომები</h1><span class="who" id="who"></span></div>
+  <div id="app"><p class="lead">იტვირთება…</p></div>
+</div>
+<script src="../config.js"></script>
+<script>
+"use strict";
+const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbycuDAMQrAPEoa3rjtgf69Z-1rqwVIbyNB6fGyWSfpj6JDtny4HGZAMS6dMd93Lt8FU2w/exec";
+const SEND_URL = ((typeof SCRIPT_URL !== "undefined" && /\/exec$/.test(String(SCRIPT_URL).trim())) ? String(SCRIPT_URL) : DEFAULT_URL).trim();
+const $ = id => document.getElementById(id);
+const APP = $("app");
+const el = (tag, cls, text) => { const e = document.createElement(tag); if(cls) e.className = cls; if(text != null) e.textContent = text; return e; };
+const lsGet = (k, d) => { try{ const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; }catch(e){ return d; } };
+const lsSet = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const lsDel = k => { try{ localStorage.removeItem(k); }catch(e){} };
+const ssGet = k => { try{ return sessionStorage.getItem(k); }catch(e){ return null; } };
+async function api(body){
+  const r = await fetch(SEND_URL, { method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(body) });
+  const t = await r.text();
+  try{ return JSON.parse(t); }catch(e){ throw new Error("სკრიპტმა მოულოდნელი პასუხი დააბრუნა. Apps Script-ში ახალი Code.gs უნდა იყოს გამოქვეყნებული (New version)."); }
+}
+const netErr = e => (e && e.message && e.message !== "Failed to fetch" && e.message !== "Load failed") ? e.message : "სკრიპტთან დაკავშირება ვერ მოხერხდა. შეამოწმე ინტერნეტი.";
+const parseCfg = s => { const p = {}; String(s || "").split("&").forEach(x => { const i = x.indexOf("="); if(i > 0) p[x.slice(0, i)] = x.slice(i + 1); }); return p; };
+// „გულის გახსნა“ → კითხვაში ლექსიკონის ფორმა, წინადადებაში — ტექსტის ფორმა ფერად
+function drill(host, run, opt){
+  const filled = it => run.ans[it.id] != null;
+  function render(){
+    host.innerHTML = "";
+    const i = Math.min(run.idx || 0, run.items.length - 1), it = run.items[i];
+    const card = el("div", "card");
+    const meta = el("div", "meta"); meta.append(el("span", "pill", (i + 1) + " / " + run.items.length)); card.appendChild(meta);
+    const s = el("div", "sent");
+    s.append(it.s.slice(0, it.a), el("mark", "", it.s.slice(it.a, it.b)), it.s.slice(it.b));
+    if(it.src) s.append(" ", el("span", "src", "(" + it.src + ")"));
+    if(!/[.!?…]["“”»]?$/.test(it.s.trim())) s.append(".");
+    card.appendChild(s);
+    const q = el("div", "q"); q.append("რას ნიშნავს „", el("b", "", it.head), "“?"); card.appendChild(q);
+    const opts = el("div", "opts");
+    it.o.forEach((t, k) => {
+      const b = el("button", "opt" + (run.ans[it.id] === k ? " sel" : "")); b.type = "button";
+      b.append(el("span", "r"), el("span", "", t));
+      b.onclick = () => { run.ans[it.id] = k; opt.onChange(); render(); };
+      opts.appendChild(b);
+    });
+    card.appendChild(opts);
+    if(it.c) card.appendChild(el("div", "sol", "სწორი პასუხი (მხოლოდ შენ გიჩანს): " + it.c));
+    const nav = el("div", "nav"), l = el("div", "l");
+    const prev = el("button", "btn ghost", "← წინა"); prev.type = "button"; prev.disabled = i === 0; prev.onclick = () => { run.idx = i - 1; opt.onChange(); render(); scrollTo(0, 0); };
+    l.appendChild(prev); nav.appendChild(l);
+    if(i < run.items.length - 1){
+      const next = el("button", "btn", "შემდეგი →"); next.type = "button"; next.onclick = () => { run.idx = i + 1; opt.onChange(); render(); scrollTo(0, 0); }; nav.appendChild(next);
+    } else if(opt.onSubmit){ const sb = el("button", "btn green", "დასრულება და გაგზავნა"); sb.type = "button"; sb.onclick = () => opt.onSubmit(filled); nav.appendChild(sb); }
+    card.appendChild(nav);
+    const dots = el("div", "dots");
+    run.items.forEach((x, k) => { const b = el("button", k === i ? "cur" : filled(x) ? "done" : "", String(k + 1)); b.type = "button";
+      b.onclick = () => { run.idx = k; opt.onChange(); render(); }; dots.appendChild(b); });
+    card.appendChild(dots);
+    const m = el("div"); m.id = "send-msg"; card.appendChild(m);
+    host.appendChild(card);
+  }
+  render();
+}
+
+/* ======================= მოსწავლე ======================= */
+async function startStudent(){
+  let name = ssGet("lit-session-name") || ""; if(!name){ try{ name = localStorage.getItem("lit-user") || ""; }catch(e){} }
+  const cfg = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+  APP.innerHTML = "";
+  const back = el("a", "back", "← დავალებაზე დაბრუნება"); back.href = "../";
+  back.onclick = () => { try{ sessionStorage.setItem("lit-return", "assign"); }catch(e){} };
+  const bw = el("p"); bw.style.margin = "0 0 14px"; bw.appendChild(back); APP.appendChild(bw);
+  if(!name){ APP.appendChild(el("p", "lead", "ჯერ მთავარ გვერდზე შედი შენი სახელით და გვარით.")); return; }
+  $("who").textContent = name;
+  if(!cfg){ APP.appendChild(el("p", "lead", "დავალება არ არის არჩეული.")); return; }
+  const RUN = "idi-run:" + name + ":" + cfg, key = "idi:" + cfg;
+  let run = lsGet(RUN, null);
+  const host = el("div"); APP.appendChild(host);
+  if(!run){
+    host.appendChild(el("p", "lead", "კითხვები იტვირთება…"));
+    try{
+      const r = await api({ action:"idiGet", name, cfg });
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+      run = { items: r.items, ans: {}, idx: 0 }; lsSet(RUN, run);
+    }catch(e){ host.innerHTML = ""; host.appendChild(el("div", "msg bad", netErr(e))); return; }
+  }
+  const save = () => lsSet(RUN, run);
+  drill(host, run, { onChange: save, onSubmit: filled => {
+    const empty = run.items.filter(it => !filled(it)).length, m = $("send-msg"); m.innerHTML = "";
+    if(empty){
+      const w = el("div", "msg bad", "პასუხი არ აქვს " + empty + " კითხვას. მაინც გავგზავნო? ");
+      const y = el("button", "btn", "კი, გაგზავნე"); y.type = "button"; y.onclick = send;
+      const n = el("button", "btn ghost", "არა"); n.type = "button"; n.style.marginLeft = "6px"; n.onclick = () => { m.innerHTML = ""; };
+      w.append(el("br"), y, n); m.appendChild(w);
+    } else send();
+  } });
+  async function send(){
+    const m = $("send-msg"); m.innerHTML = ""; const info = el("div", "msg ok", "იგზავნება…"); m.appendChild(info);
+    host.querySelectorAll("button").forEach(b => b.disabled = true);
+    const items = run.items.map(it => ({ id: it.id, a: run.ans[it.id] == null ? "" : it.o[run.ans[it.id]] }));
+    try{
+      const r = await api({ action:"idiSubmit", name, cfg, items, time: new Date().toLocaleString("ka-GE") });
+      if(!r || !r.ok) throw new Error(r && r.error);
+      lsDel(RUN);
+      const dk = "lit-done:" + name, d = lsGet(dk, []); if(d.indexOf(key) < 0){ d.push(key); lsSet(dk, d); }
+      host.innerHTML = "";
+      const c = el("div", "card"); c.append(el("h2", "", "გაიგზავნა ✔"), el("p", "lead", "პასუხები მასწავლებელს გაეგზავნა."));
+      const b = el("a", "btn", "დავალებაზე დაბრუნება"); b.href = "../"; b.style.cssText = "display:inline-block;text-decoration:none";
+      b.onclick = () => { try{ sessionStorage.setItem("lit-return", "assign"); }catch(e){} };
+      c.appendChild(b); host.appendChild(c); scrollTo(0, 0);
+    }catch(e){
+      info.className = "msg bad"; info.textContent = "ვერ გაიგზავნა: " + netErr(e) + " პასუხები შენახულია — სცადე ხელახლა.";
+      host.querySelectorAll("button").forEach(b => b.disabled = false);
+    }
+  }
+}
+
+/* ======================= მასწავლებელი: რაოდენობის არჩევა ======================= */
+function startTeacher(){
+  $("who").textContent = "დავალების შედგენა";
+  const inFrame = window.parent !== window;
+  APP.innerHTML = "";
+  const main = el("div"), prevHost = el("div", "hidden"); APP.append(main, prevHost);
+  const c = el("div", "card"); main.appendChild(c);
+  c.append(el("p", "lead", "მოსწავლეს ბაზიდან შემთხვევით შეხვდება იმდენი იდიომი, რამდენსაც აქ მიუთითებ. თითოეულ მოსწავლეს — სხვადასხვა."));
+  const f = el("div", "f"); const lb = el("label", "t", "კითხვების რაოდენობა"); const ni = el("input", "in"); ni.type = "number"; ni.min = "1"; ni.max = "100"; ni.value = "10"; ni.inputMode = "numeric";
+  f.append(lb, ni); c.appendChild(f);
+  const br = el("div", "row"); br.style.marginTop = "14px";
+  const pv = el("button", "btn ghost", "ნახე, როგორ დაინახავს მოსწავლე"); pv.type = "button";
+  const ad = el("button", "btn green", "დავალებაში დამატება"); ad.type = "button";
+  const cl = el("button", "btn ghost", inFrame ? "დახურვა" : "უკან"); cl.type = "button";
+  br.append(pv); if(inFrame) br.append(ad); br.append(cl); c.appendChild(br);
+  const bm = el("div"); c.appendChild(bm);
+  const n = () => Math.max(1, Math.min(100, parseInt(ni.value, 10) || 10));
+  const cfgStr = () => "n=" + n() + "&r=" + Date.now().toString(36);   // r — რომ ორი ცალკე დავალება ერთმანეთში არ აირიოს
+  cl.onclick = () => inFrame ? window.parent.postMessage({ type:"idi-close" }, location.origin) : (location.href = "../");
+  ad.onclick = () => { window.parent.postMessage({ type:"idi-add", cfg: cfgStr() }, location.origin); ad.textContent = "დაემატა ✓"; setTimeout(() => ad.textContent = "დავალებაში დამატება", 2500); };
+  pv.onclick = async () => {
+    bm.innerHTML = ""; pv.disabled = true;
+    try{
+      const r = await api({ action:"idiGet", key: ssGet("lit-stl-key") || "", cfg: "n=" + n() });
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+      main.classList.add("hidden"); prevHost.classList.remove("hidden"); prevHost.innerHTML = "";
+      const b = el("button", "btn ghost", "← პარამეტრებზე დაბრუნება"); b.type = "button"; b.style.marginBottom = "12px";
+      b.onclick = () => { prevHost.classList.add("hidden"); main.classList.remove("hidden"); };
+      const h = el("div"); prevHost.append(b, el("p", "lead", "მასწავლებლის ნახვა: სწორი პასუხი მხოლოდ შენ გიჩანს."), h);
+      drill(h, { items: r.items, ans: {}, idx: 0 }, { onChange: () => {} });
+    }catch(e){ bm.appendChild(el("div", "msg bad", netErr(e))); }
+    finally{ pv.disabled = false; }
+  };
+}
+(location.hash === "#admin" ? startTeacher : startStudent)();
+</script>
+</body>
+</html>
