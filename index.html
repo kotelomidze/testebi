@@ -1016,11 +1016,22 @@ async function mitUrl(testFile, label, alias){   // alias — ძველი �
 //   მაგ. „რუსთაველი — ვეფხისტყაოსანი (რამაზის შეწყნარება) (ტექსტი I).pdf“ (ტირეები/ბრჭყალები/სასვენები არ ითვლება)
 // ისტორიული პარალელები (არამხატვრული წყაროებიდან): იგივე წესით, საქაღალდე istoriuli-paralelebi
 const PAR2 = "istoriuli-paralelebi";
+// ფაილს შეიძლება ერქვას „გააზრება და თემის“ PDF-ის სახელითაც: „გააზრება, 224 (გეგეჭკორი, ფეოდალი).pdf“
+let SRC_P = null; const SRC_C = {};
+async function srcOf(label, alias){   // სიაში ნაჩვენები სათაურით → დავალების sourceFile
+  SRC_P = SRC_P || fetch("gaazreba-tema/tests.json", { cache:"no-store" }).then(r => r.json()).then(j => j.tests || []).catch(() => []);
+  const ts = await SRC_P;
+  const t = ts.find(z => label && fnorm(testLabel(z)) === fnorm(label)) || ts.find(z => alias && z.alias && fnorm(z.alias) === fnorm(alias));
+  if(!t) return null;
+  if(!(t.file in SRC_C)) SRC_C[t.file] = fetch("gaazreba-tema/" + t.file, { cache:"no-store" }).then(r => r.json()).then(j => j.sourceFile || null).catch(() => null);
+  return SRC_C[t.file];
+}
 async function parUrl(label, alias, dir){
   dir = dir || "temis-paralelebi";
   if(!AUTO_FILES){ AUTO_P = AUTO_P || loadAutoFiles(); await AUTO_P; }
   const list = (AUTO_FILES && AUTO_FILES[dir]) || [];
-  const want = new Set([label, alias, String(alias || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")].filter(Boolean).map(fnorm));
+  const src = await srcOf(label, alias);
+  const want = new Set([label, alias, String(alias || "").replace(/\s*\(ტექსტი[^)]*\)\s*$/, ""), src].filter(Boolean).map(fnorm));
   const hit = list.find(f => want.has(fnorm(f)));
   return hit ? dir + "/" + encodeURIComponent(hit) : null;
 }
@@ -1399,13 +1410,14 @@ async function renderAssignView(pane, a){
     if(aphN.length) G.aph.push({ key:"aph", rows:[["აფორიზმები", "„ვეფხისტყაოსანი“ — " + (aphN.length === 1 ? "თავი " + aphN[0] : "თავები: " + aphN.join(", "))]] });
     acts.filter(x => x.t === "vj").forEach(x => G.vj.push({ key:x.key, rows:[["წინადადებების რედაქტირება", x.text]] }));
     acts.filter(x => x.t === "stl").forEach(x => G.stl.push({ key:x.key, rows:[["სტილისტიკა", x.text]] }));
+    const parHas = new Map(await Promise.all(acts.filter(x => x.t === "tema").map(async x => [x.key, [!!(await parUrl(x.text, x.alias)), !!(await parUrl(x.text, x.alias, PAR2))]])));
     ["tema","mit","red","gaz","only","gram"].forEach(t => acts.filter(x => x.t === t).forEach(x => {
       if(t === "mit" && temaKeys.has(x.key.replace(/:mit$/, ""))) return;
       const rows = [[KIND[t], x.text]];
       if(t === "tema" && acts.some(z => z.key === x.key + ":mit")) rows.push(["  ↳ თემის მითითება", "იმავე ტექსტზე"]);
-      if(t === "tema" && AUTO_FILES && (AUTO_FILES["temis-paralelebi"] || []).some(f => [x.text, x.alias].filter(Boolean).some(v => fnorm(f) === fnorm(v) || fnorm(f) === fnorm(v.replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")))))
+      if(t === "tema" && (parHas.get(x.key) || [])[0])
         rows.push(["  ↳ ლიტერატურული პარალელები", "იმავე ტექსტზე"]);
-      if(t === "tema" && AUTO_FILES && (AUTO_FILES[PAR2] || []).some(f => [x.text, x.alias].filter(Boolean).some(v => fnorm(f) === fnorm(v) || fnorm(f) === fnorm(v.replace(/\s*\(ტექსტი[^)]*\)\s*$/, "")))))
+      if(t === "tema" && (parHas.get(x.key) || [])[1])
         rows.push(["  ↳ ისტორიული პარალელები", "იმავე ტექსტზე"]);
       G[t].push({ key: t === "mit" ? x.key.replace(/:mit$/, "") : x.key, rows });
     }));
