@@ -874,11 +874,11 @@ async function themeCandidates(dir, pre){
       if(pre === "tema" && !isHidden("tema:" + t.id + ":mit")){
         const full = testLabel(t);   // როგორც სიაში
         const mu = await mitUrl(t.file, full, t.alias);
-        out.push({ kind:"mit", label, alts: mu ? [{ name:"თემის მითითება — " + decodeURIComponent(mu.split("/").pop()), url: mu }] : [] });
+        out.push({ kind:"mit", label, alts: mu ? [{ name:"თემის მითითება – " + decodeURIComponent(mu.split("/").pop()), url: mu }] : [] });
         const pu = await parUrl(full, t.alias);   // თემის პარალელები — მხოლოდ თუ ატვირთულია
-        if(pu) out.push({ kind:"par", label, alts: [{ name:"ლიტერატურული პარალელები — " + decodeURIComponent(pu.split("/").pop()), url: pu }] });
+        if(pu) out.push({ kind:"par", label, alts: [{ name:"ლიტერატურული პარალელები – " + decodeURIComponent(pu.split("/").pop()), url: pu }] });
         const pu2 = await parUrl(full, t.alias, PAR2);
-        if(pu2) out.push({ kind:"par2", label, alts: [{ name:"ისტორიული პარალელები — " + decodeURIComponent(pu2.split("/").pop()), url: pu2 }] });
+        if(pu2) out.push({ kind:"par2", label, alts: [{ name:"ისტორიული პარალელები – " + decodeURIComponent(pu2.split("/").pop()), url: pu2 }] });
       }
       return out;
     }catch(e){ return null; }
