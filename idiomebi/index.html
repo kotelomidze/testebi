@@ -131,7 +131,15 @@ function drill(host, run, opt){
     host.innerHTML = "";
     const i = Math.min(run.idx || 0, run.items.length - 1), it = run.items[i];
     const card = el("div", "card");
-    const meta = el("div", "meta"); meta.append(el("span", "pill", (i + 1) + " / " + run.items.length)); card.appendChild(meta);
+    const meta = el("div", "meta"); meta.append(el("span", "pill", (i + 1) + " / " + run.items.length));
+    if(opt.onToggle){   // მასწავლებელი: იდიომის გათიშვა / ჩართვა
+      const tg = el("button", "btn " + (it.off ? "green" : "ghost"), it.off ? "გათიშულია — ჩართვა" : "გათიშვა"); tg.type = "button";
+      tg.style.minHeight = "36px"; tg.style.padding = "6px 14px";
+      tg.onclick = async () => { tg.disabled = true; try{ await opt.onToggle(it, !it.off); }catch(e){ alert(netErr(e)); } render(); };
+      meta.appendChild(tg);
+    }
+    card.appendChild(meta);
+    if(it.off) card.appendChild(el("div", "msg bad", "ეს იდიომი გათიშულია — მოსწავლეებს აღარ შეხვდება."));
     const s = el("div", "sent");
     s.append(it.s.slice(0, it.a), el("mark", "", it.s.slice(it.a, it.b)), it.s.slice(it.b));
     if(it.src) s.append(" ", el("span", "src", "(" + it.src + ")"));
@@ -155,7 +163,12 @@ function drill(host, run, opt){
     } else if(opt.onSubmit){ const sb = el("button", "btn green", "დასრულება და გაგზავნა"); sb.type = "button"; sb.onclick = () => opt.onSubmit(filled); nav.appendChild(sb); }
     card.appendChild(nav);
     const dots = el("div", "dots");
-    run.items.forEach((x, k) => { const b = el("button", k === i ? "cur" : filled(x) ? "done" : "", String(k + 1)); b.type = "button";
+    if(run.items.length > 60){   // ბევრი კითხვა — ნომრით გადასვლა
+      const ji = el("input", "in"); ji.type = "number"; ji.min = "1"; ji.max = String(run.items.length); ji.placeholder = "ნომერი"; ji.style.maxWidth = "120px";
+      const jb = el("button", "btn ghost", "გადასვლა"); jb.type = "button";
+      jb.onclick = () => { const k = parseInt(ji.value, 10); if(k >= 1 && k <= run.items.length){ run.idx = k - 1; render(); } };
+      jb.style.cssText = "width:auto;height:auto;padding:8px 14px;color:var(--primary)"; dots.append(ji, jb);
+    } else run.items.forEach((x, k) => { const b = el("button", k === i ? "cur" : filled(x) ? "done" : "", String(k + 1)); b.type = "button";
       b.onclick = () => { run.idx = k; opt.onChange(); render(); }; dots.appendChild(b); });
     card.appendChild(dots);
     const m = el("div"); m.id = "send-msg"; card.appendChild(m);
@@ -232,6 +245,46 @@ function startTeacher(){
   const ad = el("button", "btn green", "დავალებაში დამატება"); ad.type = "button";
   const cl = el("button", "btn ghost", inFrame ? "დახურვა" : "უკან"); cl.type = "button";
   br.append(pv); if(inFrame) br.append(ad); br.append(cl); c.appendChild(br);
+  const c2 = el("div", "card"); main.appendChild(c2);
+  c2.append(el("h3", "", "იდიომების გადარჩევა"), el("p", "lead", "გადახედე ყველა იდიომს და გათიშე, რომლებიც არ მოგწონს — მოსწავლეებს აღარ შეხვდებიან (არც არასწორ პასუხად). გათიშულების სია შეგიძლია ჩამოწერო."));
+  const br2 = el("div", "row");
+  const rv = el("button", "btn", "ყველა იდიომის გადახედვა"); rv.type = "button";
+  const ls = el("button", "btn ghost", "გათიშულების სია"); ls.type = "button";
+  br2.append(rv, ls); c2.appendChild(br2);
+  const bm2 = el("div"); c2.appendChild(bm2);
+  const KEY = ssGet("lit-stl-key") || "";
+  const POS = "idi-review-pos";
+  async function toggle(it, off){
+    const r = await api({ action:"idiSetOff", key: KEY, head: it.head, off });
+    if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+    it.off = off;
+  }
+  async function preview(cfg, note, review){
+    const r = await api({ action:"idiGet", key: KEY, cfg });
+    if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+    main.classList.add("hidden"); prevHost.classList.remove("hidden"); prevHost.innerHTML = "";
+    const b = el("button", "btn ghost", "← პარამეტრებზე დაბრუნება"); b.type = "button"; b.style.marginBottom = "12px";
+    b.onclick = () => { prevHost.classList.add("hidden"); main.classList.remove("hidden"); };
+    const h = el("div"); prevHost.append(b, el("p", "lead", note), h);
+    const run = { items: r.items, ans: {}, idx: review ? Math.min(lsGet(POS, 0), r.items.length - 1) : 0 };
+    drill(h, run, { onChange: () => { if(review) lsSet(POS, run.idx); }, onToggle: toggle });
+  }
+  rv.onclick = async () => { bm2.innerHTML = ""; rv.disabled = true;
+    try{ await preview("all=1", "ყველა იდიომი რიგზე (" + "სწორი პასუხი მხოლოდ შენ გიჩანს). ბოლოს ნანახ ადგილს დაიმახსოვრებს.", true); }
+    catch(e){ bm2.appendChild(el("div", "msg bad", netErr(e))); } finally{ rv.disabled = false; } };
+  ls.onclick = async () => { bm2.innerHTML = ""; ls.disabled = true;
+    try{
+      const r = await api({ action:"idiGet", key: KEY, cfg: "n=1" });
+      if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
+      const off = (r.off || []).slice().sort((x, y) => x.localeCompare(y, "ka"));
+      bm2.appendChild(el("p", "lead", "გათიშულია " + off.length + " იდიომი."));
+      if(off.length){
+        const ta = el("textarea", "ans"); ta.value = off.join("\n"); ta.readOnly = true; ta.style.minHeight = "200px";
+        const cp = el("button", "btn ghost", "კოპირება"); cp.type = "button"; cp.style.marginTop = "8px";
+        cp.onclick = () => { ta.select(); try{ navigator.clipboard.writeText(ta.value); }catch(e){ document.execCommand("copy"); } cp.textContent = "დაკოპირდა ✓"; };
+        bm2.append(ta, cp);
+      }
+    }catch(e){ bm2.appendChild(el("div", "msg bad", netErr(e))); } finally{ ls.disabled = false; } };
   const bm = el("div"); c.appendChild(bm);
   const n = () => Math.max(1, Math.min(100, parseInt(ni.value, 10) || 10));
   const cfgStr = () => "n=" + n() + "&r=" + Date.now().toString(36);   // r — რომ ორი ცალკე დავალება ერთმანეთში არ აირიოს
@@ -239,15 +292,8 @@ function startTeacher(){
   ad.onclick = () => { window.parent.postMessage({ type:"idi-add", cfg: cfgStr() }, location.origin); ad.textContent = "დაემატა ✓"; setTimeout(() => ad.textContent = "დავალებაში დამატება", 2500); };
   pv.onclick = async () => {
     bm.innerHTML = ""; pv.disabled = true;
-    try{
-      const r = await api({ action:"idiGet", key: ssGet("lit-stl-key") || "", cfg: "n=" + n() });
-      if(!r || !r.ok) throw new Error(r && r.error ? r.error : "Apps Script ჯერ ძველი ვერსიაა.");
-      main.classList.add("hidden"); prevHost.classList.remove("hidden"); prevHost.innerHTML = "";
-      const b = el("button", "btn ghost", "← პარამეტრებზე დაბრუნება"); b.type = "button"; b.style.marginBottom = "12px";
-      b.onclick = () => { prevHost.classList.add("hidden"); main.classList.remove("hidden"); };
-      const h = el("div"); prevHost.append(b, el("p", "lead", "მასწავლებლის ნახვა: სწორი პასუხი მხოლოდ შენ გიჩანს."), h);
-      drill(h, { items: r.items, ans: {}, idx: 0 }, { onChange: () => {} });
-    }catch(e){ bm.appendChild(el("div", "msg bad", netErr(e))); }
+    try{ await preview("n=" + n(), "მასწავლებლის ნახვა: სწორი პასუხი მხოლოდ შენ გიჩანს. ზედა ღილაკით შეგიძლია იდიომი გათიშო.", false); }
+    catch(e){ bm.appendChild(el("div", "msg bad", netErr(e))); }
     finally{ pv.disabled = false; }
   };
 }
