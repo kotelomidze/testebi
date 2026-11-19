@@ -83,6 +83,7 @@
   .reader{position:fixed;inset:0;z-index:30;background:var(--paper);display:flex;flex-direction:column}
   .reader-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid var(--line);
     padding:calc(10px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) 10px calc(16px + env(safe-area-inset-left,0px));background:var(--paper)}
+  .r-btns{display:flex;gap:8px;flex:none}
   .r-work{color:var(--muted);font-size:.85rem;line-height:1.3}
   .r-title{font-family:var(--serif);font-weight:700;font-size:1.25rem;color:var(--lapis);line-height:1.3}
   .reader-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
@@ -588,7 +589,7 @@
 <div class="reader hidden" id="reader" role="dialog" aria-modal="true" aria-labelledby="r-title">
   <div class="reader-bar">
     <div><div class="r-work" id="r-work"></div><div class="r-title" id="r-title"></div></div>
-    <button class="btn small" id="close-text">დახურვა</button>
+    <div class="r-btns"><button class="btn small ghost" id="find-text" type="button" aria-label="ტექსტში ძიება" title="ტექსტში ძიება" onclick="window.POISK_OPEN && POISK_OPEN()">🔍</button><button class="btn small" id="close-text">დახურვა</button></div>
   </div>
   <div class="reader-scroll" id="r-scroll"><article class="reader-body" id="r-body"></article></div>
 </div>
@@ -605,6 +606,8 @@
 </div>
 
 <script src="config.js"></script>
+<script>window.POISK_NOBTN = true; window.POISK_TARGET = function(){ var r = document.getElementById("reader"); return r && !r.classList.contains("hidden") ? document.getElementById("r-body") : null; };</script>
+<script src="poisk.js?v=1"></script>
 <script>
 /* Apps Script-ის ბმული ცალკე ფაილშია: config.js (index.html-ის განახლებისას არ იკარგება) */
 const DEFAULT_URL = "https://script.google.com/macros/s/AKfycbycuDAMQrAPEoa3rjtgf69Z-1rqwVIbyNB6fGyWSfpj6JDtny4HGZAMS6dMd93Lt8FU2w/exec"; // სათადარიგო, თუ config.js არ აიტვირთა
