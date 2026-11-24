@@ -3249,7 +3249,7 @@ function showStanzas(spec){
   sp.split(',').map(s => s.trim()).filter(Boolean).forEach(part => {
     const [a, b] = part.split(/[–-]/).map(Number);
     const hi = b || a;
-    for (let k = a; k <= hi && nums.length < 70; k++) {
+    for (let k = a; k <= hi; k++) {
       if (ST[k - off] || a === hi) nums.push(k);
     }
   });
