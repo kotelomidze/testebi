@@ -297,6 +297,14 @@
   .slist li span{min-width:0;overflow-wrap:anywhere}
   .slist .del{background:none;border:1.5px solid #E2B4AE;color:#A3291C;border-radius:6px;padding:6px 10px;font-size:.88rem;min-height:36px;flex:0 0 auto}
   .slist .empty{color:var(--muted);justify-content:center}
+  .slist li{flex-wrap:wrap}
+  .slist li > span:first-child{flex:1 1 200px}
+  .slist .sbtns{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+  .slist .paybtn{background:none;border:1.5px solid var(--line);color:var(--lapis);border-radius:6px;padding:6px 10px;font-size:.88rem;min-height:36px}
+  .slist .paybtn.on{border-color:#E2C48A;color:#8A5A0B;background:#FFF6E3}
+  .slist .paytag{display:block;color:#8A5A0B;font-size:.85rem;margin-top:2px}
+  .paynote{background:#FFF6E3;border:1.5px solid #E2C48A;color:#7A4E08;border-radius:10px;padding:12px 14px;margin:0 0 16px;font-weight:600}
+  .modal-box input[type=date]{width:100%;font:inherit;padding:10px;border:1.5px solid var(--line);border-radius:8px;margin:0 0 18px}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
   @media (max-width:560px){
     body{font-size:16px}
@@ -458,6 +466,7 @@
   <!-- 1ა. დავალების ტიპი -->
   <section id="s-mode" class="hidden">
     <h2>დავალებები</h2>
+    <p class="paynote hidden" id="paynote"></p>
     <p class="err hidden" id="mode-none">ჯერ დავალება არ მოგცემია. მიმართე მასწავლებელს.</p>
     <div class="assign-btns" id="assign-btns">
       <button class="btn allbtn" id="mode-new">📋 ახალი დავალება<span class="sub" id="new-sub"></span></button>
@@ -594,6 +603,18 @@
   <div class="reader-scroll" id="r-scroll"><article class="reader-body" id="r-body"></article></div>
 </div>
 
+<div class="modal hidden" id="paymodal" role="dialog" aria-modal="true" aria-labelledby="pm-title">
+  <div class="modal-box">
+    <h3 id="pm-title">სწავლის გადასახადის შეხსენება</h3>
+    <p id="pm-name"></p>
+    <label for="pm-date" style="display:block;font-weight:600;margin-bottom:6px">გადახდის თარიღი</label>
+    <input type="date" id="pm-date">
+    <div class="modal-actions">
+      <button class="btn ghost" id="pm-no">გაუქმება</button>
+      <button class="btn" id="pm-yes">ჩართვა</button>
+    </div>
+  </div>
+</div>
 <div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="m-title">
   <div class="modal-box">
     <h3 id="m-title">გავაგზავნო პასუხები?</h3>
@@ -749,7 +770,20 @@ function applyHidden(){
 }
 function refreshHidden(){   // ფონურად: უახლესი დავალებები სკრიპტიდან
   if(!state.name) return;
-  api({ action:"visibility", name: state.name }).then(r => { if(r && r.ok){ setNoBank(r.noBank); setOrder(r.order); setAssigns(r.assigns, r.materials); } }).catch(() => {});
+  api({ action:"visibility", name: state.name }).then(r => { if(r && r.ok){ setNoBank(r.noBank); setOrder(r.order); setAssigns(r.assigns, r.materials); setPay(r.pay); } }).catch(() => {});
+}
+/* ===== სწავლის გადასახადის შეხსენება (ჩანს მხოლოდ მაშინ, როცა მასწავლებელი ამ მოსწავლეზე ჩართავს) ===== */
+function fmtDay(iso){   // "2026-12-05" → "5 დეკემბერი"
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || ""); if(!m) return "";
+  const y = +m[1];
+  return (+m[3]) + " " + KA_MONTHS[+m[2] - 1] + (y !== new Date().getFullYear() ? " " + y : "");
+}
+function setPay(d){
+  d = typeof d === "string" ? d : "";
+  if(state.name) lsSet("lit-pay:" + state.name, d);
+  const t = fmtDay(d);
+  $("paynote").textContent = t ? "💳 სწავლის გადასახადის შეხსენება (" + t + ")" : "";
+  $("paynote").classList.toggle("hidden", !t);
 }
 /* ===== მოსწავლის „გავაკეთე“ ნიშნები (მხოლოდ მისთვის, ტელეფონში) ===== */
 let DONE = new Set();
@@ -808,7 +842,7 @@ async function chooseStudent(n, surname){
     const r = await api({ action:"login", name: n });
     if(!r.ok || !r.name){ $("name-err").textContent = "ეს მოსწავლე სიაში აღარ არის. მიმართე მასწავლებელს."; clearPick(); return; }
     signIn(r.name);
-    setNoBank(r.noBank); setOrder(r.order); setAssigns(r.assigns, r.materials);
+    setNoBank(r.noBank); setOrder(r.order); setAssigns(r.assigns, r.materials); setPay(r.pay);
     try{ localStorage.setItem(NAME_KEY, surname); }catch(e){}
     clearPick();
     goHome();
@@ -1256,7 +1290,7 @@ $("old-back").onclick = goHome;
 $("back-mode").onclick = backToAssign;
 
 /* მასწავლებლის გვერდი: მოსწავლეების დამატება/წაშლა */
-let students = [];
+let students = [], PAYS = {};   // PAYS: {სახელი: "YYYY-MM-DD"} — ვისზეა ჩართული გადასახადის შეხსენება
 function adminMsg(text, ok){ $("admin-msg").textContent = text; $("admin-msg").className = "msg " + (ok ? "ok" : "bad"); }
 function renderStudents(){
   const f = $("filter").value.trim().toLowerCase();
@@ -1272,9 +1306,14 @@ function renderStudents(){
     const li = document.createElement("li");
     const sp = document.createElement("span"); sp.textContent = n;
     const g = groupOf(n); const t = document.createElement("span"); t.className = "gtag"; t.textContent = g ? "· " + g.name : "· ჯგუფის გარეშე"; sp.appendChild(t);
+    if(PAYS[n]){ const pt = document.createElement("span"); pt.className = "paytag"; pt.textContent = "💳 შეხსენება ჩართულია (" + fmtDay(PAYS[n]) + ")"; sp.appendChild(pt); }
+    const pb = document.createElement("button"); pb.className = "paybtn" + (PAYS[n] ? " on" : "");
+    pb.textContent = PAYS[n] ? "შეხსენების გამორთვა" : "💳 შეხსენება";
+    pb.onclick = () => PAYS[n] ? setPayFor(n, "", pb) : openPayModal(n);
     const b = document.createElement("button"); b.className = "del"; b.textContent = "წაშლა";
     b.onclick = () => openModal("წავშალო სიიდან?", n + " ვეღარ შევა აპლიკაციაში.", "გაუქმება", "წაშლა", () => removeStudent(n));
-    li.append(sp, b); $("slist").appendChild(li);
+    const bx = document.createElement("div"); bx.className = "sbtns"; bx.append(pb, b);
+    li.append(sp, bx); $("slist").appendChild(li);
   });
 }
 async function openAdmin(){
@@ -1800,6 +1839,7 @@ async function renderTree(){
 }
 function fillAdmin(r){
   if(r.students) students = r.students;
+  if(r.pay) PAYS = r.pay;
   loadCfg(r);
   renderStudents(); renderGroups(); renderAsGroups(); renderAssign(); renderMats();
   if(EDIT) renderTree();
@@ -1931,11 +1971,37 @@ $("add-students").onclick = async () => {
   }catch(e){ adminMsg(netErr(e), false); }
   finally{ btn.disabled = false; btn.textContent = "დამატება"; }
 };
+/* სწავლის გადასახადის შეხსენება: მასწავლებელი რთავს ცალკეულ მოსწავლეზე */
+let PAY_FOR = null;
+function openPayModal(n){
+  PAY_FOR = n;
+  $("pm-name").textContent = n + " აპლიკაციაში დაინახავს: „სწავლის გადასახადის შეხსენება (თარიღი)“. სხვები ამას ვერ დაინახავენ.";
+  const d = new Date(), p = x => String(x).padStart(2, "0");
+  $("pm-date").value = d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  $("paymodal").classList.remove("hidden"); $("pm-date").focus();
+}
+$("pm-no").onclick = () => { $("paymodal").classList.add("hidden"); PAY_FOR = null; };
+$("pm-yes").onclick = () => {
+  const d = $("pm-date").value;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ $("pm-date").focus(); return; }
+  $("paymodal").classList.add("hidden"); const n = PAY_FOR; PAY_FOR = null;
+  if(n) setPayFor(n, d);
+};
+async function setPayFor(n, date, btn){
+  if(btn) btn.disabled = true;
+  try{
+    const r = await api({ action:"setPay", key: adminKey, name: n, date: date });
+    if(!r.ok) throw new Error(r.error || "სკრიპტის შეცდომა");
+    PAYS = r.pay || {};
+    renderStudents();
+    adminMsg(date ? n + ": შეხსენება ჩაირთო (" + fmtDay(date) + ")" : n + ": შეხსენება გამოირთო", true);
+  }catch(e){ adminMsg(netErr(e), false); if(btn) btn.disabled = false; }
+}
 async function removeStudent(n){
   try{
     const r = await api({ action:"remove", key: adminKey, name: n });
     if(!r.ok) throw new Error(r.error);
-    students = r.students; CFG.groups.forEach(g => g.members.delete(n));
+    students = r.students; CFG.groups.forEach(g => g.members.delete(n)); delete PAYS[n];
     renderStudents(); renderGroups(); renderAsGroups(); adminMsg("წაიშალა: " + n, true);
   }catch(e){ adminMsg(netErr(e), false); }
 }
@@ -2145,6 +2211,7 @@ $("again").onclick = () => { state.chap = null; state.done = false; renderChapte
   signIn(sn);
   const cached = lsGet("lit-assigns:" + sn, null);   // ბოლოს ნანახი — სანამ სკრიპტი უპასუხებს
   setAssigns(cached ? cached.assigns : [], cached ? cached.materials : []);
+  setPay(lsGet("lit-pay:" + sn, ""));
   goHome();
   refreshHidden();
   let ret = null; try{ ret = sessionStorage.getItem("lit-return"); sessionStorage.removeItem("lit-return"); }catch(e){}
